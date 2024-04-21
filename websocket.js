@@ -9,8 +9,8 @@ function websocket (io) {
         console.log(">> client connected");
         
         socket.on('player-command', command => {
-            console.log("command.value", command.value);
-            socket.broadcast.emit("player-response", { value: command.value })
+            console.log(`${command.name} says ${command.value}`);
+            socket.broadcast.emit("player-response", { name: command.name, value: command.value })
         });
 
         socket.on('disconnect', () => {

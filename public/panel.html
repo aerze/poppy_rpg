@@ -19,9 +19,9 @@
 
     </div>
     <script>
-        var name = "";
+        var name = "anon";
         window.Twitch.ext.onAuthorized(async function (auth) {
-            const viewerUserId = auth.userId;
+            const viewerUserId = window.Twitch.ext.viewer.id;
             if (viewerUserId) {
                 const defaultOptions = {
                     headers: {
@@ -69,14 +69,14 @@
 
         form.addEventListener("submit", (event) => {
             event.preventDefault();
-            socket.emit("player-command", { value: textInput.value.trim() });
-            appendToLog("me: " + textInput.value.trim());
+            socket.emit("player-command", { name, value: textInput.value.trim() });
+            appendToLog(name + " : " + textInput.value.trim());
             textInput.value = '';
         });
 
         socket.on('player-response', (data) => {
-            appendToLog("chat: " + data.value);
-        })
+            appendToLog(data.name + " : " + data.value);
+        });
 
     </script>
 </body>
