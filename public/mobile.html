@@ -8,61 +8,118 @@
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-    <p> Status <span id="status">disconnected</span></p>
+    <h2> Status <span id="status">disconnected</span></h2>
+    <p>Health: <span id="health"></span></p>
+    <p>Active: <span id="active"></span></p>
     <h2>Commands</h2>
-    <form id="command-form">
-        <input id="text" type="text"></input>
-        <button id="send" type="submit">Send!</button>
-        <button id="clear">Clear</button>
-    </form>
+    <div>
+        <button id="attack">Attack</button>
+        <button id="defend">Defend</button>
+        <button id="heal">Heal</button>
+        <button id="revive" disabled>Revive</button>
+    </div>
     <div id="log">
 
     </div>
     <script>
-        var name = "";
-        window.Twitch.ext.onAuthorized(function(auth) {
-            console.log(">> opaqueId", window.Twitch.ext.viewer.opaqueId);
-            name = window.Twitch.ext.viewer.opaqueId;
+        var name = "anon";
+        window.Twitch.ext.onAuthorized(async function (auth) {
+            const viewerUserId = window.Twitch.ext.viewer.id;
+            if (viewerUserId) {
+                const defaultOptions = {
+                    headers: {
+                        'Authorization': auth.helixToken ? `Extension ${auth.helixToken}` : '',
+                        'client-id': auth.clientId,
+                    }
+                }
+
+                const response = await fetch(`https://api.twitch.tv/helix/users?id=${viewerUserId}`, defaultOptions)
+                const json = await response.json();
+                if (json) {
+                    console.log(">> json", json);
+                    name = json.data[0].display_name;
+
+                    initializeSocket(auth.userId);
+                }
+            }
         });
 
-
-        const socket = io();
-        socket.on('connect', () => {
-            status.textContent = "connected";
-        });
-
-        socket.on('disconnect', () => {
-            status.textContent = "disconnected";
-        });
         
+        const log = document.getElementById("log");
+        const status = document.getElementById("status");
+        const attackButton = document.getElementById("attack");
+        const defendButton = document.getElementById("defend");
+        const healButton = document.getElementById("heal");
+        const reviveButton = document.getElementById("revive");
+        const health = document.getElementById("health");
+        const active = document.getElementById("active");
+        
+        initializeSocket(123);
+
         function appendToLog(text) {
             const line = document.createElement('p');
             line.textContent = text;
-            log.appendChild(line);
+            log.insertBefore(line, log.firstChild);
         }
 
-        const textInput = document.getElementById("text");
-        const sendButton = document.getElementById("send");
-        const clearButton = document.getElementById("clear");
-        const form = document.getElementById('command-form');
-        const log = document.getElementById("log");
-        const status = document.getElementById("status");
+        function disableAllButtons(value) {
+            attackButton.disabled = value;
+            defendButton.disabled = value;
+            healButton.disabled = value;
+        }
 
-        clearButton.addEventListener('click', (event) => {
-            event.preventDefault();
-            log.innerHTML = '';
-        });
+        function initializeSocket(uid) {
+            const socket = io();
+            socket.on('connect', () => {
+                status.textContent = "connected";
+                socket.emit("create-character", { uid, name });
+            });
+    
+            socket.on('disconnect', () => {
+                status.textContent = "disconnected";
+                appendToLog(name + " : disconnected from the server :C");
+            });
 
-        form.addEventListener("submit", (event) => {
-            event.preventDefault();
-            socket.emit("player-command", { value: textInput.value.trim() });
-            appendToLog("me: " + textInput.value.trim());
-            textInput.value = '';
-        });
+            socket.on("update", ({ player }) => {
+                health.textContent = player.health;
+                active.textContent = player.active ? "Alive" : "Dead";
 
-        socket.on('player-response', (data) => {
-            appendToLog("chat: " + data.value);
-        })
+                if (!player.active) {
+                    revive.disabled = false;
+                }
+            });
+            
+            attackButton.addEventListener('click', (event) => {
+                disableAllButtons(true);
+                event.preventDefault();
+                setTimeout(() => {disableAllButtons(false)}, 500);
+                socket.emit("attack");
+            });
+
+            defendButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                disableAllButtons(true);
+                setTimeout(() => {disableAllButtons(false)}, 500);
+                socket.emit("defend");
+            });
+
+            healButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                disableAllButtons(true);
+                setTimeout(() => {disableAllButtons(false)}, 500);
+                socket.emit("heal");
+            });
+
+            reviveButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                socket.emit("revive");
+                reviveButton.disabled = true;
+            });
+    
+            socket.on('log', (data) => {
+                appendToLog(data);
+            });
+        }
 
     </script>
 </body>

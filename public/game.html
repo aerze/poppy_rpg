@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel</title>
+    <title>GameView</title>
     <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -19,6 +19,27 @@
 
     </div>
     <script>
+        var name = "anon";
+        window.Twitch.ext.onAuthorized(async function (auth) {
+            const viewerUserId = window.Twitch.ext.viewer.id;
+            if (viewerUserId) {
+                const defaultOptions = {
+                    headers: {
+                        'Authorization': auth.helixToken ? `Extension ${auth.helixToken}` : '',
+                        'client-id': auth.clientId,
+                    }
+                }
+
+                const response = await fetch(`https://api.twitch.tv/helix/users?id=${viewerUserId}`, defaultOptions)
+                const json = await response.json();
+                if (json) {
+                    console.log(">> json", json);
+                    name = json.data[0].display_name;
+                }
+            }
+        });
+
+
         const socket = io();
         socket.on('connect', () => {
             status.textContent = "connected";
@@ -48,12 +69,14 @@
 
         form.addEventListener("submit", (event) => {
             event.preventDefault();
-            socket.emit("player-command", { value: textInput.value.trim() });
-            appendToLog("me: " + textInput.value.trim());
+            socket.emit("player-command", { name, value: textInput.value.trim() });
+            appendToLog(name + " : " + textInput.value.trim());
             textInput.value = '';
         });
 
-
+        socket.on('player-response', (data) => {
+            appendToLog(data.name + " : " + data.value);
+        });
 
     </script>
 </body>
