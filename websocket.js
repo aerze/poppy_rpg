@@ -53,29 +53,36 @@ function websocket (io) {
             }
         }
 
+        function log(...args) {
+            console.log(`>> ${player.name}:${player.uid}:`, ...args);
+        }
+
         socket.on("create-character", ({ uid, name }) => {
             player.uid = uid;
             player.name = name;
             players.set(uid, player);            
-            console.log(`>> client ${name}:${uid} connected`);
+            log('created character');
             player.update();
         })
         
         socket.on('attack', () => {
             player.action = 'attack';
             player.update();
+            log('attack');
             io.emit("log", `${player.name} prepares to attack!`);
         });
 
         socket.on('defend', () => {
             player.action = 'defend';
             player.update();
+            log('defend');
             io.emit("log", `${player.name} prepares to defend!`);
         });
 
         socket.on('heal', () => {
             player.action = 'heal';
             player.update();
+            log('heal');
             io.emit("log", `${player.name} prepares to heal!`);
         });
 
@@ -83,12 +90,13 @@ function websocket (io) {
             player.active = true;
             player.health = player.maxHealth;
             player.update();
+            log('revive');
             io.emit("log", `${player.name} has been revived!`);
         })
 
         socket.on('disconnect', () => {
             players.delete(player.uid);
-            console.log(">> client disconnected");
+            log('disconnected');
         });
       }
     io.on('connection', handleNewClient);
