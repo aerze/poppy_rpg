@@ -21,12 +21,12 @@
     <script>
         var name = "";
         window.Twitch.ext.onAuthorized(async function (auth) {
-            const viewerUserId = auth.getUserId();
+            const viewerUserId = auth.userId;
             if (viewerUserId) {
                 const defaultOptions = {
                     headers: {
                         'Authorization': auth.helixToken ? `Extension ${auth.helixToken}` : '',
-                        'client-id': "8nb7f43cmfs99gfu066i6e4ckkfqzb",
+                        'client-id': auth.clientId,
                     }
                 }
 
