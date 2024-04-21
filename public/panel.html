@@ -20,9 +20,23 @@
     </div>
     <script>
         var name = "";
-        window.Twitch.ext.onAuthorized(function(auth) {
-            console.log(">> opaqueId", window.Twitch.ext.viewer.opaqueId);
-            name = window.Twitch.ext.viewer.opaqueId;
+        window.Twitch.ext.onAuthorized(async function (auth) {
+            const viewerUserId = auth.getUserId();
+            if (viewerUserId) {
+                const defaultOptions = {
+                    headers: {
+                        'Authorization': auth.helixToken ? `Extension ${auth.helixToken}` : '',
+                        'client-id': "8nb7f43cmfs99gfu066i6e4ckkfqzb",
+                    }
+                }
+
+                const response = await fetch(`https://api.twitch.tv/helix/users?id=${viewerUserId}`, defaultOptions)
+                const json = await response.json();
+                if (json) {
+                    console.log(">> json", json);
+                    name = json.data[0].display_name;
+                }
+            }
         });
 
 
