@@ -5,8 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mobile</title>
     <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-    Mobile
+    <p> Status <span id="status">disconnected</span></p>
+    <h2>Commands</h2>
+    <form id="command-form">
+        <input id="text" type="text"></input>
+        <button id="send" type="submit">Send!</button>
+        <button id="clear">Clear</button>
+    </form>
+    <div id="log">
+
+    </div>
+    <script>
+        var name = "";
+        window.Twitch.ext.onAuthorized(function(auth) {
+            console.log(">> opaqueId", window.Twitch.ext.viewer.opaqueId);
+            name = window.Twitch.ext.viewer.opaqueId;
+        });
+
+
+        const socket = io();
+        socket.on('connect', () => {
+            status.textContent = "connected";
+        });
+
+        socket.on('disconnect', () => {
+            status.textContent = "disconnected";
+        });
+        
+        function appendToLog(text) {
+            const line = document.createElement('p');
+            line.textContent = text;
+            log.appendChild(line);
+        }
+
+        const textInput = document.getElementById("text");
+        const sendButton = document.getElementById("send");
+        const clearButton = document.getElementById("clear");
+        const form = document.getElementById('command-form');
+        const log = document.getElementById("log");
+        const status = document.getElementById("status");
+
+        clearButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            log.innerHTML = '';
+        });
+
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            socket.emit("player-command", { value: textInput.value.trim() });
+            appendToLog("me: " + textInput.value.trim());
+            textInput.value = '';
+        });
+
+        socket.on('player-response', (data) => {
+            appendToLog("chat: " + data.value);
+        })
+
+    </script>
 </body>
 </html>

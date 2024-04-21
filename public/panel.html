@@ -19,6 +19,13 @@
 
     </div>
     <script>
+        var name = "";
+        window.Twitch.ext.onAuthorized(function(auth) {
+            console.log(">> opaqueId", window.Twitch.ext.viewer.opaqueId);
+            name = window.Twitch.ext.viewer.opaqueId;
+        });
+
+
         const socket = io();
         socket.on('connect', () => {
             status.textContent = "connected";
