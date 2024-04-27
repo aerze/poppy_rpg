@@ -6,6 +6,17 @@
     <title>Panel</title>
     <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+    <style>
+        html, body {
+            background-color: #664488;
+            color: white;
+        }
+
+        #log {
+            max-height: 10em;
+            overflow-y: scroll;
+        }
+    </style>
 </head>
 <body>
     <h2> Status <span id="status">disconnected</span></h2>
@@ -43,7 +54,6 @@
                 }
             }
         });
-
         
         const log = document.getElementById("log");
         const status = document.getElementById("status");
@@ -53,6 +63,10 @@
         const reviveButton = document.getElementById("revive");
         const health = document.getElementById("health");
         const active = document.getElementById("active");
+
+        
+        // name = "Poppy",
+        // initializeSocket("poppy");
 
         function appendToLog(text) {
             const line = document.createElement('p');

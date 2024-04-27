@@ -1,23 +1,33 @@
 const { Socket } = require("socket.io");
 
+const gameClients = new Set();
+
+function emitToGameClients(eventName, ...data) {
+    for (const socket of gameClients) {
+        socket.emit(eventName, ...data)
+    }
+}
+
+
 const players = new Map();
 
-const monsters = [
-    createMonster("red slime"),
-    createMonster("green slime"),
-    createMonster("blue slime"),
+var monsters = [
+    createMonster("red slime", "#FF0000"),
+    createMonster("green slime", "#00FF00"),
+    createMonster("blue slime", "#0000FF"),
 ];
 
 var gio;
 
-function createMonster(name) {
+function createMonster(name, color) {
     return {
         name,
-        maxHealth: 30,
-        health: 30,
-        attack: 3,
+        maxHealth: 8,
+        health: 8,
+        attack: 1,
         defense: 2,
         heal: 1,
+        color
     }
 }
 
@@ -39,6 +49,7 @@ function websocket (io) {
             socket,
             toJSON() {
                 return {
+                    name: player.name,
                     action: player.action,
                     maxHealth: player.maxHealth,
                     health: player.health,
@@ -57,12 +68,33 @@ function websocket (io) {
             console.log(`>> ${player.name}:${player.uid}:`, ...args);
         }
 
+        socket.on("game-client", () => {
+            gameClients.add(socket);
+            socket.emit("snapshot", {
+                activePlayers: Array.from(players.values()).filter(activeFilter),
+                monsters
+            });
+        });
+
+        socket.on('reset-monsters', () => {
+            monsters = [
+                createMonster("red slime", "#FF0000"),
+                createMonster("green slime", "#00FF00"),
+                createMonster("blue slime", "#0000FF"),
+            ];
+            socket.emit("snapshot", {
+                activePlayers: Array.from(players.values()).filter(activeFilter),
+                monsters
+            });
+        })
+
         socket.on("create-character", ({ uid, name }) => {
             player.uid = uid;
             player.name = name;
             players.set(uid, player);            
             log('created character');
             player.update();
+            emitToGameClients("player-added", player)
         })
         
         socket.on('attack', () => {
@@ -97,6 +129,10 @@ function websocket (io) {
         socket.on('disconnect', () => {
             players.delete(player.uid);
             log('disconnected');
+            gameClients.delete(socket);
+            emitToGameClients("player-disconnected", {
+                activePlayers: Array.from(players.values()).filter(activeFilter)
+            });
         });
       }
     io.on('connection', handleNewClient);
@@ -108,18 +144,35 @@ function websocket (io) {
 function loop() {
     setTimeout(loop, 5000);
 
-    if (monsters.length === 0) {
-        gio.emit("log", `There are no monsters nearby.`);
-        return;
-    }
-
     const activePlayers = Array.from(players.values()).filter(activeFilter);
 
     if (activePlayers.length === 0) {
         gio.emit("log", `The heros have gone missing.`);
+        emitToGameClients('no-players');
         return;
     }
 
+    const healers = activePlayers.filter(healFilter);
+    const damaged = activePlayers.filter(damagedFilter);
+    for (const healer of healers) {
+        const target = damaged[getRandomInt(0, damaged.length - 1)];
+        const heal = healer.heal
+        target.health += healer.heal;
+        target.update();
+        gio.emit("log", `${healer.name} heals ${target.name} for ${heal}hp`);
+        emitToGameClients('player-heal', {
+            activePlayers,
+            monsters,
+            healer,
+            target
+        });
+    }
+
+    if (monsters.length === 0) {
+        gio.emit("log", `There are no monsters nearby.`);
+        emitToGameClients('no-monsters');
+        return;
+    }
 
     // player actions
     const attackers = activePlayers.filter(attackFilter);
@@ -129,6 +182,12 @@ function loop() {
         target.health -= damage
         attacker.update();
         gio.emit("log", `${attacker.name} attacks ${target.name} for ${damage}hp`);
+        emitToGameClients('player-attack', {
+            activePlayers,
+            monsters,
+            attacker,
+            target
+        });
     }
 
     // monster actions
@@ -144,16 +203,12 @@ function loop() {
         target.health -= damage
         target.update();
         gio.emit("log", `${monster.name} attacks ${target.name} for ${damage}hp`);
-    }
-
-    const healers = activePlayers.filter(healFilter);
-    const damaged = activePlayers.filter(damagedFilter);
-    for (const healer of healers) {
-        const target = damaged[getRandomInt(0, damaged.length - 1)];
-        const heal = healer.heal
-        target.health += healer.heal;
-        target.update();
-        gio.emit("log", `${healer.name} heals ${target.name} for ${heal}hp`);
+        emitToGameClients('monster-attack', {
+            activePlayers,
+            monsters,
+            monster,
+            target
+        });
     }
 
     for (const player of activePlayers) {
@@ -161,12 +216,23 @@ function loop() {
             player.active = false;
             player.update();
             gio.emit("log", `${player.name} is dead.`);
+            emitToGameClients('player-died', {
+                activePlayers,
+                monsters,
+                player,
+            });
         }
     }
 
     for (const monster of monsters) {
         if (monster.health <= 0 ) {
             monsters.splice(monsters.indexOf(monster), 1);
+            gio.emit("log", `${monster.name} has been defeated.`);
+            emitToGameClients("monster-died", {
+                activePlayers,
+                monsters,
+                monster
+            })
         }
     }
 }

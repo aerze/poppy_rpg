@@ -1,83 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GameView</title>
-    <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
+    <!-- <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script> -->
     <script src="/socket.io/socket.io.js"></script>
-</head>
-<body>
-    <p> Status <span id="status">disconnected</span></p>
-    <h2>Commands</h2>
-    <form id="command-form">
-        <input id="text" type="text"></input>
-        <button id="send" type="submit">Send!</button>
-        <button id="clear">Clear</button>
-    </form>
-    <div id="log">
+    <style>
+      .half-screen-container {
+        display: flex;
+        flex-direction: row;
+      }
+      #player-container,
+      #monster-container {
+        flex: 1 1;
+      }
+      .player {
+        width: 4em;
+        height: 4em;
+        background: greenyellow;
+        font-size: 2rem;
+      }
 
+      .monster {
+        width: 4em;
+        height: 4em;
+        font-size: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Status <span id="status">disconnected</span></p>
+    <button id="reset">Reset Monsters</button>
+
+    <div class="half-screen-container">
+      <div id="player-container"></div>
+      <div id="monster-container"></div>
     </div>
     <script>
-        var name = "anon";
-        window.Twitch.ext.onAuthorized(async function (auth) {
-            const viewerUserId = window.Twitch.ext.viewer.id;
-            if (viewerUserId) {
-                const defaultOptions = {
-                    headers: {
-                        'Authorization': auth.helixToken ? `Extension ${auth.helixToken}` : '',
-                        'client-id': auth.clientId,
-                    }
-                }
+      const status = document.getElementById("status");
+      const reset = document.getElementById('reset');
+      const playerContainer = document.getElementById("player-container");
+      const monsterContainer = document.getElementById("monster-container");
 
-                const response = await fetch(`https://api.twitch.tv/helix/users?id=${viewerUserId}`, defaultOptions)
-                const json = await response.json();
-                if (json) {
-                    console.log(">> json", json);
-                    name = json.data[0].display_name;
-                }
-            }
-        });
+      const socket = io();
 
+      const players = new Map();
+      const playerElements = new Map();
 
-        const socket = io();
-        socket.on('connect', () => {
-            status.textContent = "connected";
-        });
+      const monsters = new Map();
+      const monsterElements = new Map();
 
-        socket.on('disconnect', () => {
-            status.textContent = "disconnected";
-        });
-        
-        function appendToLog(text) {
-            const line = document.createElement('p');
-            line.textContent = text;
-            log.appendChild(line);
+      reset.addEventListener('click', (e) => {
+        e.preventDefault();
+        socket.emit("reset-monsters");
+      })
+
+      socket.on("connect", () => {
+        status.textContent = "connected";
+        socket.emit("game-client");
+      });
+
+      socket.on("snapshot", ({ activePlayers, monsters }) => {
+        playerContainer.innerHTML = '';
+        playerElements.clear();
+        monsterContainer.innerHTML = '';
+        monsterElements.clear();
+
+        for (const player of activePlayers) {
+            createPlayer(player);
         }
+        for (const monster of monsters) {
+            createMonster(monster);
+        }
+      })
 
-        const textInput = document.getElementById("text");
-        const sendButton = document.getElementById("send");
-        const clearButton = document.getElementById("clear");
-        const form = document.getElementById('command-form');
-        const log = document.getElementById("log");
-        const status = document.getElementById("status");
+      socket.on("disconnect", () => {
+        status.textContent = "disconnected";
+      });
 
-        clearButton.addEventListener('click', (event) => {
-            event.preventDefault();
-            log.innerHTML = '';
-        });
+      socket.on("player-disconnected", ({ activePlayers }) => {
+        playerContainer.innerHTML = '';
+        playerElements.clear();
+        for (const player of activePlayers) {
+            createPlayer(player);
+        }
+      })
 
-        form.addEventListener("submit", (event) => {
-            event.preventDefault();
-            socket.emit("player-command", { name, value: textInput.value.trim() });
-            appendToLog(name + " : " + textInput.value.trim());
-            textInput.value = '';
-        });
+      socket.on("player-added", (player) => {
+        createPlayer(player);
+      });
 
-        socket.on('player-response', (data) => {
-            appendToLog(data.name + " : " + data.value);
-        });
+      socket.on("no-monsters", () => {
+        console.log("no-monsters fired");
+      });
+
+      socket.on("no-players", () => {
+        console.log("no-players fired");
+      });
+
+      socket.on("player-attack", ({ attacker, target }) => {
+        console.log("player-attack fired");
+        updatePlayer(attacker);
+        updateMonster(target);
+      });
+
+      socket.on("monster-attack", ({monster, target}) => {
+        console.log("monster-attack fired");
+        updateMonster(monster);
+        updatePlayer(target);
+      });
+
+      socket.on("player-heal", ({ healer, target }) => {
+        console.log("player-heal fired");
+        updatePlayer(target);
+      });
+
+      socket.on("player-died", (data) => {
+        console.log("player-died fired");
+      });
+
+      socket.on("monster-died", ({ monster }) => {
+        console.log("monster-died fired");
+        const $monster = monsterElements.get(monster.name);
+        $monster.remove();
+        monsterElements.delete(monster.name);
+      });
+
+      socket.on("log", (data) => {
+        console.log(data);
+      });
+
+      function createPlayer(player) {
+        const $player = document.createElement("div");
+        $player.className = "player";
+        $player.textContent = `${player.name} hp[${player.health}/${player.maxHealth}]`;
+        playerContainer.appendChild($player);
+        players.set(player.name, players);
+        playerElements.set(player.name, $player);
+      }
+
+      function updatePlayer(player) {
+        const $player = playerElements.get(player.name);
+        $player.textContent = `${player.name} hp[${player.health}/${player.maxHealth}]`;
+      }
+
+      function createMonster(monster) {
+        const $monster = document.createElement("div");
+        $monster.className = "monster";
+        $monster.style.backgroundColor = monster.color;
+        $monster.textContent = `${monster.name} hp[${monster.health}/${monster.maxHealth}]`;
+        monsterContainer.appendChild($monster);
+        console.log("monster", monster);
+        monsters.set(monster.name, monsters);
+        monsterElements.set(monster.name, $monster);
+      }
+
+      function updateMonster(monster) {
+        const $monster = monsterElements.get(monster.name);
+        $monster.textContent = `${monster.name} hp[${monster.health}/${monster.maxHealth}]`;
+      }
 
     </script>
-</body>
+  </body>
 </html>
