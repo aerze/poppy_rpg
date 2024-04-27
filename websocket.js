@@ -82,7 +82,7 @@ function websocket (io) {
                 createMonster("green slime", "#00FF00"),
                 createMonster("blue slime", "#0000FF"),
             ];
-            socket.emit("snapshot", {
+            emitToGameClients("snapshot", {
                 activePlayers: Array.from(players.values()).filter(activeFilter),
                 monsters
             });
