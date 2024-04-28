@@ -10,15 +10,22 @@
         html, body {
             background-color: #664488;
             color: white;
+            width: 500px;
         }
 
         #log {
             max-height: 10em;
             overflow-y: scroll;
         }
+        
+        .screen {
+            width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
+    <img id="title-screen" class="screen" src="./title-screen.png"/>
     <h2> Status <span id="status">disconnected</span></h2>
     <p>Health: <span id="health"></span></p>
     <p>Active: <span id="active"></span></p>
