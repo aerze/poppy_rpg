@@ -12,6 +12,20 @@
                 background-color: #664488;
                 color: white;
                 width: 500px;
+
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            .flex {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .row {
+                display: flex;
+                flex-direction: row;
             }
         
             .screen {
@@ -19,15 +33,196 @@
                 height: 496px;
                 border: 2px solid black;
             }
+
+            .hidden {
+                display: none;
+            }
+
+            #main-screen {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #main-screen header {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            #main-screen header h2 {
+                margin-bottom: 0;
+            }
+
+            #main-screen header h1 {
+                margin-top: .5em;
+            }
+
+            #main-screen main {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+
+            }
+
+            #character-screen {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #character-screen .player-display{
+                display: flex;
+                flex-direction: row;
+                height: 300px;
+            }
+
+            #character-screen .controls {
+                padding: 0.5rem;
+                display: flex;
+                flex-direction: column;
+                flex: 1 1;
+            }
+
+            #character-screen .player-view {
+                display: flex;
+                flex-direction: column;
+                flex: 1 1;
+            }
+
+            #character-screen .player-form {
+                
+            }
+
+            #game-screen {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #game-screen .player-display {
+                flex: 1 1;
+                display: flex;
+                flex-direction: column;
+
+                padding: 1em;
+            }
+
+            #game-screen .player-display h5 {
+                margin: 0;
+            }
+
+            #game-screen .player-display .hp {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #game-screen .player-display #player-name {
+                margin: 0;
+            }
+
+            #game-screen .player-display #player-job {
+                font-size: 1rem;
+                font-weight: 400;
+                margin-left: 1rem;
+            }
+
+            #game-screen .player-display #player-hp-text {
+                margin: 0;
+            }
+
+            #game-screen .button-container {
+                flex: 1 1;
+                display: flex;
+                flex-direction: column;
+                flex-wrap: wrap;
+            }
+
+            #game-screen .button-container .button-row {
+                flex: 1 1;
+            }
+
+            #game-screen .actions {
+                flex: 1 1;
+            }
+
+            #log {
+                height: 100px;
+                overflow-y: scroll;
+            }
         </style>
     </head>
     <body>
-        <!-- <img id="title-screen" class="screen" src="./title-screen.png"/> -->
-        <div class="screen">
+        <div id="main-screen" class="main screen" style="display: flex;">
+            <header class="flex">
+                <h2>Poppy's</h2>
+                <h1>RPG</h1>
+            </header>
+
+            <main class="flex">
+                <button id="connect">CONNECT</button>
+            </main>
         </div>
 
+        <div id="character-screen" class="screen">
+            <form id="character-form">
+                <div class="player-display">
+                    <div class="controls">
+                        <label name="preset">
+                            Preset Name
+                            <select id="preset" name="preset">
+                                <option value="a">Volvo</option>
+                                <option value="b">Saab</option>
+                                <option value="c">Mercedes</option>
+                                <option value="d">Audi</option>
+                            </select>
+                        </label>
+                        <label name="job">
+                            Job Class
+                            <select id="job" name="job">
+                                <option value="healer">🐞Lady Healer </option>
+                                <option value="tank">🪲 Beetle Warden</option>
+                                <option value="knight">🐸 Frog Knight</option>
+                            </select>
+                        </label>
+
+                        <label name="color">
+                            Color
+                            <input type="color" id="color" name="color"/>
+                        </label>
+                    </div>
+                    <div class="player-view"></div>
+                </div>
+                <div class="player-form">
+                    <label>
+                        Character Name
+                        <input id="charcterName" name="characterName" type="text"/>
+                    </label>
+                    <button>Save</button>
+                </div>
+            </form>
         </div>
-        <script>
-        </script>
+
+        <div id="game-screen" class="screen">
+            <div class="player-display">
+                <h2 id="player-name">Aerze<span id="player-job">Healer</span></h2>
+                <div class="hp">
+                    <progress id="player-hp-bar" value="100" max="100"></progress>
+                    <h5 id="player-hp-text">HP: 80/80</h5>
+                </div>
+                <h5 id="player-attack">ATK: 12 </h5>
+                <h5 id="player-defense">DEF: 23 </h5>
+                <h5 id="player-heal">HEAL: 12 </h5>
+                <h5 id="player-action">ACT: ATTACK</h5>
+            </div>
+            <div class="button-container">
+                <div class="row button-row">
+                    <button id="attack-action" class="actions">Attack</button>
+                    <button id="defend-action" class="actions">Defend</button>
+                    <button id="heal-action" class="actions">Heal</button>
+                </div>
+                <div id="log"></div>
+            </div>
+        </div>
+        <script src="./scripts/standalone.js"></script>
     </body>
 </html>

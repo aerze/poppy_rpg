@@ -5,6 +5,30 @@ class Player {
         HEAL: 'heal'
     }
 
+    static JOBS = {
+      "healer": {
+        maxHealth: 50,
+        health: 50,
+        attack: 1,
+        defense: 2,
+        heal: 5,
+      },
+      "tank": {
+        maxHealth: 120,
+        health: 120,
+        attack: 2,
+        defense: 5,
+        heal: 1,
+      },
+      "knight": {
+        maxHealth: 80,
+        health: 80,
+        attack: 4,
+        defense: 2,
+        heal: 3,
+      },
+    }
+
     /**
      * @param {number} id
      * @param {object} data
@@ -22,20 +46,22 @@ class Player {
     constructor(id, socket, data = {}, ) {
       this.id = id;
       this.socket = socket;
-      this.name = data.name ?? "";
-      this.action = data.action ?? "";
-      this.maxHealth = data.maxHealth ?? -1;
-      this.health = data.health ?? -1;
-      this.attack = data.attack ?? -1;
-      this.defense = data.defense ?? -1;
-      this.heal = data.heal ?? -1;
+      this.name = data.name ?? "anon";
+      this.action = data.action ?? "attack";
       this.color = data.color ?? '';
-      this.job = data.job ?? '';
       this.active = data.active ?? false;
+      this.job = data.job ?? '';
+      const job = Player.JOBS[this.job];
+
+      this.maxHealth = job.maxHealth;
+      this.health = job.health;
+      this.attack = job.attack;
+      this.defense = job.defense;
+      this.heal = job.heal;
     }
 
     updatePlayerClient() {
-        this.socket.emit("update", this);
+        this.socket.emit("Update", this);
     }
   
     toJSON() {

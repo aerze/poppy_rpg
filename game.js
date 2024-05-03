@@ -30,6 +30,7 @@ class Game {
         // Outgoing
         Log: "Log",
         Snapshot: "Snapshot",
+        PlayerRegistered: "PlayerRegistered",
 
         // Built-In
         Disconnect: 'disconnect'
@@ -60,12 +61,14 @@ class Game {
 
     /** @param {import('socket.io').Socket} socket */
     handleConnection = (socket) => {
+        console.log(">> handleConnection");
         socket.once(Game.SocketEvents.DisplayConnected, this.registerDisplayClient.bind(this, socket));
         socket.once(Game.SocketEvents.PlayerConnected, this.registerPlayerClient.bind(this, socket));
     }
 
     /** @param {import('socket.io').Socket} socket */
     registerDisplayClient(socket) {
+        console.log(">> registerDisplayClient");
         this.displays.add(socket);
         socket.once(Game.SocketEvents.Disconnect, this.unregisterDisplayClient.bind(this, socket));
         socket.emit(Game.SocketEvents.Snapshot, this.getSnapshot());
@@ -74,27 +77,33 @@ class Game {
 
     /** @param {import('socket.io').Socket} socket */
     unregisterDisplayClient(socket) {
+        console.log(">> unregisterDisplayClient");
         this.displays.delete(socket);
     }
 
     /** @param {import('socket.io').Socket} socket */
     registerPlayerClient(socket, data) {
+        console.log(">> registerPlayerClient");
         const player = new Player(this.connectionCounter.next(), socket, data);
         this.players.set(player.id, player);
         socket.once(Game.SocketEvents.Disconnect, this.unregisterPlayerClient.bind(this, player));
         socket.on(Game.SocketEvents.PlayerAction, this.handlePlayerAction.bind(this, player));
         socket.on(Game.SocketEvents.PlayerRevive, this.handlePlayerRevive.bind(this, player));
+        socket.emit(Game.SocketEvents.PlayerRegistered);
+        console.log('>> player', player)
         player.updatePlayerClient();
         this.sendSnapshot();
     }
 
     /** @param {Player} player */
     unregisterPlayerClient(player) {
+        console.log(">> unregisterPlayerClient");
         this.players.delete(player.id);
         this.sendSnapshot();
     }
 
     handleResetMonsters = () => {
+        console.log(">> handleResetMonsters");
         this.monsters.createSimpleMonster(this.connectionCounter.next(), "red slime", "#FF0000");
         this.monsters.createSimpleMonster(this.connectionCounter.next(), "green slime", "#00FF00");
         this.monsters.createSimpleMonster(this.connectionCounter.next(), "blue slime", "#0000FF");
@@ -103,12 +112,15 @@ class Game {
 
     /** @param {Player} player */
     handlePlayerAction = (player, data) => {
+        console.log(">> handlePlayerAction");
+        this.sendLog(`${player.name} gets ready to ${data.action}`);
         player.action = data.action;
         player.updatePlayerClient();
     }
 
     /** @param {Player} player */
     handlePlayerRevive = (player) => {
+        console.log(">> handlePlayerRevive");
         player.active = true;
         player.health = player.maxHealth;
         player.updatePlayerClient();
@@ -124,6 +136,8 @@ class Game {
     }
 
     async loop() {
+        this.frameCounter.next();
+        console.log(`>> loop (${this.frameCounter.count})`);
         const players = this.players.toArray();
         const monsters = this.monsters.toArray();
         const activePlayers = players.filter(PlayerMap.Filters.Active);
@@ -139,15 +153,18 @@ class Game {
         // player heals
         const healers = activePlayers.filter(PlayerMap.Filters.Heal);
         const damaged = activePlayers.filter(PlayerMap.Filters.Damaged);
-        for (const healer of healers) {
-            const target = damaged[getRandomInt(0, damaged.length - 1)];
-            const heal = healer.heal
-            target.health += healer.heal;
-            target.updatePlayerClient();
-            this.sendLog(`${healer.name} heals ${target.name} for ${heal}hp`);
-            // this.sendPlayerHealed
-            this.sendSnapshot();
-            await sleep();
+
+        if (damaged.length) {
+            for (const healer of healers) {
+                const target = damaged[getRandomInt(0, damaged.length - 1)];
+                const heal = healer.heal
+                target.health += healer.heal;
+                target.updatePlayerClient();
+                this.sendLog(`${healer.name} heals ${target.name} for ${heal}hp`);
+                // this.sendPlayerHealed
+                this.sendSnapshot();
+                await sleep();
+            }
         }
 
         // monster check
