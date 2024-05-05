@@ -1,5 +1,4 @@
-
-var name = "anon";
+let twitchName = '';
 window.Twitch.ext.onAuthorized(async function (auth) {
     const viewerUserId = window.Twitch.ext.viewer.id;
     if (viewerUserId) {
@@ -13,88 +12,154 @@ window.Twitch.ext.onAuthorized(async function (auth) {
         const response = await fetch(`https://api.twitch.tv/helix/users?id=${viewerUserId}`, defaultOptions)
         const json = await response.json();
         if (json) {
-            console.log(">> json", json);
-            name = json.data[0].display_name;
-
-            initializeSocket(auth.userId);
+            twitchName = json.data[0].display_name;
         }
     }
 });
 
-const log = document.getElementById("log");
-const status = document.getElementById("status");
-const attackButton = document.getElementById("attack");
-const defendButton = document.getElementById("defend");
-const healButton = document.getElementById("heal");
-const reviveButton = document.getElementById("revive");
-const health = document.getElementById("health");
-const active = document.getElementById("active");
+const $mainScreen = document.getElementById("main-screen");
+const $connectButton = document.getElementById("connect");
 
+const $characterScreen = document.getElementById("character-screen");
+const $characterForm = document.getElementById('character-form');
+const $characterName = document.getElementById('characterName');
 
-// name = "Poppy",
-// initializeSocket("poppy");
+const $gameScreen = document.getElementById("game-screen");
+const $playerName = document.getElementById("player-name");
+const $playerJob = document.getElementById("player-job");
+const $playerHealthBar = document.getElementById("player-hp-bar");
+const $playerHealthText = document.getElementById("player-hp-text");
+const $playerAttack = document.getElementById("player-attack");
+const $playerDefense = document.getElementById("player-defense");
+const $playerHeal = document.getElementById("player-heal");
+const $playerAction = document.getElementById("player-action");
+const $attackAction = document.getElementById("attack-action");
+const $defendAction = document.getElementById("defend-action");
+const $healAction = document.getElementById("heal-action");
+const $log = document.getElementById("log");
 
-function appendToLog(text) {
-    const line = document.createElement('p');
-    line.textContent = text;
-    log.insertBefore(line, log.firstChild);
-}
+const SocketEvents = {
+    // Incoming
+    DisplayConnected: 'DisplayConnected',
+    DisplayDisconnected: 'DisplayDisconnected',
+    PlayerConnected: 'PlayerConnected',
+    PlayerDisconnected: 'PlayerDisconnected',
+    ResetMonsters: 'ResetMonsters',
+    PlayerAction: 'PlayerAction',
+    PlayerRevive: 'PlayerRevive',
 
-function disableAllButtons(value) {
-    attackButton.disabled = value;
-    defendButton.disabled = value;
-    healButton.disabled = value;
-}
-
-function initializeSocket(uid) {
-    const socket = io("wss://starfish-app-ew3jj.ondigitalocean.app");
-    socket.on('connect', () => {
-        status.textContent = "connected";
-        socket.emit("create-character", { uid, name });
-    });
-
-    socket.on('disconnect', () => {
-        status.textContent = "disconnected";
-        appendToLog(name + " : disconnected from the server :C");
-    });
-
-    socket.on("update", ({ player }) => {
-        health.textContent = player.health;
-        active.textContent = player.active ? "Alive" : "Dead";
-
-        if (!player.active) {
-            revive.disabled = false;
-        }
-    });
+    // Outgoing
+    Log: "Log",
+    Snapshot: "Snapshot",
+    Update: "Update",
+    PlayerRegistered: "PlayerRegistered",
     
-    attackButton.addEventListener('click', (event) => {
-        disableAllButtons(true);
-        event.preventDefault();
-        setTimeout(() => {disableAllButtons(false)}, 500);
-        socket.emit("attack");
+    // Built-In
+    Connect: 'connect',
+    Disconnect: 'disconnect',
+    
+    // Display Clients
+    PlayerRevived: "PlayerRevived",
+    PlayerHealed: "PlayerHealed",
+    PlayerAttack: "PlayerAttack",
+    MonsterAttack: "MonsterAttack",
+    PlayerDied: "PlayerDied",
+    MonsterDied: "MonsterDied",
+}
+
+const screens = {
+    screenElements: [$mainScreen, $characterScreen, $gameScreen],
+    open(screenToOpen) {
+        this.screenElements.forEach(screenElement => {
+            if (screenToOpen === screenElement) {
+                screenElement.style.display = "flex";
+            } else {
+                screenElement.style.display = "none";
+            }
+        });
+    }
+};
+
+let localPlayer = {};
+let socket = null;
+
+$connectButton.addEventListener('click', () => {
+    initConnection();
+});
+
+function initConnection() {
+    if (socket) {
+        socket.connect("wss://starfish-app-ew3jj.ondigitalocean.app");
+    } else {
+        socket = io("wss://starfish-app-ew3jj.ondigitalocean.app");
+    }
+    socket.on(SocketEvents.Connect, () => {
+        screens.open($characterScreen);
+        $characterName.value = twitchName;
     });
 
-    defendButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        disableAllButtons(true);
-        setTimeout(() => {disableAllButtons(false)}, 500);
-        socket.emit("defend");
-    });
-
-    healButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        disableAllButtons(true);
-        setTimeout(() => {disableAllButtons(false)}, 500);
-        socket.emit("heal");
-    });
-
-    reviveButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        socket.emit("revive");
-        reviveButton.disabled = true;
-    });
-
-    socket.on('log', (data) => {
-        appendToLog(data);
+    socket.on(SocketEvents.Disconnect, () => {
+        screens.open($mainScreen);
     });
 }
+
+$characterForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.target).entries());
+    if (!data.characterName.trim()) {
+        return;
+    }
+
+    socket.once(SocketEvents.PlayerRegistered, () => {
+        screens.open($gameScreen);
+        initializeGameScreen();
+    });
+    socket.emit(SocketEvents.PlayerConnected, {
+        name: data.characterName,
+        action: 'attack',
+        color: data.color,
+        job: data.job,
+        active: true
+    });
+});
+
+
+function initializeGameScreen() {
+    socket.on(SocketEvents.Update, (player) => {
+        localPlayer = player;
+        $playerName.innerText = player.name;
+        $playerJob.innerText = player.job;
+        $playerHealthText.innerText = `HP: ${player.health}/${player.maxHealth}`;
+        $playerHealthBar.value = player.health;
+        $playerHealthBar.max = player.maxHealth;
+        $playerAttack.innerText = `ATK: ${player.attack}`;
+        $playerDefense.innerText = `DEF: ${player.defense}`;
+        $playerHeal.innerText = `HEAL: ${player.heal}`;
+        $playerAction.innerText = `ACT: ${player.action?.toUpperCase()}`;
+    });
+
+    socket.on(SocketEvents.Log, (text) => {
+        const line = document.createElement('p');
+        line.textContent = text;
+        $log.insertBefore(line, $log.firstChild);
+    });
+}
+
+
+$attackAction.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    socket.emit(SocketEvents.PlayerAction, { action: "attack" });
+});
+
+$defendAction.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    socket.emit(SocketEvents.PlayerAction, { action: "defend" });
+});
+
+$healAction.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    socket.emit(SocketEvents.PlayerAction, { action: "heal" });
+});
