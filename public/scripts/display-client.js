@@ -312,7 +312,7 @@ function playerHealed({ healer, target }) {
 
 function playerAttacked({ attacker, target }) {
     console.log('>> playerAttacked');
-    playerMap.set(target.id, target);
+    monsterMap.set(target.id, target);
     scene.update(target.id, target);
 }
 
