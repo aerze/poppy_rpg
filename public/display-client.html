@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Display Client</title>
+        <script src="/socket.io/socket.io.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <style>
+            html, body {
+                color: white;
+                width: 800px;
+                height: 600px;
+                border: 1px solid black;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            .flex {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .row {
+                display: flex;
+                flex-direction: row;
+            }
+
+            .sprite {
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100px;
+                height: 150px;
+            }
+
+            .sprite .hud {
+                display: flex;
+                flex-direction: column;
+                padding: 0.5em;
+            }
+
+            .sprite .hud .name {
+                margin: 0;
+                font-size: 26px;
+            }
+
+            .sprite .hud .job {
+                margin: 0;
+            }
+
+            .sprite .hud .hpLabel {
+                margin: 0;
+                font-size: 12px;
+            }
+
+            .sprite .hud .hpBar {
+                margin: 0;
+                width: 100%
+            }
+        
+            #log {
+                height: 100px;
+                overflow-y: scroll;
+            }
+        </style>
+    </head>
+    <body>
+        <button id="add">add monsters</button>
+        <script src="./scripts/display-client.js"></script>
+    </body>
+</html>

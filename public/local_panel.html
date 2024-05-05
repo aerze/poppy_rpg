@@ -10,15 +10,22 @@
         html, body {
             background-color: #664488;
             color: white;
+            width: 500px;
         }
 
         #log {
             max-height: 10em;
             overflow-y: scroll;
         }
+        
+        .screen {
+            width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 <body>
+    <img id="title-screen" class="screen" src="./title-screen.png"/>
     <h2> Status <span id="status">disconnected</span></h2>
     <p>Health: <span id="health"></span></p>
     <p>Active: <span id="active"></span></p>
@@ -34,26 +41,26 @@
     </div>
     <script>
         var name = "anon";
-        window.Twitch.ext.onAuthorized(async function (auth) {
-            const viewerUserId = window.Twitch.ext.viewer.id;
-            if (viewerUserId) {
-                const defaultOptions = {
-                    headers: {
-                        'Authorization': auth.helixToken ? `Extension ${auth.helixToken}` : '',
-                        'client-id': auth.clientId,
-                    }
-                }
+        // window.Twitch.ext.onAuthorized(async function (auth) {
+        //     const viewerUserId = window.Twitch.ext.viewer.id;
+        //     if (viewerUserId) {
+        //         const defaultOptions = {
+        //             headers: {
+        //                 'Authorization': auth.helixToken ? `Extension ${auth.helixToken}` : '',
+        //                 'client-id': auth.clientId,
+        //             }
+        //         }
 
-                const response = await fetch(`https://api.twitch.tv/helix/users?id=${viewerUserId}`, defaultOptions)
-                const json = await response.json();
-                if (json) {
-                    console.log(">> json", json);
-                    name = json.data[0].display_name;
+        //         const response = await fetch(`https://api.twitch.tv/helix/users?id=${viewerUserId}`, defaultOptions)
+        //         const json = await response.json();
+        //         if (json) {
+        //             console.log(">> json", json);
+        //             name = json.data[0].display_name;
 
-                    initializeSocket(auth.userId);
-                }
-            }
-        });
+        //             initializeSocket(auth.userId);
+        //         }
+        //     }
+        // });
         
         const log = document.getElementById("log");
         const status = document.getElementById("status");
@@ -83,6 +90,7 @@
         function initializeSocket(uid) {
             const socket = io();
             socket.on('connect', () => {
+                console.log('>> connect');
                 status.textContent = "connected";
                 socket.emit("create-character", { uid, name });
             });

@@ -13,6 +13,8 @@ window.Twitch.ext.onAuthorized(async function (auth) {
         const json = await response.json();
         if (json) {
             twitchName = json.data[0].display_name;
+
+            // initializeSocket(auth.userId);
         }
     }
 });
@@ -88,10 +90,11 @@ $connectButton.addEventListener('click', () => {
 });
 
 function initConnection() {
+    // socket = io("wss://starfish-app-ew3jj.ondigitalocean.app");
     if (socket) {
-        socket.connect("wss://starfish-app-ew3jj.ondigitalocean.app");
+        socket.connect();
     } else {
-        socket = io("wss://starfish-app-ew3jj.ondigitalocean.app");
+        socket = io();
     }
     socket.on(SocketEvents.Connect, () => {
         screens.open($characterScreen);
