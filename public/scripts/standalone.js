@@ -1,3 +1,4 @@
+let twitchName = '';
 window.Twitch.ext.onAuthorized(async function (auth) {
     const viewerUserId = window.Twitch.ext.viewer.id;
     if (viewerUserId) {
@@ -11,7 +12,7 @@ window.Twitch.ext.onAuthorized(async function (auth) {
         const response = await fetch(`https://api.twitch.tv/helix/users?id=${viewerUserId}`, defaultOptions)
         const json = await response.json();
         if (json) {
-            player.name = json.data[0].display_name;
+            twitchName = json.data[0].display_name;
 
             // initializeSocket(auth.userId);
         }
@@ -23,6 +24,7 @@ const $connectButton = document.getElementById("connect");
 
 const $characterScreen = document.getElementById("character-screen");
 const $characterForm = document.getElementById('character-form');
+const $characterName = document.getElementById('characterName');
 
 const $gameScreen = document.getElementById("game-screen");
 const $playerName = document.getElementById("player-name");
@@ -50,13 +52,21 @@ const SocketEvents = {
 
     // Outgoing
     Log: "Log",
-    Update: "Update",
     Snapshot: "Snapshot",
+    Update: "Update",
     PlayerRegistered: "PlayerRegistered",
-
+    
     // Built-In
-    Connect: "connect",
-    Disconnect: 'disconnect'
+    Connect: 'connect',
+    Disconnect: 'disconnect',
+    
+    // Display Clients
+    PlayerRevived: "PlayerRevived",
+    PlayerHealed: "PlayerHealed",
+    PlayerAttack: "PlayerAttack",
+    MonsterAttack: "MonsterAttack",
+    PlayerDied: "PlayerDied",
+    MonsterDied: "MonsterDied",
 }
 
 const screens = {
@@ -81,9 +91,14 @@ $connectButton.addEventListener('click', () => {
 
 function initConnection() {
     // socket = io("wss://starfish-app-ew3jj.ondigitalocean.app");
-    socket = io();
+    if (socket) {
+        socket.connect();
+    } else {
+        socket = io();
+    }
     socket.on(SocketEvents.Connect, () => {
         screens.open($characterScreen);
+        $characterName.value = twitchName;
     });
 
     socket.on(SocketEvents.Disconnect, () => {
@@ -123,12 +138,13 @@ function initializeGameScreen() {
         $playerAttack.innerText = `ATK: ${player.attack}`;
         $playerDefense.innerText = `DEF: ${player.defense}`;
         $playerHeal.innerText = `HEAL: ${player.heal}`;
+        $playerAction.innerText = `ACT: ${player.action?.toUpperCase()}`;
     });
 
     socket.on(SocketEvents.Log, (text) => {
         const line = document.createElement('p');
         line.textContent = text;
-        $log.insertBefore(line, log.firstChild);
+        $log.insertBefore(line, $log.firstChild);
     });
 }
 

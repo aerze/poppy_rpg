@@ -49,7 +49,7 @@ class Player {
       this.name = data.name ?? "anon";
       this.action = data.action ?? "attack";
       this.color = data.color ?? '';
-      this.active = data.active ?? false;
+      this.active = data.active ?? true;
       this.job = data.job ?? '';
       const job = Player.JOBS[this.job];
 
@@ -69,6 +69,7 @@ class Player {
         id: this.id,
         name: this.name,
         action: this.action,
+        job: this.job,
         maxHealth: this.maxHealth,
         health: this.health,
         attack: this.attack,

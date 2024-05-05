@@ -7,6 +7,10 @@ class SafeCounter {
         }
         return this.count;
     }
+
+    reset() {
+        this.count = 0;
+    }
 }
 
 module.exports = SafeCounter;
