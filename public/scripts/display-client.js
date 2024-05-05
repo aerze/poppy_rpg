@@ -187,7 +187,7 @@ addBossButton.addEventListener('click', (event) => {
 });
 
 socket.on(SocketEvents.Disconnect, () => {
-    document.body.innerText = "DISCONNECTED";
+    console.log('>> disconnected');
 });
 
 socket.on(SocketEvents.Snapshot, ([type, snapshot]) => {

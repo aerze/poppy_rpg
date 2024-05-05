@@ -24,6 +24,7 @@ class Game {
         PlayerConnected: 'PlayerConnected',
         PlayerDisconnected: 'PlayerDisconnected',
         AddMonsters: 'AddMonsters',
+        AddBoss: 'AddBoss',
         PlayerAction: 'PlayerAction',
         PlayerRevive: 'PlayerRevive',
 
@@ -94,6 +95,7 @@ class Game {
         socket.emit(Game.SocketEvents.Snapshot, ['initial', this.getSnapshot()]);
 
         socket.on(Game.SocketEvents.AddMonsters, this.handleAddMonsters.bind(this));
+        socket.on(Game.SocketEvents.AddBoss, this.handleAddBoss.bind(this));
     }
 
     /** @param {import('socket.io').Socket} socket */
@@ -225,13 +227,10 @@ class Game {
 
         
         // monster actions
-        let defenders = activePlayers.filter(PlayerMap.Filters.Defend);
-        if (!defenders.length) {
-            defenders = activePlayers;
-        } else {
-            const initialDefenders = defenders.slice();
-            defenders = [activePlayers, ...initialDefenders, ...initialDefenders];
-        }
+        const initialDefenders = activePlayers.filter(PlayerMap.Filters.Defend);
+        const defenders = !initialDefenders.length 
+            ? activePlayers
+            : [...activePlayers, ...initialDefenders, ...initialDefenders]
 
         for (const monster of monsters) {
             const target = defenders[getRandomInt(0, defenders.length - 1)];
