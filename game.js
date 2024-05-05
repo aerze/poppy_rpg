@@ -233,6 +233,7 @@ class Game {
             : [...activePlayers, ...initialDefenders, ...initialDefenders]
 
         for (const monster of monsters) {
+            if (Math.random() > 0.4) continue;
             const target = defenders[getRandomInt(0, defenders.length - 1)];
             const isDefending = target.action === 'defend';
             const damage = isDefending ? Math.max(0, monster.attack - target.defense) : monster.attack;

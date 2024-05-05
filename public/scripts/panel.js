@@ -13,6 +13,8 @@ window.Twitch.ext.onAuthorized(async function (auth) {
         const json = await response.json();
         if (json) {
             twitchName = json.data[0].display_name;
+
+            // initializeSocket(auth.userId);
         }
     }
 });
@@ -36,6 +38,7 @@ const $playerAction = document.getElementById("player-action");
 const $attackAction = document.getElementById("attack-action");
 const $defendAction = document.getElementById("defend-action");
 const $healAction = document.getElementById("heal-action");
+const $reviveAction = document.getElementById("revive-action");
 const $log = document.getElementById("log");
 
 const SocketEvents = {
@@ -44,7 +47,8 @@ const SocketEvents = {
     DisplayDisconnected: 'DisplayDisconnected',
     PlayerConnected: 'PlayerConnected',
     PlayerDisconnected: 'PlayerDisconnected',
-    ResetMonsters: 'ResetMonsters',
+    AddMonsters: 'AddMonsters',
+    AddBoss: 'AddBoss',
     PlayerAction: 'PlayerAction',
     PlayerRevive: 'PlayerRevive',
 
@@ -59,10 +63,11 @@ const SocketEvents = {
     Disconnect: 'disconnect',
     
     // Display Clients
+    PlayerStanceChange: "PlayerStanceChange",
     PlayerRevived: "PlayerRevived",
     PlayerHealed: "PlayerHealed",
-    PlayerAttack: "PlayerAttack",
-    MonsterAttack: "MonsterAttack",
+    PlayerAttacked: "PlayerAttacked",
+    MonsterAttacked: "MonsterAttacked",
     PlayerDied: "PlayerDied",
     MonsterDied: "MonsterDied",
 }
@@ -88,8 +93,9 @@ $connectButton.addEventListener('click', () => {
 });
 
 function initConnection() {
+    // socket = io("wss://starfish-app-ew3jj.ondigitalocean.app");
     if (socket) {
-        socket.connect("wss://starfish-app-ew3jj.ondigitalocean.app");
+        socket.connect();
     } else {
         socket = io("wss://starfish-app-ew3jj.ondigitalocean.app");
     }
@@ -135,7 +141,9 @@ function initializeGameScreen() {
         $playerAttack.innerText = `ATK: ${player.attack}`;
         $playerDefense.innerText = `DEF: ${player.defense}`;
         $playerHeal.innerText = `HEAL: ${player.heal}`;
+        $reviveAction.disabled = player.active;
         $playerAction.innerText = `ACT: ${player.action?.toUpperCase()}`;
+
     });
 
     socket.on(SocketEvents.Log, (text) => {
@@ -162,4 +170,10 @@ $healAction.addEventListener('click', (event) => {
     event.preventDefault();
 
     socket.emit(SocketEvents.PlayerAction, { action: "heal" });
+});
+
+$reviveAction.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    socket.emit(SocketEvents.PlayerRevive);
 });

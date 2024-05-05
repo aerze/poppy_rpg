@@ -38,6 +38,7 @@ const $playerAction = document.getElementById("player-action");
 const $attackAction = document.getElementById("attack-action");
 const $defendAction = document.getElementById("defend-action");
 const $healAction = document.getElementById("heal-action");
+const $reviveAction = document.getElementById("revive-action");
 const $log = document.getElementById("log");
 
 const SocketEvents = {
@@ -140,7 +141,9 @@ function initializeGameScreen() {
         $playerAttack.innerText = `ATK: ${player.attack}`;
         $playerDefense.innerText = `DEF: ${player.defense}`;
         $playerHeal.innerText = `HEAL: ${player.heal}`;
+        $reviveAction.disabled = player.active;
         $playerAction.innerText = `ACT: ${player.action?.toUpperCase()}`;
+
     });
 
     socket.on(SocketEvents.Log, (text) => {
@@ -167,4 +170,10 @@ $healAction.addEventListener('click', (event) => {
     event.preventDefault();
 
     socket.emit(SocketEvents.PlayerAction, { action: "heal" });
+});
+
+$reviveAction.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    socket.emit(SocketEvents.PlayerRevive);
 });

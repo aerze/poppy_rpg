@@ -293,9 +293,8 @@ function playerStanceChange([playerId, playerAction]) {
     const player = playerMap.get(playerId);
     if (player) {
         player.action = playerAction;
+        scene.update(player.id, player);
     }
-
-    scene.update(player.id, player);
 }
 
 function playerRevived(player) {
@@ -328,7 +327,7 @@ function playerDied(playerId) {
     if (player) {
         player.active = false;
     }
-
+    
     scene.update(player.id, player);
 }
 
