@@ -46,7 +46,8 @@ const SocketEvents = {
     DisplayDisconnected: 'DisplayDisconnected',
     PlayerConnected: 'PlayerConnected',
     PlayerDisconnected: 'PlayerDisconnected',
-    ResetMonsters: 'ResetMonsters',
+    AddMonsters: 'AddMonsters',
+    AddBoss: 'AddBoss',
     PlayerAction: 'PlayerAction',
     PlayerRevive: 'PlayerRevive',
 
@@ -61,10 +62,11 @@ const SocketEvents = {
     Disconnect: 'disconnect',
     
     // Display Clients
+    PlayerStanceChange: "PlayerStanceChange",
     PlayerRevived: "PlayerRevived",
     PlayerHealed: "PlayerHealed",
-    PlayerAttack: "PlayerAttack",
-    MonsterAttack: "MonsterAttack",
+    PlayerAttacked: "PlayerAttacked",
+    MonsterAttacked: "MonsterAttacked",
     PlayerDied: "PlayerDied",
     MonsterDied: "MonsterDied",
 }

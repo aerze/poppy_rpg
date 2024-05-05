@@ -130,6 +130,12 @@ class Game {
         this.sendSnapshot();
     }
 
+    handleAddBoss = () => {
+        console.log(">> Spawning new boss");
+        this.monsters.createSimpleBoss(this.connectionCounter.next(), "Super Bear Slime", "#D65151");
+        this.sendSnapshot();
+    }
+
     /** @param {Player} player */
     handlePlayerAction = (player, data) => {
         console.log(`>> ${player.name} -> ${data.action}`);
@@ -190,7 +196,7 @@ class Game {
             for (const healer of healers) {
                 const target = damaged[getRandomInt(0, damaged.length - 1)];
                 const heal = healer.heal
-                target.health += healer.heal;
+                target.health = Math.min(target.health + heal, target.maxHealth);
                 target.updatePlayerClient();
                 this.sendLog(`${healer.name} heals ${target.name} for ${heal}hp`);
                 this.emitToDisplays(Game.SocketEvents.PlayerHealed, { healer, target });
@@ -220,7 +226,13 @@ class Game {
         
         // monster actions
         let defenders = activePlayers.filter(PlayerMap.Filters.Defend);
-        if (!defenders.length) defenders = activePlayers;
+        if (!defenders.length) {
+            defenders = activePlayers;
+        } else {
+            const initialDefenders = defenders.slice();
+            defenders = [activePlayers, ...initialDefenders, ...initialDefenders];
+        }
+
         for (const monster of monsters) {
             const target = defenders[getRandomInt(0, defenders.length - 1)];
             const isDefending = target.action === 'defend';

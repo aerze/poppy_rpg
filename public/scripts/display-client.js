@@ -5,6 +5,7 @@ const SocketEvents = {
     PlayerConnected: 'PlayerConnected',
     PlayerDisconnected: 'PlayerDisconnected',
     AddMonsters: 'AddMonsters',
+    AddBoss: 'AddBoss',
     PlayerAction: 'PlayerAction',
     PlayerRevive: 'PlayerRevive',
 
@@ -164,6 +165,7 @@ const scene = {
 }
 
 const addButton = document.getElementById('add');
+const addBossButton = document.getElementById('add-boss');
 const playerMap = new Map();
 const monsterMap = new Map();
 const socket = io();
@@ -177,7 +179,12 @@ socket.on(SocketEvents.Connect, () => {
 addButton.addEventListener('click', (event) => {
     event.preventDefault();
     socket.emit(SocketEvents.AddMonsters)
-})
+});
+
+addBossButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    socket.emit(SocketEvents.AddBoss);
+});
 
 socket.on(SocketEvents.Disconnect, () => {
     document.body.innerText = "DISCONNECTED";
