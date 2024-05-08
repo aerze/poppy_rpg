@@ -8,6 +8,8 @@ const SocketEvents = {
     AddBoss: 'AddBoss',
     PlayerAction: 'PlayerAction',
     PlayerRevive: 'PlayerRevive',
+    DeleteMonsters: 'DeleteMonsters',
+    ReviveParty: 'ReviveParty',
 
     // Outgoing
     Log: "Log",
@@ -90,11 +92,11 @@ class CharacterSprite {
     update(data) {
         this.data = data;
         this.elements.name.innerText = this.data.name;
-        this.elements.job.innerText = this.data.job ? this.data.job : '';
+        this.elements.job.innerText =  `Lv:${this.data.level} ${this.data.job ?? ''}`;
         this.elements.hpLabel.innerText = `hp:${this.data.health}/${this.data.maxHealth}`;
         this.elements.hpBar.value = this.data.health;
         this.elements.hpBar.max = this.data.maxHealth;
-        
+
         this.elements.base.style.top = `${this.y}px`;
         this.elements.base.style.left = `${this.x}px`;
 
@@ -166,6 +168,8 @@ const scene = {
 
 const addButton = document.getElementById('add');
 const addBossButton = document.getElementById('add-boss');
+const deleteMonstersButton = document.getElementById('delete-monsters');
+const revivePartyButton = document.getElementById('revive-party');
 const playerMap = new Map();
 const monsterMap = new Map();
 const socket = io();
@@ -173,7 +177,6 @@ const socket = io();
 socket.on(SocketEvents.Connect, () => {
     console.log("Connected");
     socket.emit(SocketEvents.DisplayConnected);
-    
 });
 
 addButton.addEventListener('click', (event) => {
@@ -184,6 +187,16 @@ addButton.addEventListener('click', (event) => {
 addBossButton.addEventListener('click', (event) => {
     event.preventDefault();
     socket.emit(SocketEvents.AddBoss);
+});
+
+deleteMonstersButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    socket.emit(SocketEvents.DeleteMonsters);
+});
+
+revivePartyButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    socket.emit(SocketEvents.ReviveParty);
 });
 
 socket.on(SocketEvents.Disconnect, () => {

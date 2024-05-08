@@ -3,18 +3,8 @@ const Monster = require("./scripts/monster");
 const Player = require("./scripts/player");
 const PlayerMap = require("./scripts/player-map");
 const MonsterMap = require("./scripts/monster-map");
-
-function sleep(time = 1000) {
-    return new Promise((resolve) => {
-        setTimeout(() => resolve(), time);
-    });
-}
-
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+const { sleep, getRandomInt } = require('./scripts/helpers');
+const { getLevelRequirement } = require("./scripts/xp");
 
 class Game {
     static SocketEvents = {
@@ -27,7 +17,9 @@ class Game {
         AddBoss: 'AddBoss',
         PlayerAction: 'PlayerAction',
         PlayerRevive: 'PlayerRevive',
-
+        DeleteMonsters: 'DeleteMonsters',
+        ReviveParty: 'ReviveParty',
+    
         // Outgoing
         Log: "Log",
         Snapshot: "Snapshot",
@@ -94,8 +86,10 @@ class Game {
         
         socket.emit(Game.SocketEvents.Snapshot, ['initial', this.getSnapshot()]);
 
-        socket.on(Game.SocketEvents.AddMonsters, this.handleAddMonsters.bind(this));
-        socket.on(Game.SocketEvents.AddBoss, this.handleAddBoss.bind(this));
+        socket.on(Game.SocketEvents.AddMonsters, this.handleAddMonsters);
+        socket.on(Game.SocketEvents.AddBoss, this.handleAddBoss);
+        socket.on(Game.SocketEvents.DeleteMonsters, this.handleDeleteMonsters);
+        socket.on(Game.SocketEvents.ReviveParty, this.handleReviveParty);
     }
 
     /** @param {import('socket.io').Socket} socket */
@@ -126,15 +120,29 @@ class Game {
 
     handleAddMonsters = () => {
         console.log(">> Spawning new monsters");
-        this.monsters.createSimpleMonster(this.connectionCounter.next(), "red slime", "#FF0000");
-        this.monsters.createSimpleMonster(this.connectionCounter.next(), "green slime", "#00FF00");
-        this.monsters.createSimpleMonster(this.connectionCounter.next(), "blue slime", "#0000FF");
+        // this.monsters.createBlueSlime(this.connectionCounter.next(), getRandomInt(1, 3));
+        this.monsters.createGreenSlime(this.connectionCounter.next(), getRandomInt(1, 3));
+        // this.monsters.createRedSlime(this.connectionCounter.next(), getRandomInt(1, 3));
         this.sendSnapshot();
     }
 
     handleAddBoss = () => {
         console.log(">> Spawning new boss");
-        this.monsters.createSimpleBoss(this.connectionCounter.next(), "Super Bear Slime", "#D65151");
+        this.monsters.createBossSlime(this.connectionCounter.next(), getRandomInt(1, 3));
+        this.sendSnapshot();
+    }
+
+    handleDeleteMonsters = () => {
+        this.monsters.clear();
+        this.sendSnapshot();
+    }
+
+    handleReviveParty = () => {
+        this.players.forEach((player) => {
+            player.active = true;
+            player.health = player.maxHealth;
+            player.updatePlayerClient();
+        });
         this.sendSnapshot();
     }
 
@@ -155,6 +163,7 @@ class Game {
         player.updatePlayerClient();
         this.emitToDisplays(Game.SocketEvents.PlayerRevived, player);
     }
+    
 
     sendLog(message) {
         this.io.emit(Game.SocketEvents.Log, message);
@@ -169,11 +178,13 @@ class Game {
         this.frameCounter.next();
         console.log(`>> loop (${this.frameCounter.count})`);
 
+        this.runPromotions();
+
         if (this.framesWithoutMonsters.count >= 15) {
             this.framesWithoutMonsters.reset();
-            this.monsters.createSimpleMonster(this.connectionCounter.next(), "red slime", "#FF0000");
-            this.monsters.createSimpleMonster(this.connectionCounter.next(), "green slime", "#00FF00");
-            this.monsters.createSimpleMonster(this.connectionCounter.next(), "blue slime", "#0000FF");
+            this.monsters.createBlueSlime(this.connectionCounter.next(), getRandomInt(1, 3));
+            this.monsters.createGreenSlime(this.connectionCounter.next(), getRandomInt(1, 3));
+            this.monsters.createRedSlime(this.connectionCounter.next(), getRandomInt(1, 3));
         }
 
         this.sendSnapshot("loop");
@@ -258,12 +269,28 @@ class Game {
         // monster deaths
         for (const monster of monsters) {
             if (monster.health <= 0 ) {
+                this.players.giveXP(monster.xp);
                 this.monsters.delete(monster.id);
                 this.sendLog(`${monster.name} has been defeated.`);
                 this.emitToDisplays(Game.SocketEvents.MonsterDied, monster.id);
             }
         }
         await sleep();
+    }
+
+    runPromotions() {
+        for (const [id, player] of this.players) {
+            const levelRequirement = getLevelRequirement(player.level);
+
+            if (player.xp >= levelRequirement) {
+                player.level += 1;
+                player.xp = levelRequirement - player.xp;
+            }
+
+            player.updatePlayerClient();
+        }
+
+        this.sendSnapshot();
     }
 }
 

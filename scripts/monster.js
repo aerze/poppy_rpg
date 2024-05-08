@@ -14,6 +14,7 @@ class Monster {
   constructor(id, data) {
     this.id = id;
     this.name = data.name;
+    this.level = data.level;
     this.maxHealth = data.maxHealth;
     this.health = data.health;
     this.attack = data.attack;
@@ -21,12 +22,14 @@ class Monster {
     this.heal = data.heal;
     this.color = data.color;
     this.type = data.type;
+    this.xp = data.xp;
   }
 
   toJSON() {
     return {
       id: this.id,
       name: this.name,
+      level: this.level,
       maxHealth: this.maxHealth,
       health: this.health,
       attack: this.attack,
@@ -34,6 +37,7 @@ class Monster {
       heal: this.heal,
       color: this.color,
       type: this.type,
+      xp: this.xp,
     };
   }
 }

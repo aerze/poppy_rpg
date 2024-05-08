@@ -1,3 +1,5 @@
+
+
 class Player {
     static ACTION = {
         ATTACK: 'attack',
@@ -58,6 +60,8 @@ class Player {
       this.attack = job.attack;
       this.defense = job.defense;
       this.heal = job.heal;
+      this.level = 1;
+      this.xp = 0;
     }
 
     updatePlayerClient() {
@@ -77,7 +81,9 @@ class Player {
         heal: this.heal,
         color: this.color,
         type: this.type,
-        active: this.active
+        active: this.active,
+        level: this.level,
+        xp: this.xp,
       };
     }
   }

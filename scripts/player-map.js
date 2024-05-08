@@ -24,6 +24,13 @@ class PlayerMap extends Map {
         return count;
     }
 
+    giveXP(xp) {
+        this.forEach((player) => {
+            player.xp += xp;
+            player.updatePlayerClient();
+        });
+    }
+
     // TODO
     // wrap set/delete/clear methods to recreate array then
 }

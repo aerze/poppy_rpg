@@ -1,10 +1,6 @@
 const Monster = require("./monster");
-
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+const { getRandomInt } = require('./helpers');
+const Slime = require("./monsters/slime");
 
 class MonsterMap extends Map {
     static Filters = {}
@@ -16,7 +12,26 @@ class MonsterMap extends Map {
         return Array.from(this.values());
     }
 
+    createBlueSlime(id, level) {
+        const slime = new Slime(id, Slime.generate(level, Slime.BLUE_SLIME));
+        this.set(id, slime);
+    }
     
+    createGreenSlime(id, level) {
+        const slime = new Slime(id, Slime.generate(level, Slime.GREEN_SLIME));
+        this.set(id, slime);
+    }
+    
+    createRedSlime(id, level) {
+        const slime = new Slime(id, Slime.generate(level, Slime.RED_SLIME));
+        this.set(id, slime);
+    }
+
+    createBossSlime(id, level) {
+        const slime = new Slime(id, Slime.generate(level, Slime.BOSS_SLIME));
+        this.set(id, slime);
+    }
+
     createSimpleMonster(id, name, color) {
         const maxHealth = getRandomInt(6, 16);
         this.set(id, new Monster(id, {

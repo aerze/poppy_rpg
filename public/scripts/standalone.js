@@ -1,3 +1,42 @@
+const SocketEvents = {
+    // Incoming
+    DisplayConnected: 'DisplayConnected',
+    DisplayDisconnected: 'DisplayDisconnected',
+    PlayerConnected: 'PlayerConnected',
+    PlayerDisconnected: 'PlayerDisconnected',
+    AddMonsters: 'AddMonsters',
+    AddBoss: 'AddBoss',
+    PlayerAction: 'PlayerAction',
+    PlayerRevive: 'PlayerRevive',
+
+    // Outgoing
+    Log: "Log",
+    Snapshot: "Snapshot",
+    Update: "Update",
+    PlayerRegistered: "PlayerRegistered",
+    
+    // Built-In
+    Connect: 'connect',
+    Disconnect: 'disconnect',
+    
+    // Display Clients
+    PlayerStanceChange: "PlayerStanceChange",
+    PlayerRevived: "PlayerRevived",
+    PlayerHealed: "PlayerHealed",
+    PlayerAttacked: "PlayerAttacked",
+    MonsterAttacked: "MonsterAttacked",
+    PlayerDied: "PlayerDied",
+    MonsterDied: "MonsterDied",
+}
+
+function getLevelRequirement(level) {
+    if (level === 1) {
+        return 4;
+    }
+
+    return Math.pow(level, 3);
+}
+
 let twitchName = '';
 window.Twitch.ext.onAuthorized(async function (auth) {
     const viewerUserId = window.Twitch.ext.viewer.id;
@@ -31,6 +70,7 @@ const $playerName = document.getElementById("player-name");
 const $playerJob = document.getElementById("player-job");
 const $playerHealthBar = document.getElementById("player-hp-bar");
 const $playerHealthText = document.getElementById("player-hp-text");
+const $playerXPText = document.getElementById("player-xp-text");
 const $playerAttack = document.getElementById("player-attack");
 const $playerDefense = document.getElementById("player-defense");
 const $playerHeal = document.getElementById("player-heal");
@@ -41,36 +81,6 @@ const $healAction = document.getElementById("heal-action");
 const $reviveAction = document.getElementById("revive-action");
 const $log = document.getElementById("log");
 
-const SocketEvents = {
-    // Incoming
-    DisplayConnected: 'DisplayConnected',
-    DisplayDisconnected: 'DisplayDisconnected',
-    PlayerConnected: 'PlayerConnected',
-    PlayerDisconnected: 'PlayerDisconnected',
-    AddMonsters: 'AddMonsters',
-    AddBoss: 'AddBoss',
-    PlayerAction: 'PlayerAction',
-    PlayerRevive: 'PlayerRevive',
-
-    // Outgoing
-    Log: "Log",
-    Snapshot: "Snapshot",
-    Update: "Update",
-    PlayerRegistered: "PlayerRegistered",
-    
-    // Built-In
-    Connect: 'connect',
-    Disconnect: 'disconnect',
-    
-    // Display Clients
-    PlayerStanceChange: "PlayerStanceChange",
-    PlayerRevived: "PlayerRevived",
-    PlayerHealed: "PlayerHealed",
-    PlayerAttacked: "PlayerAttacked",
-    MonsterAttacked: "MonsterAttacked",
-    PlayerDied: "PlayerDied",
-    MonsterDied: "MonsterDied",
-}
 
 const screens = {
     screenElements: [$mainScreen, $characterScreen, $gameScreen],
@@ -86,6 +96,7 @@ const screens = {
 };
 
 let localPlayer = {};
+window.localPlayer = localPlayer;
 let socket = null;
 
 $connectButton.addEventListener('click', () => {
@@ -134,7 +145,8 @@ function initializeGameScreen() {
     socket.on(SocketEvents.Update, (player) => {
         localPlayer = player;
         $playerName.innerText = player.name;
-        $playerJob.innerText = player.job;
+        $playerJob.innerText = `Lv:${player.level} ${player.job}`;
+        $playerXPText.innerText = `XP: ${player.xp}/${getLevelRequirement(player.level)}`;
         $playerHealthText.innerText = `HP: ${player.health}/${player.maxHealth}`;
         $playerHealthBar.value = player.health;
         $playerHealthBar.max = player.maxHealth;
