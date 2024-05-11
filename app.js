@@ -3,7 +3,9 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var Game = require('./game');
 
+const game = new Game();
 var app = express();
 
 // view engine setup
@@ -15,6 +17,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.post('/heal-party', (request, response) => {
+  game.handleReviveParty();
+  response.send('ok');
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -32,4 +39,4 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+module.exports = { app, game };
