@@ -48,7 +48,7 @@ class Player {
     constructor(id, socket, data = {}, ) {
       this.id = id;
       this.socket = socket;
-      this.name = data.name ?? "anon";
+      this.name = data.name ?? "Stranger";
       this.action = data.action ?? "attack";
       this.color = data.color ?? '';
       this.active = data.active ?? true;

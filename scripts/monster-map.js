@@ -1,10 +1,27 @@
 const Monster = require("./monster");
-const { getRandomInt } = require('./helpers');
+const { getRandomInt, getRandomFromArray } = require('./helpers');
 const Slime = require("./monsters/slime");
 
 class MonsterMap extends Map {
-    static Filters = {}
 
+    /**
+     * @param {number} id 
+     * @param {import("./monster").MonsterData} monsterData 
+     */
+    create(id, monsterData) {
+        const monster = new Monster(id, monsterData);
+        this.set(id, monster);
+    }
+
+    /**
+     * @returns {Monster}
+     */
+    getRandom() {
+        const keys = Array.from(this.keys());
+        const id = getRandomFromArray(keys);
+        if (id) return this.get(id);
+    }
+    
     /**
      * @returns {Monster[]}
      */
@@ -57,9 +74,6 @@ class MonsterMap extends Map {
             color
         }));
     }
-    
-    // TODO
-    // wrap set/delete/clear methods to recreate array then
 }
 
 module.exports = MonsterMap;

@@ -10,7 +10,18 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * 
+ * @param {Array} arr 
+ * @returns
+ */
+function getRandomFromArray(arr) {
+    if (!arr.length) return;
+    return arr[getRandomInt(0, arr.length -1)];
+}
+
 module.exports = {
     sleep,
-    getRandomInt
+    getRandomInt,
+    getRandomFromArray
 }

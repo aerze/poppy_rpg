@@ -7,12 +7,25 @@
         <script src="/socket.io/socket.io.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <style>
+            @font-face {
+                font-family: Yuruka;
+                src: url("YurukaStd-UB.otf") format("opentype");
+            }
+
             html, body {
                 color: white;
                 width: 800px;
                 height: 600px;
-                border: 1px solid black;
                 font-family: Arial, Helvetica, sans-serif;
+            }
+
+            #dungeon-info {
+                color: white;
+                font: 800 35px Yuruka;
+                -webkit-text-fill-color: white;
+                -webkit-text-stroke: 1px;
+                -webkit-text-stroke-color: black;
+                margin: 0 1em;
             }
 
             .flex {
@@ -27,6 +40,29 @@
                 flex-direction: row;
             }
 
+            .flyaway {
+                color: black;
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                opacity: 1;
+                transition: top 200ms ease-out 0s, left 200ms ease-out 0s, opacity 200ms ease 500ms;
+
+                
+                font: 800 80px Arial;
+                -webkit-text-fill-color: white;
+                -webkit-text-stroke: 4px;
+            }
+
+            .flyaway.damage {
+                -webkit-text-stroke-color: rgb(236, 72, 88);
+            }
+
+            .flyaway.heal {
+                -webkit-text-stroke-color: rgb(29, 180, 70);
+            }
+
             .sprite {
                 display: flex;
                 flex-direction: column;
@@ -35,6 +71,7 @@
                 left: 0;
                 width: 100px;
                 height: 150px;
+                transition: top 500ms ease 0s, left 500ms ease 0s;
             }
 
             .sprite .hud {
@@ -66,13 +103,25 @@
                 height: 100px;
                 overflow-y: scroll;
             }
+
+            .buttons {
+                display: flex;
+                flex-direction: row;
+            }
+
+            .hidden { 
+                display: none;
+            }
         </style>
     </head>
     <body>
-        <button id="add">add monsters</button>
-        <button id="add-boss">add boss</button>
-        <button id="delete-monsters">delete monsters</button>
-        <button id="revive-party">revive-party</button>
+        <h2 id="dungeon-info">???</h2>
+        <div id="buttons" class="hidden">
+            <button id="add">add monsters</button>
+            <button id="add-boss">add boss</button>
+            <button id="delete-monsters">delete monsters</button>
+            <button id="revive-party">revive-party</button>
+        </div>
         <script src="./scripts/display-client.js"></script>
     </body>
 </html>

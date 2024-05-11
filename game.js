@@ -3,8 +3,9 @@ const Monster = require("./scripts/monster");
 const Player = require("./scripts/player");
 const PlayerMap = require("./scripts/player-map");
 const MonsterMap = require("./scripts/monster-map");
-const { sleep, getRandomInt } = require('./scripts/helpers');
+const { sleep, getRandomInt, getRandomFromArray } = require('./scripts/helpers');
 const { getLevelRequirement } = require("./scripts/xp");
+const Dungeon = require("./scripts/dungeon");
 
 class Game {
     static SocketEvents = {
@@ -47,15 +48,16 @@ class Game {
         this.frameCounter = new SafeCounter();
         this.players = new PlayerMap();
         this.monsters = new MonsterMap();
+        this.dungeon = new Dungeon(Dungeon.SLIME_DUNGEON);
+        
         this.displays = new Set();
-
-        this.framesWithoutMonsters = new SafeCounter();
     }
 
     getSnapshot() {
         return {
             players: this.players.toArray(),
             monsters: this.monsters.toArray(),
+            dungeon: this.dungeon.toJSON()
         }
     }
 
@@ -178,108 +180,11 @@ class Game {
         this.frameCounter.next();
         console.log(`>> loop (${this.frameCounter.count})`);
 
-        this.runPromotions();
-
-        if (this.framesWithoutMonsters.count >= 15) {
-            this.framesWithoutMonsters.reset();
-            this.monsters.createBlueSlime(this.connectionCounter.next(), getRandomInt(1, 3));
-            this.monsters.createGreenSlime(this.connectionCounter.next(), getRandomInt(1, 3));
-            this.monsters.createRedSlime(this.connectionCounter.next(), getRandomInt(1, 3));
-        }
-
-        this.sendSnapshot("loop");
-        await sleep(2000);
-
         const players = this.players.toArray();
-        const monsters = this.monsters.toArray();
         const activePlayers = players.filter(PlayerMap.Filters.Active);
-        
-        // players check
-        if (!activePlayers.length) {
-            this.sendLog(`The heros have gone missing.`);
-            return;
-        }
-        
-        
-        // player heals
-        const healers = activePlayers.filter(PlayerMap.Filters.Heal);
-        const damaged = activePlayers.filter(PlayerMap.Filters.Damaged);
 
-        if (damaged.length) {
-            for (const healer of healers) {
-                const target = damaged[getRandomInt(0, damaged.length - 1)];
-                const heal = healer.heal
-                target.health = Math.min(target.health + heal, target.maxHealth);
-                target.updatePlayerClient();
-                this.sendLog(`${healer.name} heals ${target.name} for ${heal}hp`);
-                this.emitToDisplays(Game.SocketEvents.PlayerHealed, { healer, target });
-                await sleep();
-            }
-        }
-
-        // monster check
-        if (!monsters.length) {
-            this.framesWithoutMonsters.next();
-            this.sendLog(`There are no monsters nearby. (${this.framesWithoutMonsters.count})`);
-            return;
-        }
-        
-        // player attacks
-        const attackers = activePlayers.filter(PlayerMap.Filters.Attack);
-        for (const attacker of attackers) {
-            const target = monsters[getRandomInt(0, monsters.length - 1)];
-            const damage = attacker.attack;
-            target.health -= damage
-            attacker.updatePlayerClient();
-            this.sendLog(`${attacker.name} attacks ${target.name} for ${damage}hp`);
-            this.emitToDisplays(Game.SocketEvents.PlayerAttacked, { attacker, target })
-            await sleep();
-        }
-
-        
-        // monster actions
-        const initialDefenders = activePlayers.filter(PlayerMap.Filters.Defend);
-        const defenders = !initialDefenders.length 
-            ? activePlayers
-            : [...activePlayers, ...initialDefenders, ...initialDefenders]
-
-        for (const monster of monsters) {
-            if (Math.random() > 0.4) continue;
-            const target = defenders[getRandomInt(0, defenders.length - 1)];
-            const isDefending = target.action === 'defend';
-            const damage = isDefending ? Math.max(0, monster.attack - target.defense) : monster.attack;
-            target.health -= damage
-            target.updatePlayerClient();
-            this.sendLog(`${monster.name} attacks ${target.name} for ${damage}hp`);
-            this.emitToDisplays(Game.SocketEvents.MonsterAttacked, { monster, target });
-            await sleep();
-        }
-    
-        // player deaths
-        for (const player of activePlayers) {
-            if (player.health <= 0) {
-                player.active = false;
-                player.updatePlayerClient();
-                this.sendLog(`${player.name} is dead.`);
-                this.emitToDisplays(Game.SocketEvents.PlayerDied, player.id);
-            }
-        }
-        await sleep();
-
-        // monster deaths
-        for (const monster of monsters) {
-            if (monster.health <= 0 ) {
-                this.players.giveXP(monster.xp);
-                this.monsters.delete(monster.id);
-                this.sendLog(`${monster.name} has been defeated.`);
-                this.emitToDisplays(Game.SocketEvents.MonsterDied, monster.id);
-            }
-        }
-        await sleep();
-    }
-
-    runPromotions() {
-        for (const [id, player] of this.players) {
+        // promote players
+        for (const player of players) {
             const levelRequirement = getLevelRequirement(player.level);
 
             if (player.xp >= levelRequirement) {
@@ -290,7 +195,107 @@ class Game {
             player.updatePlayerClient();
         }
 
+        
+        // dungeon iteration
+        if (!this.monsters.size) {
+            this.dungeon.currentRoom++;
+
+            if (this.dungeon.currentRoom > this.dungeon.finalRoom) {
+                this.dungeon = new Dungeon(Dungeon.SLIME_DUNGEON);
+            } 
+
+            const encounter = this.dungeon.generateEncounter(this.dungeon.currentRoom);
+            for (const monsterData of encounter) {
+                this.monsters.create(this.connectionCounter.next(), monsterData);
+            }
+        }
+
         this.sendSnapshot();
+
+        // players check
+        if (!activePlayers.length) {
+            this.sendLog(`The heros have gone missing.`);
+            return;
+        }
+        
+        // player heals
+        const healers = activePlayers.filter(PlayerMap.Filters.Heal);
+        const damaged = activePlayers.filter(PlayerMap.Filters.Damaged);
+        if (damaged.length) {
+            for (const healer of healers) {
+                const target = getRandomFromArray(damaged);
+                if (!target) continue;
+                
+                this.emitToDisplays(Game.SocketEvents.PlayerHealed, { healer, target });
+                await sleep(500);
+
+                const heal = healer.heal
+                target.health = Math.min(target.health + heal, target.maxHealth);
+                target.updatePlayerClient();
+                this.sendLog(`${healer.name} heals ${target.name} for ${heal}hp`);
+                this.emitToDisplays(Game.SocketEvents.PlayerHealed, { healer, target, heal });
+                await sleep();
+            }
+        }
+
+        
+        
+        // player attacks
+        const attackers = activePlayers.filter(PlayerMap.Filters.Attack);
+        for (const attacker of attackers) {
+            const target = this.monsters.getRandom();
+            if (!target) continue;
+            
+            this.emitToDisplays(Game.SocketEvents.PlayerAttacked, { attacker, target });
+            await sleep(500);
+
+            const damage = attacker.attack;
+            target.health = Math.max(target.health - damage, 0);
+            this.sendLog(`${attacker.name} attacks ${target.name} for ${damage}hp`);
+            this.emitToDisplays(Game.SocketEvents.PlayerAttacked, { attacker, target, damage });
+            await sleep();
+
+            if (target.health <= 0) {
+                this.players.giveXP(target.xp);
+                this.monsters.delete(target.id);
+                this.emitToDisplays(Game.SocketEvents.MonsterDied, target.id);
+                await sleep();
+            }
+        }
+
+        
+        // monster actions
+        const initialDefenders = activePlayers.filter(PlayerMap.Filters.Defend);
+        const defenders = !initialDefenders.length 
+            ? activePlayers
+            : [...activePlayers, ...initialDefenders, ...initialDefenders]
+
+        for (const [id, monster] of this.monsters) {
+            if (Math.random() < 0.4) continue;
+
+            const target = getRandomFromArray(defenders);
+            if (!target) continue;
+
+            this.emitToDisplays(Game.SocketEvents.MonsterAttacked, { monster, target });
+            await sleep(500);
+
+            const isDefending = target.action === 'defend';
+            const damage = isDefending ? Math.max(0, monster.attack - target.defense) : monster.attack;
+            target.health = Math.max(target.health - damage, 0);
+            target.updatePlayerClient();
+            this.sendLog(`${monster.name} attacks ${target.name} for ${damage}hp`);
+            this.emitToDisplays(Game.SocketEvents.MonsterAttacked, { monster, target, damage });
+            await sleep();
+
+            if (target.health <= 0) {
+                target.active = false;
+                target.updatePlayerClient();
+                this.sendLog(`${target.name} is dead.`);
+                this.emitToDisplays(Game.SocketEvents.PlayerDied, target.id);
+                await sleep();
+            }
+
+        }
     }
 }
 
