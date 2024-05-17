@@ -50,7 +50,7 @@ class CharacterSprite {
 
     createBaseElements() {
         const base = document.createElement('div');
-        base.classList.add("sprite");
+        base.classList.add("card-sprite");
         base.style.background = `${this.data.color}AA`;
 
         const hud = document.createElement('div');
@@ -121,6 +121,105 @@ class CharacterSprite {
         this.elements.hpLabel.remove();
         this.elements.hpBar.remove();
         this.elements.hud.remove();
+        this.elements.base.remove();
+    }
+}
+
+class Sprite {
+    static PresetMap = {
+        'a': '/sprites/tay_test.png',
+        'b': '/sprites/abby_test.png',
+        'c': '/sprites/tay_test.png',
+        'd': '/sprites/abby_test.png',
+    }
+
+    constructor(type, data) {
+        this.id = data.id;
+        this.type = type;
+        this.data = data;
+        this.x = 0;
+        this.y = 0;
+        this.elements = this.createBaseElements();
+        this.root = this.elements.base;
+    }
+
+    createBaseElements() {
+        const base = document.createElement('div');
+        base.classList.add("sprite");
+        base.style.borderColor = `${this.data.color}AA`;
+
+        const image = document.createElement('img');
+        image.src = Sprite.PresetMap[this.data.preset];
+        base.appendChild(image);
+
+        // const hud = document.createElement('div');
+        // base.appendChild(hud);
+        // hud.classList.add("hud");
+
+        // const name = document.createElement('h5');
+        // hud.appendChild(name);
+        // name.classList.add("name");
+
+        // const job = document.createElement('p');
+        // hud.appendChild(job);
+        // job.classList.add("job");
+
+        // const hpLabel = document.createElement('label');
+        // hud.appendChild(hpLabel);
+        // hpLabel.classList.add("hpLabel");
+
+        // const hpBar = document.createElement('progress');
+        // hud.appendChild(hpBar);
+        // hpBar.classList.add("hpBar");
+
+        // const stance = document.createElement('p');
+        // hud.appendChild(stance);
+        // hpBar.classList.add("stance");
+
+        document.body.appendChild(base);
+
+        return {
+            base,
+            // hud,
+            // name, 
+            // job,
+            // hpLabel,
+            // hpBar,
+            // stance
+        }
+    }
+
+    updatePosition() {
+        this.elements.base.style.top = `${this.y}px`;
+        this.elements.base.style.left = `${this.x}px`;
+    }
+
+    update(data) {
+        this.data = data;
+        // this.elements.name.innerText = this.data.name;
+        // this.elements.job.innerText =  `Lv:${this.data.level} ${this.data.job ?? ''}`;
+        // this.elements.hpLabel.innerText = `hp:${this.data.health}/${this.data.maxHealth}`;
+        // this.elements.hpBar.value = this.data.health;
+        // this.elements.hpBar.max = this.data.maxHealth;
+
+        this.updatePosition();
+
+        if (this.type === "player") {
+            // this.elements.stance.innerText = this.data.action.toUpperCase();
+            if (this.data.active) {
+                this.elements.base.style.opacity = "1";
+            } else {
+                this.elements.base.style.opacity = "0.33";
+            }
+        }
+    }
+
+    remove() {
+        // this.elements.name.remove();
+        // this.elements.job.remove();
+        // this.elements.hpLabel.remove();
+        // this.elements.hpBar.remove();
+        // this.elements.hud.remove();
         this.elements.base.remove();
     }
 }
@@ -263,7 +362,9 @@ const scene = {
     },
 
     add(id, data, type) {
-        const sprite = new CharacterSprite(type, data);
+        const sprite = data.preset
+            ? new Sprite(type, data)
+            : new CharacterSprite(type, data);
         this.spriteMap.set(id, sprite);
 
         switch (type) {

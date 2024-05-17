@@ -62,8 +62,19 @@
             .flyaway.heal {
                 -webkit-text-stroke-color: rgb(29, 180, 70);
             }
-
+            
             .sprite {
+                display: flex;
+                flex-direction: column;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 200px;
+                height: 200px;
+                transition: top 500ms ease 0s, left 500ms ease 0s;
+            }
+
+            .card-sprite {
                 display: flex;
                 flex-direction: column;
                 position: fixed;
@@ -74,27 +85,27 @@
                 transition: top 500ms ease 0s, left 500ms ease 0s;
             }
 
-            .sprite .hud {
+            .card-sprite .hud {
                 display: flex;
                 flex-direction: column;
                 padding: 0.5em;
             }
 
-            .sprite .hud .name {
+            .card-sprite .hud .name {
                 margin: 0;
                 font-size: 26px;
             }
 
-            .sprite .hud .job {
+            .card-sprite .hud .job {
                 margin: 0;
             }
 
-            .sprite .hud .hpLabel {
+            .card-sprite .hud .hpLabel {
                 margin: 0;
                 font-size: 12px;
             }
 
-            .sprite .hud .hpBar {
+            .card-sprite .hud .hpBar {
                 margin: 0;
                 width: 100%
             }

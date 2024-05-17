@@ -136,6 +136,7 @@ $characterForm.addEventListener('submit', (event) => {
         action: 'attack',
         color: data.color,
         job: data.job,
+        preset: data.preset,
         active: true
     });
 });

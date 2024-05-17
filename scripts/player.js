@@ -54,6 +54,7 @@ class Player {
       this.active = data.active ?? true;
       this.job = data.job ?? '';
       const job = Player.JOBS[this.job];
+      this.preset = data.preset ?? 'a';
 
       this.maxHealth = job.maxHealth;
       this.health = job.health;
@@ -74,6 +75,7 @@ class Player {
         name: this.name,
         action: this.action,
         job: this.job,
+        preset: this.preset,
         maxHealth: this.maxHealth,
         health: this.health,
         attack: this.attack,
