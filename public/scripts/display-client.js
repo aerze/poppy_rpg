@@ -205,7 +205,7 @@ class Sprite {
         this.updatePosition();
 
         if (this.type === "player") {
-            this.elements.stance.innerText = this.data.action.toUpperCase();
+            // this.elements.stance.innerText = this.data.action.toUpperCase();
             if (this.data.active) {
                 this.elements.base.style.opacity = "1";
             } else {
