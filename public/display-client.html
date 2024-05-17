@@ -64,6 +64,7 @@
             }
             
             .sprite {
+                color: black;
                 display: flex;
                 flex-direction: column;
                 position: fixed;
@@ -72,6 +73,35 @@
                 width: 200px;
                 height: 200px;
                 transition: top 500ms ease 0s, left 500ms ease 0s;
+            }
+
+            .sprite .hud {
+                position: absolute;
+                top: -80px;
+                left: 50px;
+                display: flex;
+                flex-direction: column;
+                padding: 0.5em;               
+                width: 80px;
+            }
+
+            .sprite .hud .name {
+                margin: 0;
+                font-size: 26px;
+            }
+
+            .sprite .hud .job {
+                margin: 0;
+            }
+
+            .sprite .hud .hpLabel {
+                margin: 0;
+                font-size: 12px;
+            }
+
+            .sprite .hud .hpBar {
+                margin: 0;
+                width: 100%
             }
 
             .card-sprite {

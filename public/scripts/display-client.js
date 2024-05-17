@@ -146,31 +146,31 @@ class Sprite {
     createBaseElements() {
         const base = document.createElement('div');
         base.classList.add("sprite");
-        base.style.borderColor = `${this.data.color}AA`;
-
+        
         const image = document.createElement('img');
         image.src = Sprite.PresetMap[this.data.preset];
         base.appendChild(image);
+        
+        const hud = document.createElement('div');
+        base.appendChild(hud);
+        hud.style.backgroundColor = `${this.data.color}44`;
+        hud.classList.add("hud");
+        
+        const name = document.createElement('h5');
+        hud.appendChild(name);
+        name.classList.add("name");
 
-        // const hud = document.createElement('div');
-        // base.appendChild(hud);
-        // hud.classList.add("hud");
+        const job = document.createElement('p');
+        hud.appendChild(job);
+        job.classList.add("job");
 
-        // const name = document.createElement('h5');
-        // hud.appendChild(name);
-        // name.classList.add("name");
+        const hpLabel = document.createElement('label');
+        hud.appendChild(hpLabel);
+        hpLabel.classList.add("hpLabel");
 
-        // const job = document.createElement('p');
-        // hud.appendChild(job);
-        // job.classList.add("job");
-
-        // const hpLabel = document.createElement('label');
-        // hud.appendChild(hpLabel);
-        // hpLabel.classList.add("hpLabel");
-
-        // const hpBar = document.createElement('progress');
-        // hud.appendChild(hpBar);
-        // hpBar.classList.add("hpBar");
+        const hpBar = document.createElement('progress');
+        hud.appendChild(hpBar);
+        hpBar.classList.add("hpBar");
 
         // const stance = document.createElement('p');
         // hud.appendChild(stance);
@@ -180,11 +180,11 @@ class Sprite {
 
         return {
             base,
-            // hud,
-            // name, 
-            // job,
-            // hpLabel,
-            // hpBar,
+            hud,
+            name, 
+            job,
+            hpLabel,
+            hpBar,
             // stance
         }
     }
@@ -196,16 +196,16 @@ class Sprite {
 
     update(data) {
         this.data = data;
-        // this.elements.name.innerText = this.data.name;
-        // this.elements.job.innerText =  `Lv:${this.data.level} ${this.data.job ?? ''}`;
-        // this.elements.hpLabel.innerText = `hp:${this.data.health}/${this.data.maxHealth}`;
-        // this.elements.hpBar.value = this.data.health;
-        // this.elements.hpBar.max = this.data.maxHealth;
+        this.elements.name.innerText = this.data.name;
+        this.elements.job.innerText =  `Lv:${this.data.level} ${this.data.job ?? ''}`;
+        this.elements.hpLabel.innerText = `hp:${this.data.health}/${this.data.maxHealth}`;
+        this.elements.hpBar.value = this.data.health;
+        this.elements.hpBar.max = this.data.maxHealth;
 
         this.updatePosition();
 
         if (this.type === "player") {
-            // this.elements.stance.innerText = this.data.action.toUpperCase();
+            this.elements.stance.innerText = this.data.action.toUpperCase();
             if (this.data.active) {
                 this.elements.base.style.opacity = "1";
             } else {
