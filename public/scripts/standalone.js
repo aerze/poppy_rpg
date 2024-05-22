@@ -1,3 +1,5 @@
+import audio from "./audio-manager.js"
+
 const SocketEvents = {
     // Incoming
     DisplayConnected: 'DisplayConnected',
@@ -64,8 +66,11 @@ const $connectButton = document.getElementById("connect");
 const $characterScreen = document.getElementById("character-screen");
 const $characterForm = document.getElementById('character-form');
 const $characterName = document.getElementById('characterName');
+const $characterImage = document.getElementById("player-character");
+const $characterPreset = document.getElementById("preset");
 
 const $gameScreen = document.getElementById("game-screen");
+const $gameCharacter = document.getElementById("game-view-character");
 const $playerName = document.getElementById("player-name");
 const $playerJob = document.getElementById("player-job");
 const $playerHealthBar = document.getElementById("player-hp-bar");
@@ -100,8 +105,21 @@ window.localPlayer = localPlayer;
 let socket = null;
 
 $connectButton.addEventListener('click', () => {
+    audio.play('confirm');
     initConnection();
 });
+
+
+
+
+
+
+
+
+
+
+
+
 
 function initConnection() {
     // socket = io("wss://starfish-app-ew3jj.ondigitalocean.app");
@@ -141,10 +159,41 @@ $characterForm.addEventListener('submit', (event) => {
     });
 });
 
+const tempCharacterSpriteMap = {
+    a: "sprites/tay_test.png",
+    b: "sprites/abby_test.png"
+}
+
+$characterImage.src = tempCharacterSpriteMap.a;
+$characterPreset.addEventListener('change', (event) => {
+    console.log('>> CHANGE');
+    $characterImage.src = tempCharacterSpriteMap[event.target.value];
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function initializeGameScreen() {
     socket.on(SocketEvents.Update, (player) => {
         localPlayer = player;
+        $gameCharacter.src = tempCharacterSpriteMap[player.preset];
         $playerName.innerText = player.name;
         $playerJob.innerText = `Lv:${player.level} ${player.job}`;
         $playerXPText.innerText = `XP: ${player.xp}/${getLevelRequirement(player.level)}`;
@@ -169,24 +218,24 @@ function initializeGameScreen() {
 
 $attackAction.addEventListener('click', (event) => {
     event.preventDefault();
-
+    if (localPlayer.action === 'attack') return;
     socket.emit(SocketEvents.PlayerAction, { action: "attack" });
 });
 
 $defendAction.addEventListener('click', (event) => {
     event.preventDefault();
-
+    if (localPlayer.action === 'defend') return;
     socket.emit(SocketEvents.PlayerAction, { action: "defend" });
 });
 
 $healAction.addEventListener('click', (event) => {
     event.preventDefault();
-
+    if (localPlayer.action === 'heal') return;
     socket.emit(SocketEvents.PlayerAction, { action: "heal" });
 });
 
 $reviveAction.addEventListener('click', (event) => {
     event.preventDefault();
-
+    if (localPlayer.action === 'revive') return;
     socket.emit(SocketEvents.PlayerRevive);
 });

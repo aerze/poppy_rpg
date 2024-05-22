@@ -1,229 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Panel</title>
-        <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
-        <script src="/socket.io/socket.io.js"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <style>
-            html, body {
-                background-color: #664488;
-                color: white;
-                width: 500px;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel</title>
+    <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+      integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="stylesheets/player-client.css" />
+    <style>
+      html,
+      body {
+        background-color: #664488;
+        color: black;
+        font-family: Arial, Helvetica, sans-serif;
+      }
 
-                font-family: Arial, Helvetica, sans-serif;
-            }
+      .flex {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
 
-            .flex {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-            }
+      .row {
+        display: flex;
+        flex-direction: row;
+      }
 
-            .row {
-                display: flex;
-                flex-direction: row;
-            }
-        
-            .screen {
-                width: 318px;
-                height: 496px;
-                border: 2px solid black;
-            }
+      .screen {
+        width: 318px;
+        height: 496px;
+        border: 2px solid black;
+      }
+      /* 
+            @media screen and (min-width: 318px) {
+                .screen {
+                    width: auto;
+                    height: 496px;
+                    border: 2px solid black;
+                }
+            } */
 
-            .hidden {
-                display: none;
-            }
+      .hidden {
+        display: none;
+      }
 
-            #main-screen {
-                display: flex;
-                flex-direction: column;
-            }
+      #main-screen {
+        display: flex;
+        flex-direction: column;
+      }
 
-            #main-screen header {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-            }
+      #main-screen header {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
 
-            #main-screen header h2 {
-                margin-bottom: 0;
-            }
+      #main-screen header h2 {
+        margin-bottom: 0;
+      }
 
-            #main-screen header h1 {
-                margin-top: .5em;
-            }
+      #main-screen header h1 {
+        margin-top: 0.5em;
+      }
 
-            #main-screen main {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
+      #main-screen main {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
 
-            }
+      #character-screen {
+        display: flex;
+        flex-direction: column;
+      }
 
-            #character-screen {
-                display: flex;
-                flex-direction: column;
-            }
+      #character-form {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
 
-            #character-screen .player-display{
-                display: flex;
-                flex-direction: row;
-                height: 300px;
-            }
+      #character-screen .player-display {
+        display: flex;
+        flex-direction: row;
+        height: 300px;
+        background: url(images/mori_jungle.png);
+        background-size: cover;
+      }
 
-            #character-screen .controls {
-                padding: 0.5rem;
-                display: flex;
-                flex-direction: column;
-                flex: 1 1;
-            }
+      #character-screen .controls {
+        padding: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1 1;
+      }
 
-            #character-screen .player-view {
-                display: flex;
-                flex-direction: column;
-                flex: 1 1;
-            }
+      #character-screen .controls label {
+        margin: 0.5rem 0;
+      }
 
-            #character-screen .player-form {
-                
-            }
+      #character-screen .player-view {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1;
+      }
 
-            #game-screen {
-                display: flex;
-                flex-direction: column;
-            }
+      #character-screen .player-form {
+        flex: 1 0;
+        background: url(images/parchment.jpg);
+        background-size: cover;
+        padding: 0.2rem;
+        color: black;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: -0.2px;
+        font-family: monospace;
+      }
 
-            #game-screen .player-display {
-                flex: 1 1;
-                display: flex;
-                flex-direction: column;
+      #player-character {
+        width: 100%;
+        height: auto;
+      }
 
-                padding: 1em;
-            }
+      #game-screen {
+        display: flex;
+        flex-direction: column;
+      }
 
-            #game-screen .player-display h5 {
-                margin: 0;
-            }
+      #game-screen .player-controls {
+        flex: 1 1;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        background: url(images/parchment.jpg);
+      }
 
-            #game-screen .player-display .hp {
-                display: flex;
-                flex-direction: column;
-            }
+      #game-screen .player-display {
+        flex: 1 1;
+        display: flex;
+        flex-direction: column;
 
-            #game-screen .player-display #player-name {
-                margin: 0;
-            }
+        padding: 1em;
+        background: url(images/mori_jungle.png);
+        background-size: cover;
+      }
 
-            #game-screen .player-display #player-job {
-                font-size: 1rem;
-                font-weight: 400;
-            }
+      #game-screen .player-stats {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        padding: 0.5rem;
+        background: linear-gradient(137deg, rgba(255,255,255,0.6951155462184874) 0%, rgba(255,255,255,0.6979166666666667) 16%, rgba(0,0,0,0) 100%);
+      }
 
-            #game-screen .player-display #player-hp-text {
-                margin: 0;
-            }
+      #game-screen .player-display .player-view {
+        position: relative;
+        top: 20px;
+        left: 30px;
+      }
 
-            #game-screen .button-container {
-                flex: 1 1;
-                display: flex;
-                flex-direction: column;
-                flex-wrap: wrap;
-            }
+      #game-view-character {
+        width: 100%;
+        height: auto;
+      }
 
-            #game-screen .button-container .button-row {
-                flex: 1 1;
-            }
+      #game-screen .player-display h5 {
+        margin: 0;
+      }
 
-            #game-screen .actions {
-                flex: 1 1;
-            }
+      #game-screen .player-display .hp {
+        display: flex;
+        flex-direction: column;
+      }
 
-            #log {
-                height: 100px;
-                overflow-y: scroll;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="main-screen" class="main screen" style="display: flex;">
-            <header class="flex">
-                <h2>Poppy's</h2>
-                <h1>RPG</h1>
-            </header>
+      #game-screen .player-display #player-name {
+        margin: 0;
+      }
 
-            <main class="flex">
-                <button id="connect">CONNECT</button>
-            </main>
+      #game-screen .player-display #player-job {
+        font-size: 1rem;
+        font-weight: 400;
+      }
+
+      #game-screen .player-display #player-hp-text {
+        margin: 0;
+      }
+
+      #game-screen .player-controls .button-row {
+        flex: 1 1;
+      }
+
+      #game-screen .actions {
+        flex: 1 1;
+      }
+
+      #log {
+        padding: 0.6rem;
+        height: 100px;
+        overflow-y: scroll;
+      }
+    </style>
+  </head>
+  <body class="flex center">
+    <div id="main-screen" class="main screen center" style="display: flex">
+      <header class="flex">
+        <h1>
+          Poppy's <br />
+          Dungeon
+        </h1>
+      </header>
+
+      <main class="flex">
+        <button id="connect" class="display-button">Start Game</button>
+      </main>
+    </div>
+
+    <div id="character-screen" class="screen" style="display: none">
+      <form id="character-form">
+        <div class="player-display">
+          <div class="player-view">
+            <img id="player-character" />
+          </div>
         </div>
 
-        <div id="character-screen" style="display: none;" class="screen">
-            <form id="character-form">
-                <div class="player-display">
-                    <div class="controls">
-                        <label name="preset">
-                            Preset Name
-                            <select id="preset" name="preset">
-                                <option value="a">Volvo</option>
-                                <option value="b">Saab</option>
-                                <option value="c">Mercedes</option>
-                                <option value="d">Audi</option>
-                            </select>
-                        </label>
-                        <label name="job">
-                            Job Class
-                            <select id="job" name="job">
-                                <option value="healer">🐞Lady Healer </option>
-                                <option value="tank">🪲 Beetle Warden</option>
-                                <option value="knight">🐸 Frog Knight</option>
-                            </select>
-                        </label>
+        <div class="player-form">
+          <div class="controls">
+            <label>
+              CHARACTER NAME:
+              <input id="characterName" name="characterName" type="text" />
+            </label>
 
-                        <label name="color">
-                            Color
-                            <input type="color" id="color" name="color"/>
-                        </label>
-                    </div>
-                    <div class="player-view"></div>
-                </div>
-                <div class="player-form">
-                    <label>
-                        Character Name
-                        <input id="characterName" name="characterName" type="text"/>
-                    </label>
-                    <button>Save</button>
-                </div>
-            </form>
-        </div>
+            <label name="preset">
+              PRESET NAME
+              <select id="preset" name="preset">
+                <option value="a">Volvo</option>
+                <option value="b">Saab</option>
+              </select>
+            </label>
 
-        <div id="game-screen" style="display: none;" class="screen">
-            <div class="player-display">
-                <h2 id="player-name">Anon</h2><span id="player-job">Healer</span>
-                <div class="hp">
-                    <progress id="player-hp-bar" value="100" max="100"></progress>
-                    <h5 id="player-xp-text">XP: 0/0</h5>
-                    <h5 id="player-hp-text">HP: 80/80</h5>
-                </div>
-                <h5 id="player-attack">ATK: 12 </h5>
-                <h5 id="player-defense">DEF: 23 </h5>
-                <h5 id="player-heal">HEAL: 12 </h5>
-                <h5 id="player-action">ACT: ATTACK</h5>
-            </div>
-            <div class="button-container">
-                <div class="row button-row">
-                    <button id="attack-action" class="actions">Attack</button>
-                    <button id="defend-action" class="actions">Defend</button>
-                    <button id="heal-action" class="actions">Heal</button>
-                    <button id="revive-action" class="actions">Revive</button>
-                </div>
-                <div id="log"></div>
-            </div>
+            <label name="job">
+              Job Class
+              <select id="job" name="job">
+                <option value="healer">🐞Lady Healer</option>
+                <option value="tank">🪲 Beetle Warden</option>
+                <option value="knight">🐸 Frog Knight</option>
+              </select>
+            </label>
+
+            <label name="color">
+              Color
+              <input type="color" id="color" name="color" />
+            </label>
+
+            <button>Create</button>
+          </div>
         </div>
-        <script src="./scripts/standalone.js"></script>
-    </body>
+      </form>
+    </div>
+
+    <div id="game-screen" class="screen" style="display: none">
+      <div class="player-display">
+        <div class="player-view">
+          <img id="game-view-character"/>
+        </div>
+        <div class="player-stats">
+          <h2 id="player-name">Anon</h2>
+          <span id="player-job">Healer</span>
+          <div class="hp">
+            <progress id="player-hp-bar" value="100" max="100"></progress>
+            <h5 id="player-xp-text">XP: 0/0</h5>
+            <h5 id="player-hp-text">HP: 80/80</h5>
+          </div>
+          <h5 id="player-attack">ATK: 12</h5>
+          <h5 id="player-defense">DEF: 23</h5>
+          <h5 id="player-heal">HEAL: 12</h5>
+          <h5 id="player-action">ACT: ATTACK</h5>
+        </div>
+      </div>
+
+      <div class="player-controls">
+        <div class="row button-row">
+          <button id="attack-action" class="actions">Attack</button>
+          <button id="defend-action" class="actions">Defend</button>
+          <button id="heal-action" class="actions">Heal</button>
+          <button id="revive-action" class="actions">Revive</button>
+        </div>
+        <div id="log"></div>
+      </div>
+    </div>
+    <script src="./scripts/standalone.js" type="module"></script>
+  </body>
 </html>
