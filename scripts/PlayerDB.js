@@ -15,6 +15,7 @@ class PlayerDB {
       name: sanitize(userData.name),
       action: sanitize(userData.action),
       color: sanitize(userData.color),
+      preset: sanitize(userData.preset),
       job: sanitize(userData.job),
       active: Boolean(userData.active),
     };
