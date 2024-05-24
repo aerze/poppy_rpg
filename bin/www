@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require('dotenv').config();
 
 /**
  * Module dependencies.
@@ -22,7 +23,7 @@ var server = http.createServer(app);
 var io = require("socket.io")(server);
 game.io = io;
 io.on('connection', game.handleConnection);
-game.main();
+
 /**
  * Listen on provided port, on all network interfaces.
  */

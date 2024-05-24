@@ -6,6 +6,7 @@ const MonsterMap = require("./scripts/monster-map");
 const { sleep, getRandomInt, getRandomFromArray } = require('./scripts/helpers');
 const { getLevelRequirement } = require("./scripts/xp");
 const Dungeon = require("./scripts/dungeon");
+const { MongoClient } = require("mongodb");
 
 class Game {
     static SocketEvents = {
@@ -41,9 +42,11 @@ class Game {
         MonsterDied: "MonsterDied",
     }
 
-    /** @param {import('socket.io').Server} io */
-    constructor(io) {
-        this.io = io;
+    /** @param {MongoClient} client */
+    constructor(client) {
+        /** @type {MongoClient} */
+        this.mongo = client;
+        this.initMongo();
         this.connectionCounter = new SafeCounter();
         this.frameCounter = new SafeCounter();
         this.players = new PlayerMap();
@@ -51,6 +54,20 @@ class Game {
         this.dungeon = new Dungeon(Dungeon.SLIME_DUNGEON);
         
         this.displays = new Set();
+    }
+
+    async initMongo() {
+        try {
+            await this.mongo.connect();
+            console.log(">> DB CONNECTED");
+        } catch (e) {
+            console.log(">> FAILED TO CONNECT DUMMY");
+        }
+        
+        this.main();
+        const db = this.mongo.db("poppyrpg");
+        this.playerDB = db.collection('players');
+        this.dungeonDB = db.collection('dungeons');
     }
 
     getSnapshot() {

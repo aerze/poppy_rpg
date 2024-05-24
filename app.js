@@ -3,9 +3,11 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const { MongoClient } = require("mongodb");
 var Game = require('./game');
 
-const game = new Game();
+const client = new MongoClient(process.env.MONGODB_URL);
+const game = new Game(client);
 var app = express();
 
 // view engine setup
