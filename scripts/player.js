@@ -1,5 +1,28 @@
 
 
+/**
+ * @typedef {Object} PlayerUserData
+ * @property {string} name
+ * @property {string} action
+ * @property {string} color
+ * @property {string} job
+ * @property {boolean} active
+ */
+
+/**
+ * @typedef {Object} PlayerData
+ * @property {string} name
+ * @property {string} action
+ * @property {number} maxHealth
+ * @property {number} health
+ * @property {number} attack
+ * @property {number} defense
+ * @property {number} heal
+ * @property {string} color
+ * @property {string} type
+ * @property {boolean} active
+ */
+
 class Player {
     static ACTION = {
         ATTACK: 'attack',
@@ -33,36 +56,27 @@ class Player {
 
     /**
      * @param {number} id
-     * @param {object} data
-     * @param {string} data.name
-     * @param {string} data.action
-     * @param {number} data.maxHealth
-     * @param {number} data.health
-     * @param {number} data.attack
-     * @param {number} data.defense
-     * @param {number} data.heal
-     * @param {string} data.color
-     * @param {string} data.type
-     * @param {boolean} data.active
+     * @param {PlayerData | PlayerUserData} data
      */
-    constructor(id, socket, data = {}, ) {
-      this.id = id;
+    constructor(data = {}, socket) {
+      this.id = '';
       this.socket = socket;
       this.name = data.name ?? "Stranger";
       this.action = data.action ?? "attack";
-      this.color = data.color ?? '';
+      this.color = data.color ?? '#b00b1e';
       this.active = data.active ?? true;
-      this.job = data.job ?? '';
-      const job = Player.JOBS[this.job];
       this.preset = data.preset ?? 'a';
-
-      this.maxHealth = job.maxHealth;
-      this.health = job.health;
-      this.attack = job.attack;
-      this.defense = job.defense;
-      this.heal = job.heal;
-      this.level = 1;
-      this.xp = 0;
+      this.job = data.job ?? '';
+      console.log(data);
+      const job = Player.JOBS[this.job];
+      this.maxHealth = data.maxHealth ?? job.maxHealth;
+      this.health = data.health ?? job.health;
+      this.attack = data.attack ?? job.attack;
+      this.defense = data.defense ?? job.defense;
+      this.heal = data.heal ?? job.heal;
+      this.type = data.type ?? '';
+      this.level = data.level ?? 1;
+      this.xp = data.xp ?? 0;
     }
 
     updatePlayerClient() {
@@ -74,16 +88,16 @@ class Player {
         id: this.id,
         name: this.name,
         action: this.action,
-        job: this.job,
+        color: this.color,
+        active: this.active,
         preset: this.preset,
+        job: this.job,
         maxHealth: this.maxHealth,
         health: this.health,
         attack: this.attack,
         defense: this.defense,
         heal: this.heal,
-        color: this.color,
         type: this.type,
-        active: this.active,
         level: this.level,
         xp: this.xp,
       };

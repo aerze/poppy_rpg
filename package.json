@@ -16,6 +16,7 @@
     "lorem-ipsum": "^2.0.3",
     "md5": "^2.2.1",
     "mersenne-twister": "^1.1.0",
+    "mongo-sanitize": "^1.1.0",
     "mongodb": "^6.6.2",
     "morgan": "~1.9.1",
     "pug": "^2.0.4",

@@ -111,16 +111,6 @@ $connectButton.addEventListener('click', () => {
 
 
 
-
-
-
-
-
-
-
-
-
-
 function initConnection() {
     // socket = io("wss://starfish-app-ew3jj.ondigitalocean.app");
     if (socket) {
@@ -129,6 +119,18 @@ function initConnection() {
         socket = io();
     }
     socket.on(SocketEvents.Connect, () => {
+        const existingPlayerId = localStorage.getItem("playerId")
+        if (existingPlayerId) {
+            console.log(">> Found existing id");
+            socket.once(SocketEvents.PlayerRegistered, ({ playerId }) => {
+                localStorage.setItem("playerId", playerId);
+                screens.open($gameScreen);
+                initializeGameScreen();
+            });
+            socket.emit(SocketEvents.PlayerConnected, { playerId: existingPlayerId });
+            return;
+        }
+
         screens.open($characterScreen);
         $characterName.value = twitchName;
     });
@@ -145,10 +147,12 @@ $characterForm.addEventListener('submit', (event) => {
         return;
     }
 
-    socket.once(SocketEvents.PlayerRegistered, () => {
+    socket.once(SocketEvents.PlayerRegistered, ({ playerId }) => {
+        localStorage.setItem("playerId", playerId);
         screens.open($gameScreen);
         initializeGameScreen();
     });
+
     socket.emit(SocketEvents.PlayerConnected, {
         name: data.characterName,
         action: 'attack',

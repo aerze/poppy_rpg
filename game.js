@@ -7,6 +7,7 @@ const { sleep, getRandomInt, getRandomFromArray } = require('./scripts/helpers')
 const { getLevelRequirement } = require("./scripts/xp");
 const Dungeon = require("./scripts/dungeon");
 const { MongoClient } = require("mongodb");
+const PlayerDB = require('./scripts/PlayerDB');
 
 class Game {
     static SocketEvents = {
@@ -46,7 +47,9 @@ class Game {
     constructor(client) {
         /** @type {MongoClient} */
         this.mongo = client;
-        this.initMongo();
+        this.mongoConnected = new Promise((resolve, reject) => {
+            this.initMongo(resolve, reject);
+        });
         this.connectionCounter = new SafeCounter();
         this.frameCounter = new SafeCounter();
         this.players = new PlayerMap();
@@ -56,18 +59,20 @@ class Game {
         this.displays = new Set();
     }
 
-    async initMongo() {
+    async initMongo(resolve, reject) {
         try {
             await this.mongo.connect();
             console.log(">> DB CONNECTED");
+            resolve();
         } catch (e) {
             console.log(">> FAILED TO CONNECT DUMMY");
+            reject();
         }
         
         this.main();
         const db = this.mongo.db("poppyrpg");
-        this.playerDB = db.collection('players');
-        this.dungeonDB = db.collection('dungeons');
+        PlayerDB.db = db.collection('players');
+        // this.dungeonDB = db.collection('dungeons');
     }
 
     getSnapshot() {
@@ -118,14 +123,26 @@ class Game {
     }
 
     /** @param {import('socket.io').Socket} socket */
-    registerPlayerClient(socket, data) {
+    async registerPlayerClient(socket, data) {
         console.log(`>> c:${socket.id} -> Player`);
-        const player = new Player(this.connectionCounter.next(), socket, data);
+        let player = null;
+
+        if (data.playerId) {
+            player = await PlayerDB.get(data.playerId, socket);
+        } else {
+            player = await PlayerDB.create(data, socket);
+        }
+
+        if (!player) {
+            console.log(`Failed to register player.`);
+            return;
+        }
+
         this.players.set(player.id, player);
         socket.once(Game.SocketEvents.Disconnect, this.unregisterPlayerClient.bind(this, player, socket));
         socket.on(Game.SocketEvents.PlayerAction, this.handlePlayerAction.bind(this, player));
         socket.on(Game.SocketEvents.PlayerRevive, this.handlePlayerRevive.bind(this, player));
-        socket.emit(Game.SocketEvents.PlayerRegistered);
+        socket.emit(Game.SocketEvents.PlayerRegistered, { playerId: player.id });
         player.updatePlayerClient();
         // this.sendSnapshot();
     }
@@ -209,6 +226,9 @@ class Game {
                 player.xp = levelRequirement - player.xp;
             }
 
+            console.time('playersave');
+            await PlayerDB.save(player);
+            console.timeEnd('playersave');
             player.updatePlayerClient();
         }
 
