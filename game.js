@@ -41,6 +41,8 @@ class Game {
         MonsterAttacked: "MonsterAttacked",
         PlayerDied: "PlayerDied",
         MonsterDied: "MonsterDied",
+        Play: "Play",
+        Pause: "Pause"
     }
 
     /** @param {MongoClient} client */
@@ -57,6 +59,7 @@ class Game {
         this.dungeon = new Dungeon(Dungeon.SLIME_DUNGEON);
         
         this.displays = new Set();
+        this.active = true;
     }
 
     async initMongo(resolve, reject) {
@@ -114,6 +117,8 @@ class Game {
         socket.on(Game.SocketEvents.AddBoss, this.handleAddBoss);
         socket.on(Game.SocketEvents.DeleteMonsters, this.handleDeleteMonsters);
         socket.on(Game.SocketEvents.ReviveParty, this.handleReviveParty);
+        socket.on(Game.SocketEvents.Play, this.handlePlay);
+        socket.on(Game.SocketEvents.Pause, this.handlePause);
     }
 
     /** @param {import('socket.io').Socket} socket */
@@ -182,6 +187,19 @@ class Game {
         this.sendSnapshot();
     }
 
+    handlePlay = () => {
+        if (this.active) return;
+        console.log('resuming');
+        this.active = true;
+        this.main();
+    }
+
+    handlePause = () => {
+        console.log("pausing");
+        clearTimeout(this.nextLoop);
+        this.active = false;
+    }
+
     /** @param {Player} player */
     handlePlayerAction = (player, data) => {
         console.log(`>> ${player.name} -> ${data.action}`);
@@ -206,8 +224,14 @@ class Game {
     }
 
     async main() {
+        if (!this.active) {
+            return console.log('paused');
+        };
         await this.loop();
-        setTimeout(this.main.bind(this), 3000);
+        if (!this.active) {
+            return console.log('paused');
+        };
+        this.nextLoop = setTimeout(this.main.bind(this), 3000);
     }
 
     async loop() {

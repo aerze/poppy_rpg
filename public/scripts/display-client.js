@@ -29,6 +29,8 @@ const SocketEvents = {
     MonsterAttacked: "MonsterAttacked",
     PlayerDied: "PlayerDied",
     MonsterDied: "MonsterDied",
+    Play: "Play",
+    Pause: "Pause"
 }
 
 function getRandomInt(min, max) {
@@ -403,6 +405,8 @@ const addButton = document.getElementById('add');
 const addBossButton = document.getElementById('add-boss');
 const deleteMonstersButton = document.getElementById('delete-monsters');
 const revivePartyButton = document.getElementById('revive-party');
+const playButton = document.getElementById('play');
+const pauseButton = document.getElementById('pause');
 const playerMap = new Map();
 const monsterMap = new Map();
 const socket = io();
@@ -435,6 +439,16 @@ deleteMonstersButton.addEventListener('click', (event) => {
 revivePartyButton.addEventListener('click', (event) => {
     event.preventDefault();
     socket.emit(SocketEvents.ReviveParty);
+});
+
+playButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    socket.emit(SocketEvents.Play);
+});
+
+pauseButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    socket.emit(SocketEvents.Pause);
 });
 
 socket.on(SocketEvents.Disconnect, () => {
