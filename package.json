@@ -19,7 +19,7 @@
     "mongo-sanitize": "^1.1.0",
     "mongodb": "^6.6.2",
     "morgan": "~1.9.1",
-    "pug": "^2.0.4",
+    "pug": "^3.0.3",
     "socket.io": "^4.7.5",
     "uglify-js": "^2.6.0"
   }
