@@ -20,11 +20,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(twitchAuthMiddleware({
-  clientId: process.env.TWITCH_OAUTH_CLIENT_ID,
-  clientSecret: process.env.TWITCH_OAUTH_CLIENT_SECRET,
-  redirectUri: process.env.TWITCH_OAUTH_REDIRECT_URI,
-}));
+// app.use(twitchAuthMiddleware({
+//   clientId: process.env.TWITCH_OAUTH_CLIENT_ID,
+//   clientSecret: process.env.TWITCH_OAUTH_CLIENT_SECRET,
+//   redirectUri: process.env.TWITCH_OAUTH_REDIRECT_URI,
+// }));
 
 // This is a test route to check the twitch authentication
 // app.get('/', (req, res, next) => {
