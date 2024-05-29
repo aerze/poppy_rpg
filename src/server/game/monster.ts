@@ -1,13 +1,8 @@
-const { getRandomInt } = require("./helpers");
-const { scaleStat, getLevelRequirement } = require("./xp");
+import { getRandomInt } from "../../shared/helpers";
+import { scaleStat, getLevelRequirement } from "../../shared/xp";
 
-class Monster {
-  /**
-   * @param {num} level 
-   * @param {MonsterBase} baseStats 
-   * @returns {MonsterData}
-   */
-  static generate(level, baseStats) {
+export class Monster {
+  static generate(level: number, baseStats: MonsterBase): MonsterData {
     const baseHealth = getRandomInt(...baseStats.health);
     const baseAttack = getRandomInt(...baseStats.attack);
     const baseDefense = getRandomInt(...baseStats.defense);
@@ -27,11 +22,22 @@ class Monster {
     };
   }
 
+  id: number;
+  name: string;
+  level: number;
+  maxHealth: number;
+  health: number;
+  attack: number;
+  defense: number;
+  heal: number;
+  color: string;
+  xp: number;
+
   /**
    * @param {number} id
    * @param {MonsterData} data
    */
-  constructor(id, data) {
+  constructor(id: number, data: MonsterData) {
     this.id = id;
     this.name = data.name;
     this.level = data.level;
@@ -41,7 +47,6 @@ class Monster {
     this.defense = data.defense;
     this.heal = data.heal;
     this.color = data.color;
-    this.type = data.type;
     this.xp = data.xp;
   }
 
@@ -56,34 +61,29 @@ class Monster {
       defense: this.defense,
       heal: this.heal,
       color: this.color,
-      type: this.type,
       xp: this.xp,
     };
   }
 }
 
-module.exports = Monster;
+export interface MonsterBase {
+  name: string;
+  color: string;
+  health: [number, number];
+  attack: [number, number];
+  defense: [number, number];
+  heal: [number, number];
+  xp: [number, number];
+}
 
-/**
- * @typedef {Object} MonsterBase
- * @property {string} name
- * @property {string} color
- * @property {[number, number]} health
- * @property {[number, number]} attack
- * @property {[number, number]} defense
- * @property {[number, number]} heal
- * @property {[number, number]} xp
- */
-
-/**
- * @typedef {Object} MonsterData
- * @property {string} name
- * @property {string} color
- * @property {number} level
- * @property {number} maxHealth
- * @property {number} health
- * @property {number} attack
- * @property {number} defense
- * @property {number} heal
- * @property {number} xp
- */
+export interface MonsterData {
+  name: string;
+  color: string;
+  level: number;
+  maxHealth: number;
+  health: number;
+  attack: number;
+  defense: number;
+  heal: number;
+  xp: number;
+}
