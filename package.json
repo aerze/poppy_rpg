@@ -7,7 +7,7 @@
     "start": "node ./dist/server/main.js",
     "build": "npm run server",
     "lint": "eslint",
-    "server": "npx tsc -p tsconfig.json",
+    "server": "tsc -p tsconfig.json",
     "server:watch": "tsc -p tsconfig.json --watch"
   },
   "dependencies": {
