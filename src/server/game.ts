@@ -80,6 +80,7 @@ export class Game {
       resolve(null);
     } catch (e) {
       console.log(">> FAILED TO CONNECT DUMMY");
+      console.error(e);
       reject();
     }
 
