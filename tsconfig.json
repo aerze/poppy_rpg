@@ -8,7 +8,9 @@
     "rootDir": "./src",
     "allowJs": true,
     "strict": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "lib": ["DOM", "es2023"],
+    "target": "ESNext"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
