@@ -1,8 +1,9 @@
+import { SocketEvents } from "../../shared/events";
 import { Scene } from "../scene";
 
 export class CharacterScene extends Scene {
   html = `
-  <div id="character-screen" class="screen" style="display: none">
+  <div id="character-screen" class="screen">
     <form id="character-form">
       <div class="player-display">
         <div class="player-view">
@@ -59,7 +60,34 @@ export class CharacterScene extends Scene {
     this.$characterName = document.getElementById("characterName") as HTMLInputElement;
     this.$characterImage = document.getElementById("player-character") as HTMLImageElement;
     this.$characterPreset = document.getElementById("preset") as HTMLSelectElement;
+    this.$form.addEventListener("submit", this.handleFormSubmit);
   }
+
+  handleFormSubmit = (event: SubmitEvent) => {
+    const socket = this.mini.network.socket;
+    event.preventDefault();
+
+    const formData = (new FormData(event.target as HTMLFormElement) as any).entries();
+    const data = Object.fromEntries(formData);
+    if (!data.characterName.trim()) {
+      return;
+    }
+
+    socket.once(SocketEvents.PlayerRegistered, this.handlePlayerRegistered);
+    socket.emit(SocketEvents.PlayerConnected, {
+      name: data.characterName,
+      action: "attack",
+      color: data.color,
+      job: data.job,
+      preset: data.preset,
+      active: true,
+    });
+  };
+
+  handlePlayerRegistered = ({ playerId }: { playerId: string }) => {
+    localStorage.setItem("playerId", playerId);
+    this.mini.scenes.open("game");
+  };
 
   destroy() {}
 }

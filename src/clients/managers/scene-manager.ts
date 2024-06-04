@@ -19,6 +19,7 @@ export class SceneManager extends BaseManager {
   }
 
   open(key: keyof typeof SceneManager.Scenes) {
+    this.log("opening", key);
     // unload prev screen
     if (this.activeScene) {
       this.activeScene.unload();

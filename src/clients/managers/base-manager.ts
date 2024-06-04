@@ -12,6 +12,6 @@ export class BaseManager {
   }
 
   log(...args: any[]) {
-    this.log(`${this.title}:`, ...args);
+    console.debug(`${this.title}:`, ...args);
   }
 }
