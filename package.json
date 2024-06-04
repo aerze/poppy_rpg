@@ -12,7 +12,8 @@
     "server": "tsc -p tsconfig.json",
     "server:watch": "tsc -p tsconfig.json --watch",
     "client": "esbuild ./dist/clients/player-client.js --bundle --outfile=./dist/builds/player-client.js",
-    "client:watch": "esbuild ./dist/clients/player-client.js --bundle --outfile=./dist/builds/player-client.js --watch"
+    "client:watch": "esbuild ./dist/clients/player-client.js --bundle --outfile=./dist/builds/player-client.js --watch",
+    "display-client": "esbuild ./dist/clients/player-client.js --bundle --outfile=./dist/builds/player-client.js"
   },
   "dependencies": {
     "@tsconfig/node-lts": "^20.1.3",
