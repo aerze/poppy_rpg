@@ -1,169 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Display Client</title>
-        <script src="/socket.io/socket.io.js"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <style>
-            @font-face {
-                font-family: Yuruka;
-                src: url("YurukaStd-UB.otf") format("opentype");
-            }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Display Client</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+      integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <style>
+      @font-face {
+        font-family: Yuruka;
+        src: url("YurukaStd-UB.otf") format("opentype");
+      }
 
-            html, body {
-                color: white;
-                width: 800px;
-                height: 600px;
-                font-family: Arial, Helvetica, sans-serif;
-            }
+      html,
+      body {
+        color: white;
+        width: 800px;
+        height: 600px;
+        font-family: Arial, Helvetica, sans-serif;
+      }
 
-            #dungeon-info {
-                color: white;
-                font: 800 35px Yuruka;
-                -webkit-text-fill-color: white;
-                -webkit-text-stroke: 1px;
-                -webkit-text-stroke-color: black;
-                margin: 0 1em;
-            }
+      body {
+        background: url("./images/background_forest.png");
+        background-repeat: no-repeat;
+      }
 
-            .flex {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-            }
+      #dungeon-info {
+        color: white;
+        font: 800 35px Yuruka;
+        -webkit-text-fill-color: white;
+        -webkit-text-stroke: 1px;
+        -webkit-text-stroke-color: black;
+        margin: 0 1em;
+      }
 
-            .row {
-                display: flex;
-                flex-direction: row;
-            }
+      .flex {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
 
-            .flyaway {
-                color: black;
-                display: flex;
-                position: fixed;
-                top: 0;
-                left: 0;
-                opacity: 1;
-                transition: top 200ms ease-out 0s, left 200ms ease-out 0s, opacity 200ms ease 500ms;
+      .row {
+        display: flex;
+        flex-direction: row;
+      }
 
-                
-                font: 800 80px Arial;
-                -webkit-text-fill-color: white;
-                -webkit-text-stroke: 4px;
-            }
+      .flyaway {
+        color: black;
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        opacity: 1;
+        transition: top 200ms ease-out 0s, left 200ms ease-out 0s, opacity 200ms ease 500ms;
 
-            .flyaway.damage {
-                -webkit-text-stroke-color: rgb(236, 72, 88);
-            }
+        font: 800 80px Arial;
+        -webkit-text-fill-color: white;
+        -webkit-text-stroke: 4px;
+      }
 
-            .flyaway.heal {
-                -webkit-text-stroke-color: rgb(29, 180, 70);
-            }
-            
-            .sprite {
-                display: flex;
-                flex-direction: column;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 200px;
-                height: 200px;
-                transition: top 500ms ease 0s, left 500ms ease 0s;
-            }
+      .flyaway.damage {
+        -webkit-text-stroke-color: rgb(236, 72, 88);
+      }
 
-            .sprite .hud {
-                position: absolute;
-                top: -80px;
-                left: 50px;
-                display: flex;
-                flex-direction: column;
-                padding: 0.5em;               
-                width: 80px;
-            }
+      .flyaway.heal {
+        -webkit-text-stroke-color: rgb(29, 180, 70);
+      }
 
-            .sprite .hud .name {
-                margin: 0;
-                font-size: 26px;
-            }
+      .sprite {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 200px;
+        height: 200px;
+        transition: top 500ms ease 0s, left 500ms ease 0s;
+      }
 
-            .sprite .hud .job {
-                margin: 0;
-            }
+      .sprite .monster {
+        width: 100px;
+        height: 100px;
+        position: relative;
+        left: 50px;
+        top: 50px;
+      }
 
-            .sprite .hud .hpLabel {
-                margin: 0;
-                font-size: 12px;
-            }
+      .sprite .hud {
+        position: absolute;
+        top: -80px;
+        left: 50px;
+        display: flex;
+        flex-direction: column;
+        padding: 0.5em;
+        width: 80px;
+      }
 
-            .sprite .hud .hpBar {
-                margin: 0;
-                width: 100%
-            }
+      .sprite .hud .name {
+        margin: 0;
+        font-size: 26px;
+      }
 
-            .card-sprite {
-                display: flex;
-                flex-direction: column;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100px;
-                height: 150px;
-                transition: top 500ms ease 0s, left 500ms ease 0s;
-            }
+      .sprite .hud .job {
+        margin: 0;
+      }
 
-            .card-sprite .hud {
-                display: flex;
-                flex-direction: column;
-                padding: 0.5em;
-            }
+      .sprite .hud .hpLabel {
+        margin: 0;
+        font-size: 12px;
+      }
 
-            .card-sprite .hud .name {
-                margin: 0;
-                font-size: 26px;
-            }
+      .sprite .hud .hpBar {
+        margin: 0;
+        width: 100%;
+      }
 
-            .card-sprite .hud .job {
-                margin: 0;
-            }
+      .card-sprite {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100px;
+        height: 150px;
+        transition: top 500ms ease 0s, left 500ms ease 0s;
+      }
 
-            .card-sprite .hud .hpLabel {
-                margin: 0;
-                font-size: 12px;
-            }
+      .card-sprite .hud {
+        display: flex;
+        flex-direction: column;
+        padding: 0.5em;
+      }
 
-            .card-sprite .hud .hpBar {
-                margin: 0;
-                width: 100%
-            }
-        
-            #log {
-                height: 100px;
-                overflow-y: scroll;
-            }
+      .card-sprite .hud .name {
+        margin: 0;
+        font-size: 26px;
+      }
 
-            .buttons {
-                display: flex;
-                flex-direction: row;
-            }
+      .card-sprite .hud .job {
+        margin: 0;
+      }
 
-            .hidden { 
-                display: none;
-            }
-        </style>
-    </head>
-    <body>
-        <h2 id="dungeon-info">???</h2>
-        <div id="buttons" class="hidden">
-            <button id="add">add monsters</button>
-            <button id="add-boss">add boss</button>
-            <button id="delete-monsters">delete monsters</button>
-            <button id="revive-party">revive-party</button>
-            <button id="play">play</button>
-            <button id="pause">pause</button>
-        </div>
-        <script src="./scripts/display-client.js"></script>
-    </body>
+      .card-sprite .hud .hpLabel {
+        margin: 0;
+        font-size: 12px;
+      }
+
+      .card-sprite .hud .hpBar {
+        margin: 0;
+        width: 100%;
+      }
+
+      #log {
+        height: 100px;
+        overflow-y: scroll;
+      }
+
+      .buttons {
+        display: flex;
+        flex-direction: row;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h2 id="dungeon-info">???</h2>
+    <div id="buttons" class="hidden">
+      <button id="add">add monsters</button>
+      <button id="add-boss">add boss</button>
+      <button id="delete-monsters">delete monsters</button>
+      <button id="revive-party">revive-party</button>
+      <button id="play">play</button>
+      <button id="pause">pause</button>
+    </div>
+    <script src="./scripts/display-client.js"></script>
+  </body>
 </html>

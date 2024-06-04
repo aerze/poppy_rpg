@@ -58,6 +58,7 @@ export class MonsterMap extends Map<number, Monster> {
         color,
         level: 1,
         xp: 5,
+        asset: "slime3.png",
       })
     );
   }
@@ -76,6 +77,7 @@ export class MonsterMap extends Map<number, Monster> {
         color,
         level: 1,
         xp: 5,
+        asset: "slime4.png",
       })
     );
   }

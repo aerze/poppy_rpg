@@ -39,106 +39,6 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-class CharacterSprite {
-  constructor(type, data) {
-    this.id = data.id;
-    this.type = type;
-    this.data = data;
-    this.x = 0;
-    this.y = 0;
-    this.elements = this.createBaseElements();
-    this.root = this.elements.base;
-  }
-
-  initPosition(x, y) {
-    this.initialPosition = [x, y];
-    this.x = x;
-    this.y = y;
-  }
-
-  resetPosition() {
-    this.x = this.initialPosition[0];
-    this.y = this.initialPosition[1];
-    this.updatePosition();
-  }
-
-  createBaseElements() {
-    const base = document.createElement("div");
-    base.classList.add("card-sprite");
-    base.style.background = `${this.data.color}AA`;
-
-    const hud = document.createElement("div");
-    base.appendChild(hud);
-    hud.classList.add("hud");
-
-    const name = document.createElement("h5");
-    hud.appendChild(name);
-    name.classList.add("name");
-
-    const job = document.createElement("p");
-    hud.appendChild(job);
-    job.classList.add("job");
-
-    const hpLabel = document.createElement("label");
-    hud.appendChild(hpLabel);
-    hpLabel.classList.add("hpLabel");
-
-    const hpBar = document.createElement("progress");
-    hud.appendChild(hpBar);
-    hpBar.classList.add("hpBar");
-
-    const stance = document.createElement("p");
-    hud.appendChild(stance);
-    hpBar.classList.add("stance");
-
-    document.body.appendChild(base);
-
-    return {
-      base,
-      hud,
-      name,
-      job,
-      hpLabel,
-      hpBar,
-      stance,
-    };
-  }
-
-  updatePosition() {
-    this.elements.base.style.top = `${this.y}px`;
-    this.elements.base.style.left = `${this.x}px`;
-  }
-
-  update(data) {
-    this.data = data;
-    this.elements.name.innerText = this.data.name;
-    this.elements.job.innerText = `Lv:${this.data.level} ${this.data.job ?? ""}`;
-    this.elements.hpLabel.innerText = `hp:${this.data.health}/${this.data.maxHealth}`;
-    this.elements.hpBar.value = this.data.health;
-    this.elements.hpBar.max = this.data.maxHealth;
-
-    this.updatePosition();
-
-    if (this.type === "player") {
-      this.elements.stance.innerText = this.data.action.toUpperCase();
-      if (this.data.active) {
-        this.elements.base.style.opacity = "1";
-      } else {
-        this.elements.base.style.opacity = "0.33";
-      }
-    }
-  }
-
-  remove() {
-    this.elements.name.remove();
-    this.elements.job.remove();
-    this.elements.hpLabel.remove();
-    this.elements.hpBar.remove();
-    this.elements.hud.remove();
-    this.elements.base.remove();
-  }
-}
-
 class Sprite {
   static PresetMap = {
     a: "/sprites/tay_test.png",
@@ -150,6 +50,7 @@ class Sprite {
   constructor(type, data) {
     this.id = data.id;
     this.type = type;
+    this.asset = data.asset;
     this.data = data;
     this.x = 0;
     this.y = 0;
@@ -174,7 +75,12 @@ class Sprite {
     base.classList.add("sprite");
 
     const image = document.createElement("img");
-    image.src = Sprite.PresetMap[this.data.preset];
+    if (this.asset) {
+      image.classList.add("monster");
+      image.src = `images/${this.asset}`;
+    } else {
+      image.src = Sprite.PresetMap[this.data.preset];
+    }
     base.appendChild(image);
 
     const hud = document.createElement("div");
@@ -261,7 +167,7 @@ const scene = {
 
   playerAnchor: [250, 250],
   healerAnchor: [120, 250],
-  monsterAnchor: [450, 250],
+  monsterAnchor: [400, 300],
 
   previousPlayerId: 0,
   previousHealerId: 0,
@@ -370,20 +276,34 @@ const scene = {
   },
 
   add(id, data, type) {
-    const sprite = data.preset ? new Sprite(type, data) : new CharacterSprite(type, data);
+    const sprite = new Sprite(type, data);
     this.spriteMap.set(id, sprite);
+
+    const playerSpawn = {
+      left: -50,
+      right: 100,
+      top: 300,
+      bottom: 375,
+    };
+
+    const monsterSpawn = {
+      left: 500,
+      right: 650,
+      top: 350,
+      bottom: 425,
+    };
 
     switch (type) {
       case "player": {
-        const x = getRandomInt(this.LEFT + 10, this.RIGHT / 2 - 100);
-        const y = getRandomInt(this.BOTTOM / 2 + 100, this.BOTTOM - 150);
+        const x = getRandomInt(playerSpawn.left, playerSpawn.right);
+        const y = getRandomInt(playerSpawn.top, playerSpawn.bottom);
         sprite.initPosition(x, y);
         break;
       }
 
       case "monster": {
-        const x = getRandomInt(this.RIGHT / 2 + 10, this.RIGHT - 100);
-        const y = getRandomInt(this.BOTTOM / 2 + 100, this.BOTTOM - 150);
+        const x = getRandomInt(monsterSpawn.left, monsterSpawn.right);
+        const y = getRandomInt(monsterSpawn.top, monsterSpawn.bottom);
         sprite.initPosition(x, y);
         break;
       }

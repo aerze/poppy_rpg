@@ -19,6 +19,7 @@ export class Monster {
       heal: scaleStat(level, baseHeal),
       color: baseStats.color,
       xp: Math.ceil(getLevelRequirement(level) / xp),
+      asset: baseStats.asset,
     };
   }
 
@@ -32,6 +33,7 @@ export class Monster {
   heal: number;
   color: string;
   xp: number;
+  asset: string;
 
   /**
    * @param {number} id
@@ -48,6 +50,7 @@ export class Monster {
     this.heal = data.heal;
     this.color = data.color;
     this.xp = data.xp;
+    this.asset = data.asset;
   }
 
   toJSON() {
@@ -62,6 +65,7 @@ export class Monster {
       heal: this.heal,
       color: this.color,
       xp: this.xp,
+      asset: this.asset,
     };
   }
 }
@@ -74,6 +78,7 @@ export interface MonsterBase {
   defense: [number, number];
   heal: [number, number];
   xp: [number, number];
+  asset: string;
 }
 
 export interface MonsterData {
@@ -86,4 +91,5 @@ export interface MonsterData {
   defense: number;
   heal: number;
   xp: number;
+  asset: string;
 }

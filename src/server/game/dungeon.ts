@@ -34,6 +34,7 @@ export class Dungeon {
       heal: [1, 2],
       color: "#AA66FF",
       xp: [80, 100],
+      asset: "slime5.png",
     }),
   };
 
@@ -94,24 +95,13 @@ export class Dungeon {
     if (isBossRoom) {
       // fight a boss
       if (isFinalRoom) {
-        encounter.push(
-          this.finalBoss,
-          this.getMonster(roomLevel + 2),
-          this.getMonster(roomLevel + 2)
-        );
+        encounter.push(this.finalBoss, this.getMonster(roomLevel + 2), this.getMonster(roomLevel + 2));
       } else {
-        encounter.push(
-          this.getBoss(roomLevel + 1),
-          this.getMonster(roomLevel + 1)
-        );
+        encounter.push(this.getBoss(roomLevel + 1), this.getMonster(roomLevel + 1));
       }
     } else {
       // generate monsters
-      encounter.push(
-        this.getMonster(roomLevel),
-        this.getMonster(roomLevel),
-        this.getMonster(roomLevel)
-      );
+      encounter.push(this.getMonster(roomLevel), this.getMonster(roomLevel), this.getMonster(roomLevel));
     }
 
     return encounter;

@@ -9,6 +9,7 @@ export class Slime extends Monster {
     defense: [1, 2],
     heal: [1, 2],
     xp: [8, 10],
+    asset: "slime2.png",
   };
 
   static GREEN_SLIME: MonsterBase = {
@@ -19,6 +20,7 @@ export class Slime extends Monster {
     defense: [1, 2],
     heal: [2, 4],
     xp: [8, 10],
+    asset: "slime3.png",
   };
 
   static RED_SLIME: MonsterBase = {
@@ -29,6 +31,7 @@ export class Slime extends Monster {
     defense: [1, 2],
     heal: [1, 2],
     xp: [8, 10],
+    asset: "slime1.png",
   };
 
   static BOSS_SLIME: MonsterBase = {
@@ -39,5 +42,6 @@ export class Slime extends Monster {
     defense: [2, 4],
     heal: [1, 2],
     xp: [8, 10],
+    asset: "slime4.png",
   };
 }
