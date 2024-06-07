@@ -264,9 +264,7 @@ export class Game {
         player.xp = levelRequirement - player.xp;
       }
 
-      console.time("playersave");
-      await PlayerDB.save(player);
-      console.timeEnd("playersave");
+      PlayerDB.save(player);
       player.updatePlayerClient();
     }
 

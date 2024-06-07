@@ -166,9 +166,9 @@ const scene = {
   spriteMap: new Map(),
 
   playerSpawn: {
-    left: 200,
-    right: 600,
-    top: 150,
+    left: 150,
+    right: 500,
+    top: 200,
     bottom: 250,
   },
 
@@ -179,9 +179,9 @@ const scene = {
     bottom: 250,
   },
 
-  playerAnchor: [800, 150],
-  healerAnchor: [600, 150],
-  monsterAnchor: [1000, 200],
+  playerAnchor: [900, 150],
+  healerAnchor: [825, 150],
+  monsterAnchor: [1100, 200],
 
   previousPlayerId: 0,
   previousHealerId: 0,
