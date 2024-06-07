@@ -1,4 +1,4 @@
-export function sleep(time = 1000) {
+export function sleep(time = 250) {
   return new Promise((resolve) => {
     setTimeout(() => resolve(null), time);
   });

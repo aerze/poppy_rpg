@@ -113,24 +113,15 @@ export class Game {
   /** @param {import('socket.io').Socket} socket */
   handleConnection = (socket: Socket) => {
     console.log(`>> New Connection c:${socket.id}`);
-    socket.once(
-      Game.SocketEvents.DisplayConnected,
-      this.registerDisplayClient.bind(this, socket)
-    );
-    socket.once(
-      Game.SocketEvents.PlayerConnected,
-      this.registerPlayerClient.bind(this, socket)
-    );
+    socket.once(Game.SocketEvents.DisplayConnected, this.registerDisplayClient.bind(this, socket));
+    socket.once(Game.SocketEvents.PlayerConnected, this.registerPlayerClient.bind(this, socket));
   };
 
   /** @param {import('socket.io').Socket} socket */
   registerDisplayClient(socket: Socket) {
     console.log(`>> c:${socket.id} -> Display`);
     this.displays.add(socket);
-    socket.once(
-      Game.SocketEvents.Disconnect,
-      this.unregisterDisplayClient.bind(this, socket)
-    );
+    socket.once(Game.SocketEvents.Disconnect, this.unregisterDisplayClient.bind(this, socket));
 
     socket.emit(Game.SocketEvents.Snapshot, ["initial", this.getSnapshot()]);
 
@@ -149,10 +140,7 @@ export class Game {
   }
 
   /** @param {import('socket.io').Socket} socket */
-  async registerPlayerClient(
-    socket: Socket,
-    data: PlayerUserData | PlayerExistingData
-  ) {
+  async registerPlayerClient(socket: Socket, data: PlayerUserData | PlayerExistingData) {
     console.log(`>> c:${socket.id} -> Player`);
     let player = null;
 
@@ -168,18 +156,9 @@ export class Game {
     }
 
     this.players.set(player.id, player);
-    socket.once(
-      Game.SocketEvents.Disconnect,
-      this.unregisterPlayerClient.bind(this, player, socket)
-    );
-    socket.on(
-      Game.SocketEvents.PlayerAction,
-      this.handlePlayerAction.bind(this, player)
-    );
-    socket.on(
-      Game.SocketEvents.PlayerRevive,
-      this.handlePlayerRevive.bind(this, player)
-    );
+    socket.once(Game.SocketEvents.Disconnect, this.unregisterPlayerClient.bind(this, player, socket));
+    socket.on(Game.SocketEvents.PlayerAction, this.handlePlayerAction.bind(this, player));
+    socket.on(Game.SocketEvents.PlayerRevive, this.handlePlayerRevive.bind(this, player));
     socket.emit(Game.SocketEvents.PlayerRegistered, { playerId: player.id });
     player.updatePlayerClient();
     // this.sendSnapshot();
@@ -195,20 +174,14 @@ export class Game {
   handleAddMonsters = () => {
     console.log(">> Spawning new monsters");
     // this.monsters.createBlueSlime(this.connectionCounter.next(), getRandomInt(1, 3));
-    this.monsters.createGreenSlime(
-      this.connectionCounter.next(),
-      getRandomInt(1, 3)
-    );
+    this.monsters.createGreenSlime(this.connectionCounter.next(), getRandomInt(1, 3));
     // this.monsters.createRedSlime(this.connectionCounter.next(), getRandomInt(1, 3));
     this.sendSnapshot();
   };
 
   handleAddBoss = () => {
     console.log(">> Spawning new boss");
-    this.monsters.createBossSlime(
-      this.connectionCounter.next(),
-      getRandomInt(1, 3)
-    );
+    this.monsters.createBossSlime(this.connectionCounter.next(), getRandomInt(1, 3));
     this.sendSnapshot();
   };
 
@@ -245,10 +218,7 @@ export class Game {
     this.sendLog(`${player.name} gets ready to ${data.action}`);
     player.action = data.action;
     player.updatePlayerClient();
-    this.emitToDisplays(Game.SocketEvents.PlayerStanceChange, [
-      player.id,
-      player.action,
-    ]);
+    this.emitToDisplays(Game.SocketEvents.PlayerStanceChange, [player.id, player.action]);
   };
 
   /** @param {Player} player */
@@ -305,9 +275,7 @@ export class Game {
         this.dungeon = new Dungeon(Dungeon.SLIME_DUNGEON);
       }
 
-      const encounter = this.dungeon.generateEncounter(
-        this.dungeon.currentRoom
-      );
+      const encounter = this.dungeon.generateEncounter(this.dungeon.currentRoom);
       for (const monsterData of encounter) {
         this.monsters.create(this.connectionCounter.next(), monsterData);
       }
@@ -330,7 +298,7 @@ export class Game {
         if (!target) continue;
 
         this.emitToDisplays(Game.SocketEvents.PlayerHealed, { healer, target });
-        await sleep(500);
+        await sleep(100);
 
         const heal = healer.heal;
         target.health = Math.min(target.health + heal, target.maxHealth);
@@ -355,7 +323,7 @@ export class Game {
         attacker,
         target,
       });
-      await sleep(500);
+      await sleep(100);
 
       const damage = attacker.attack;
       target.health = Math.max(target.health - damage, 0);
@@ -391,12 +359,10 @@ export class Game {
         monster,
         target,
       });
-      await sleep(500);
+      await sleep(100);
 
       const isDefending = target.action === "defend";
-      const damage = isDefending
-        ? Math.max(0, monster.attack - target.defense)
-        : monster.attack;
+      const damage = isDefending ? Math.max(0, monster.attack - target.defense) : monster.attack;
       target.health = Math.max(target.health - damage, 0);
       target.updatePlayerClient();
       this.sendLog(`${monster.name} attacks ${target.name} for ${damage}hp`);
