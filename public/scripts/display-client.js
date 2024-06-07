@@ -281,7 +281,7 @@ const scene = {
 
     setTimeout(() => {
       damageElement.remove();
-    }, 1000);
+    }, 500);
   },
 
   add(id, data, type) {

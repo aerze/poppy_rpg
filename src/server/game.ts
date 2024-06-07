@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { Long, MongoClient } from "mongodb";
 import { SafeCounter } from "../shared/safe-counter";
 import { Player, PlayerExistingData, PlayerUserData } from "./game/player";
 import { MonsterMap } from "./game/monster-map";
@@ -246,6 +246,9 @@ export class Game {
   }
 
   async loop() {
+    const SHORT_WAIT = 300;
+    const LONG_WAIT = 700;
+
     this.frameCounter.next();
     console.log(`>> loop (${this.frameCounter.count})`);
 
@@ -298,7 +301,7 @@ export class Game {
         if (!target) continue;
 
         this.emitToDisplays(Game.SocketEvents.PlayerHealed, { healer, target });
-        await sleep(100);
+        await sleep(SHORT_WAIT);
 
         const heal = healer.heal;
         target.health = Math.min(target.health + heal, target.maxHealth);
@@ -309,7 +312,7 @@ export class Game {
           target,
           heal,
         });
-        await sleep();
+        await sleep(LONG_WAIT);
       }
     }
 
@@ -323,7 +326,7 @@ export class Game {
         attacker,
         target,
       });
-      await sleep(100);
+      await sleep(SHORT_WAIT);
 
       const damage = attacker.attack;
       target.health = Math.max(target.health - damage, 0);
@@ -333,13 +336,13 @@ export class Game {
         target,
         damage,
       });
-      await sleep();
+      await sleep(LONG_WAIT);
 
       if (target.health <= 0) {
         this.players.giveXP(target.xp);
         this.monsters.delete(target.id);
         this.emitToDisplays(Game.SocketEvents.MonsterDied, target.id);
-        await sleep();
+        await sleep(LONG_WAIT);
       }
     }
 
@@ -359,7 +362,7 @@ export class Game {
         monster,
         target,
       });
-      await sleep(100);
+      await sleep(SHORT_WAIT);
 
       const isDefending = target.action === "defend";
       const damage = isDefending ? Math.max(0, monster.attack - target.defense) : monster.attack;
@@ -371,14 +374,14 @@ export class Game {
         target,
         damage,
       });
-      await sleep();
+      await sleep(LONG_WAIT);
 
       if (target.health <= 0) {
         target.active = false;
         target.updatePlayerClient();
         this.sendLog(`${target.name} is dead.`);
         this.emitToDisplays(Game.SocketEvents.PlayerDied, target.id);
-        await sleep();
+        await sleep(LONG_WAIT);
       }
     }
   }
