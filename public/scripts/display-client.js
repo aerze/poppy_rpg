@@ -168,8 +168,8 @@ const scene = {
   playerSpawn: {
     left: 150,
     right: 500,
-    top: 200,
-    bottom: 250,
+    top: 150,
+    bottom: 200,
   },
 
   monsterSpawn: {
