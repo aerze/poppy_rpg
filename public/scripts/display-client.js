@@ -146,7 +146,7 @@ class Sprite {
         if (this.badgeSet.has(badge.type)) continue;
         this.badgeSet.add(badge.type);
         const image = document.createElement("img");
-        image.src = `images/badges${badge.type}.png`;
+        image.src = `images/badges${badge.type - 1}.png`;
         this.elements.banner.appendChild(image);
       }
     }
