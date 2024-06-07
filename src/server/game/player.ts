@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { Badge, BadgeType } from "./badge";
 
 export interface SavedPlayerData {
   name: string;
@@ -15,6 +16,7 @@ export interface SavedPlayerData {
   type: string;
   level: number;
   xp: number;
+  banner: [{ type: number; date: Date }];
 }
 
 export interface PlayerUserData extends Partial<SavedPlayerData> {
@@ -78,8 +80,11 @@ export class Player {
   type: string;
   level: number;
   xp: number;
+  banner: Badge[];
+  bannerSet: Set<BadgeType>;
 
   constructor(data: SavedPlayerData | PlayerUserData, socket: Socket) {
+    console.log(data);
     this.id = "";
     this.socket = socket;
     this.name = data.name ?? "Stranger";
@@ -88,7 +93,6 @@ export class Player {
     this.active = data.active ?? true;
     this.preset = data.preset ?? "a";
     this.job = data.job ?? "";
-    console.log(data);
     const job = Player.JOBS[this.job];
     this.maxHealth = data.maxHealth ?? job.maxHealth;
     this.health = data.health ?? job.health;
@@ -98,6 +102,16 @@ export class Player {
     this.type = data.type ?? "";
     this.level = data.level ?? 1;
     this.xp = data.xp ?? 0;
+    this.banner = data.banner ?? [];
+    this.bannerSet = new Set(this.banner.map((b) => b.type));
+  }
+
+  addBadge(badgeType: BadgeType) {
+    if (this.bannerSet.has(badgeType)) return false;
+    const badge = new Badge(badgeType);
+    this.banner.push(badge);
+    this.bannerSet.add(badgeType);
+    return true;
   }
 
   updatePlayerClient() {
@@ -121,6 +135,7 @@ export class Player {
       type: this.type,
       level: this.level,
       xp: this.xp,
+      banner: this.banner,
     };
   }
 }

@@ -8,6 +8,7 @@ import { Dungeon } from "./game/dungeon";
 import { PlayerDB } from "./game/PlayerDB";
 import { Server, Socket } from "socket.io";
 import { getLevelRequirement } from "../shared/xp";
+import { BadgeType } from "./game/badge";
 
 export class Game {
   static SocketEvents = {
@@ -197,6 +198,8 @@ export class Game {
       player.updatePlayerClient();
     });
     this.sendSnapshot();
+
+    this.awardBadge(BadgeType.InsideJoke, this.players.toArray());
   };
 
   handlePlay = () => {
@@ -245,11 +248,20 @@ export class Game {
     this.nextLoop = setTimeout(this.main.bind(this), 3000);
   }
 
+  awardBadge(badgeType: BadgeType, players: Player[]) {
+    for (const player of players) {
+      if (player.addBadge(badgeType)) {
+        PlayerDB.save(player);
+      }
+    }
+  }
+
   async loop() {
     const SHORT_WAIT = 300;
     const LONG_WAIT = 700;
 
     this.frameCounter.next();
+
     console.log(`>> loop (${this.frameCounter.count})`);
 
     const players = this.players.toArray();
@@ -273,6 +285,7 @@ export class Game {
       this.dungeon.currentRoom++;
 
       if (this.dungeon.currentRoom > this.dungeon.finalRoom) {
+        this.awardBadge(BadgeType.SlimeDungeonClear, players);
         this.dungeon = new Dungeon(Dungeon.SLIME_DUNGEON);
       }
 

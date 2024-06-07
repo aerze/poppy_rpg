@@ -43,6 +43,11 @@ app.post("/heal-party", (request, response) => {
   response.send("ok");
 });
 
+app.get("/heal-party", (request, response) => {
+  game.handleReviveParty();
+  response.send("ok");
+});
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));

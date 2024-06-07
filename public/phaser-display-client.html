@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Display Client</title>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser-arcade-physics.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
@@ -12,6 +13,7 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <link rel="preload" href="YurukaStd-UB.otf" as="font" crossorigin="anonymous" />
     <style>
       @font-face {
         font-family: Yuruka;
@@ -123,16 +125,6 @@
         width: 100%;
       }
 
-      .sprite .hud .banner {
-        display: flex;
-        flex-direction: row;
-      }
-
-      .sprite .hud .banner img {
-        width: 25px;
-        height: auto;
-      }
-
       .card-sprite {
         display: flex;
         flex-direction: column;
@@ -185,15 +177,6 @@
     </style>
   </head>
   <body>
-    <h2 id="dungeon-info">???</h2>
-    <div id="buttons" class="hidden">
-      <button id="add">add monsters</button>
-      <button id="add-boss">add boss</button>
-      <button id="delete-monsters">delete monsters</button>
-      <button id="revive-party">revive-party</button>
-      <button id="play">play</button>
-      <button id="pause">pause</button>
-    </div>
-    <script src="./scripts/display-client.js"></script>
+    <script src="./scripts/phaser-display-client.js"></script>
   </body>
 </html>

@@ -104,6 +104,10 @@ class Sprite {
     hud.appendChild(hpBar);
     hpBar.classList.add("hpBar");
 
+    const banner = document.createElement("div");
+    hud.appendChild(banner);
+    banner.classList.add("banner");
+
     // const stance = document.createElement('p');
     // hud.appendChild(stance);
     // hpBar.classList.add("stance");
@@ -117,6 +121,7 @@ class Sprite {
       job,
       hpLabel,
       hpBar,
+      banner,
       // stance
     };
   }
@@ -126,6 +131,8 @@ class Sprite {
     this.elements.base.style.left = `${this.x}px`;
   }
 
+  badgeSet = new Set();
+
   update(data) {
     this.data = data;
     this.elements.name.innerText = this.data.name;
@@ -133,6 +140,16 @@ class Sprite {
     this.elements.hpLabel.innerText = `hp:${this.data.health}/${this.data.maxHealth}`;
     this.elements.hpBar.value = this.data.health;
     this.elements.hpBar.max = this.data.maxHealth;
+
+    if (data.banner) {
+      for (const badge of data.banner) {
+        if (this.badgeSet.has(badge.type)) continue;
+        this.badgeSet.add(badge.type);
+        const image = document.createElement("img");
+        image.src = `images/badges${badge.type}.png`;
+        this.elements.banner.appendChild(image);
+      }
+    }
 
     this.updatePosition();
 
@@ -435,7 +452,7 @@ socket.on(SocketEvents.PlayerDied, playerDied);
 socket.on(SocketEvents.MonsterDied, monsterDied);
 
 function createPlayer(player) {
-  console.log(">> createPlayer");
+  console.log(">> createPlayer", player);
 
   playerMap.set(player.id, player);
   scene.add(player.id, player, "player");
