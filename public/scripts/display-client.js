@@ -165,18 +165,27 @@ const scene = {
   /** @type {Map<string, CharacterSprite>} */
   spriteMap: new Map(),
 
-  playerAnchor: [250, 250],
-  healerAnchor: [120, 250],
-  monsterAnchor: [400, 300],
+  playerSpawn: {
+    left: 200,
+    right: 600,
+    top: 150,
+    bottom: 250,
+  },
+
+  monsterSpawn: {
+    left: 1200,
+    right: 1600,
+    top: 150,
+    bottom: 250,
+  },
+
+  playerAnchor: [800, 150],
+  healerAnchor: [600, 150],
+  monsterAnchor: [1000, 200],
 
   previousPlayerId: 0,
   previousHealerId: 0,
   previousMonsterId: 0,
-
-  playerAttackPosition: {
-    spriteId: 0,
-    spritePosition: [250, 250],
-  },
 
   moveSpriteTo(spriteId, position) {
     const playerChanged = spriteId == position.spriteId;
@@ -279,31 +288,17 @@ const scene = {
     const sprite = new Sprite(type, data);
     this.spriteMap.set(id, sprite);
 
-    const playerSpawn = {
-      left: -50,
-      right: 100,
-      top: 300,
-      bottom: 375,
-    };
-
-    const monsterSpawn = {
-      left: 500,
-      right: 650,
-      top: 350,
-      bottom: 425,
-    };
-
     switch (type) {
       case "player": {
-        const x = getRandomInt(playerSpawn.left, playerSpawn.right);
-        const y = getRandomInt(playerSpawn.top, playerSpawn.bottom);
+        const x = getRandomInt(this.playerSpawn.left, this.playerSpawn.right);
+        const y = getRandomInt(this.playerSpawn.top, this.playerSpawn.bottom);
         sprite.initPosition(x, y);
         break;
       }
 
       case "monster": {
-        const x = getRandomInt(monsterSpawn.left, monsterSpawn.right);
-        const y = getRandomInt(monsterSpawn.top, monsterSpawn.bottom);
+        const x = getRandomInt(this.monsterSpawn.left, this.monsterSpawn.right);
+        const y = getRandomInt(this.monsterSpawn.top, this.monsterSpawn.bottom);
         sprite.initPosition(x, y);
         break;
       }
