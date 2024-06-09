@@ -395,9 +395,9 @@ socket.on(SocketEvents.Disconnect, () => {
 });
 
 socket.on(SocketEvents.Snapshot, ([type, snapshot]) => {
-  console.groupCollapsed(">> snapshot");
+  console.groupCollapsed(">> snapshot", snapshot);
   const { players, monsters, dungeon } = snapshot;
-  dungeonInfo.innerText = `${dungeon.name} - Stage:${dungeon.currentRoom}/${dungeon.roomCount}`;
+  dungeonInfo.innerText = `${dungeon.name} - Floor:${dungeon.currentRoom}/${dungeon.roomCount} - ${players.length} Adventurers `;
 
   const playerIds = new Set(playerMap.keys());
 

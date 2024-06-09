@@ -3,6 +3,13 @@ import { SocketEvents } from "../../shared/events";
 import { getLevelRequirement } from "../../shared/xp";
 import { Scene } from "../scene";
 
+enum PlayerClientTabs {
+  Badges,
+  Items,
+  PlayerLogs,
+  BattleLogs,
+}
+
 export class GameScene extends Scene {
   html = `
   <div id="game-screen" class="screen">
@@ -29,29 +36,48 @@ export class GameScene extends Scene {
       <div class="row button-row">
         <button id="attack-action" class="actions">Attack</button>
         <button id="defend-action" class="actions">Defend</button>
+      </div>
+      <div class="row button-row">
         <button id="heal-action" class="actions">Heal</button>
         <button id="revive-action" class="actions">Revive</button>
       </div>
-      <div id="log"></div>
+    </div>
+
+    <div class="tabs-container">
+      <div class="tabs row">
+        <button id="badge-tab" class="tab">Badges</button>
+        <button id="items-tab" class="tab" disabled>Items</button>
+        <button id="player-logs-tab" class="tab" disabled>Player Logs</button>
+        <button id="battle-logs-tab" class="tab" disabled>Battle Logs</button>
+      </div>
+      <div id="tab-content" class="tab-content flex"></div>
     </div>
   </div>
   `;
 
-  $gameCharacter?: HTMLImageElement;
-  $playerName?: HTMLHeadingElement;
-  $playerJob?: HTMLSpanElement;
-  $playerHealthBar?: HTMLProgressElement;
-  $playerHealthText?: HTMLHeadingElement;
-  $playerXPText?: HTMLHeadingElement;
-  $playerAttack?: HTMLHeadingElement;
-  $playerDefense?: HTMLHeadingElement;
-  $playerHeal?: HTMLHeadingElement;
-  $playerAction?: HTMLHeadingElement;
-  $attackAction?: HTMLButtonElement;
-  $defendAction?: HTMLButtonElement;
-  $healAction?: HTMLButtonElement;
-  $reviveAction?: HTMLButtonElement;
-  $log?: HTMLDivElement;
+  $gameCharacter!: HTMLImageElement;
+  $playerName!: HTMLHeadingElement;
+  $playerJob!: HTMLSpanElement;
+  $playerHealthBar!: HTMLProgressElement;
+  $playerHealthText!: HTMLHeadingElement;
+  $playerXPText!: HTMLHeadingElement;
+  $playerAttack!: HTMLHeadingElement;
+  $playerDefense!: HTMLHeadingElement;
+  $playerHeal!: HTMLHeadingElement;
+  $playerAction!: HTMLHeadingElement;
+  $attackAction!: HTMLButtonElement;
+  $defendAction!: HTMLButtonElement;
+  $healAction!: HTMLButtonElement;
+  $reviveAction!: HTMLButtonElement;
+
+  $tabContent!: HTMLDivElement;
+  $badgeTab!: HTMLButtonElement;
+  $itemsTab!: HTMLButtonElement;
+  $playerLogsTab!: HTMLButtonElement;
+  $battleLogsTab!: HTMLButtonElement;
+  activeTab: PlayerClientTabs = PlayerClientTabs.Badges;
+
+  $log!: HTMLDivElement;
 
   localPlayer?: Required<PlayerUserData>;
 
@@ -73,9 +99,54 @@ export class GameScene extends Scene {
     this.$reviveAction = document.getElementById("revive-action") as HTMLButtonElement;
     this.$log = document.getElementById("log") as HTMLDivElement;
 
-    socket.on(SocketEvents.Update, this.handleUpdate);
+    this.$attackAction?.addEventListener("click", this.handleAttack);
+    this.$defendAction?.addEventListener("click", this.handleDefend);
+    this.$healAction?.addEventListener("click", this.handleHeal);
+    this.$reviveAction?.addEventListener("click", this.handleRevive);
 
+    this.$tabContent = document.getElementById("tab-content") as HTMLDivElement;
+    this.$badgeTab = document.getElementById("badge-tab") as HTMLButtonElement;
+    this.$itemsTab = document.getElementById("items-tab") as HTMLButtonElement;
+    this.$playerLogsTab = document.getElementById("player-logs-tab") as HTMLButtonElement;
+    this.$battleLogsTab = document.getElementById("battle-logs-tab") as HTMLButtonElement;
+
+    this.$badgeTab.addEventListener("click", () => this.setTab(PlayerClientTabs.Badges));
+    this.$itemsTab.addEventListener("click", () => this.setTab(PlayerClientTabs.Items));
+    this.$playerLogsTab.addEventListener("click", () => this.setTab(PlayerClientTabs.PlayerLogs));
+    this.$battleLogsTab.addEventListener("click", () => this.setTab(PlayerClientTabs.BattleLogs));
+
+    this.renderBadgesTab();
+
+    socket.on(SocketEvents.Update, this.handleUpdate);
     socket.on(SocketEvents.Log, this.handleLog);
+  }
+
+  renderBadgesTab() {
+    if (this.activeTab != PlayerClientTabs.Badges) return;
+
+    this.$tabContent.innerHTML = "";
+    if (this.localPlayer?.banner?.length) {
+      for (const badge of this.localPlayer.banner) {
+        const badgeElement = document.createElement("img");
+        badgeElement.classList.add("badge");
+        badgeElement.src = `images/badges${badge.type + 1}.png`;
+        this.$tabContent.appendChild(badgeElement);
+      }
+    }
+  }
+
+  renderItemsTab() {}
+
+  renderPlayerLogsTab() {}
+
+  renderBattleLogsTab() {}
+
+  setTab(tab: PlayerClientTabs) {
+    this.activeTab = tab;
+    this.renderBadgesTab();
+    this.renderItemsTab();
+    this.renderPlayerLogsTab();
+    this.renderBattleLogsTab();
   }
 
   handleUpdate = (player: Required<PlayerUserData>) => {
@@ -84,72 +155,27 @@ export class GameScene extends Scene {
       b: "sprites/abby_test.png",
     };
 
-    if (this.$attackAction) {
-      this.$attackAction.disabled = Boolean(player.nextAction);
-    }
-
-    if (this.$defendAction) {
-      this.$defendAction.disabled = Boolean(player.nextAction);
-    }
-
-    if (this.$healAction) {
-      this.$healAction.disabled = Boolean(player.nextAction);
-    }
-
-    if (this.$gameCharacter && this.localPlayer?.preset !== player.preset) {
-      this.$gameCharacter.src = tempCharacterSpriteMap[player.preset];
-    }
-
-    if (this.$playerName) {
-      this.$playerName.innerText = player.name;
-    }
-
-    if (this.$playerJob) {
-      this.$playerJob.innerText = `Lv:${player.level} ${player.job}`;
-    }
-
-    if (this.$playerXPText) {
-      this.$playerXPText.innerText = `XP: ${player.xp}/${getLevelRequirement(player.level)}`;
-    }
-
-    if (this.$playerHealthText) {
-      this.$playerHealthText.innerText = `HP: ${player.health}/${player.maxHealth}`;
-    }
-
-    if (this.$playerHealthBar) {
-      this.$playerHealthBar.value = player.health;
-    }
-
-    if (this.$playerHealthBar) {
-      this.$playerHealthBar.max = player.maxHealth;
-    }
-
-    if (this.$playerAttack) {
-      this.$playerAttack.innerText = `ATK: ${player.attack}`;
-    }
-
-    if (this.$playerDefense) {
-      this.$playerDefense.innerText = `DEF: ${player.defense}`;
-    }
-
-    if (this.$playerHeal) {
-      this.$playerHeal.innerText = `HEAL: ${player.heal}`;
-    }
-
-    if (this.$reviveAction) {
-      this.$reviveAction.disabled = player.active;
-    }
-
-    if (this.$playerAction) {
-      this.$playerAction.innerText = `ACT: ${player.action?.toUpperCase()}`;
-    }
-
-    this.$attackAction?.addEventListener("click", this.handleAttack);
-    this.$defendAction?.addEventListener("click", this.handleDefend);
-    this.$healAction?.addEventListener("click", this.handleHeal);
-    this.$reviveAction?.addEventListener("click", this.handleRevive);
-
+    this.$attackAction.disabled = Boolean(player.nextAction);
+    this.$defendAction.disabled = Boolean(player.nextAction);
+    this.$healAction.disabled = Boolean(player.nextAction);
+    this.$gameCharacter.src = tempCharacterSpriteMap[player.preset];
+    this.$playerName.innerText = player.name;
+    this.$playerJob.innerText = `Lv:${player.level} ${player.job}`;
+    this.$playerXPText.innerText = `XP: ${player.xp}/${getLevelRequirement(player.level)}`;
+    this.$playerHealthText.innerText = `HP: ${player.health}/${player.maxHealth}`;
+    this.$playerHealthBar.value = player.health;
+    this.$playerHealthBar.max = player.maxHealth;
+    this.$playerAttack.innerText = `ATK: ${player.attack}`;
+    this.$playerDefense.innerText = `DEF: ${player.defense}`;
+    this.$playerHeal.innerText = `HEAL: ${player.heal}`;
+    this.$reviveAction.disabled = player.active;
+    this.$playerAction.innerText = `ACT: ${player.action?.toUpperCase()}`;
     this.localPlayer = player;
+
+    this.renderBadgesTab();
+    this.renderItemsTab();
+    this.renderPlayerLogsTab();
+    this.renderBattleLogsTab();
   };
 
   handleLog = (text: string) => {
