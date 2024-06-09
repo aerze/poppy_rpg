@@ -1,4 +1,4 @@
-import { Long, MongoClient } from "mongodb";
+import { MongoClient } from "mongodb";
 import { SafeCounter } from "../shared/safe-counter";
 import { Player, PlayerExistingData, PlayerUserData } from "./game/player";
 import { MonsterMap } from "./game/monster-map";
@@ -69,7 +69,7 @@ export class Game {
     this.frameCounter = new SafeCounter();
     this.players = new PlayerMap();
     this.monsters = new MonsterMap();
-    this.dungeon = new Dungeon(Dungeon.SLIME_DUNGEON);
+    this.dungeon = Dungeon.createRandomDungeon();
     this.displays = new Set();
     this.active = true;
   }
@@ -219,7 +219,8 @@ export class Game {
   handlePlayerAction = (player: Player, data: { action: string }) => {
     console.log(`>> ${player.name} -> ${data.action}`);
     this.sendLog(`${player.name} gets ready to ${data.action}`);
-    player.action = data.action;
+    player.nextAction = data.action;
+    // player.action = data.action;
     player.updatePlayerClient();
     this.emitToDisplays(Game.SocketEvents.PlayerStanceChange, [player.id, player.action]);
   };
@@ -269,9 +270,15 @@ export class Game {
 
     // promote players
     for (const player of players) {
+      if (player.nextAction) {
+        player.action = player.nextAction;
+        player.nextAction = null;
+      }
+
       const levelRequirement = getLevelRequirement(player.level);
 
       if (player.xp >= levelRequirement) {
+        this.awardBadge(BadgeType.FirstLevelUp, [player]);
         player.level += 1;
         player.xp = levelRequirement - player.xp;
       }
@@ -285,8 +292,9 @@ export class Game {
       this.dungeon.currentRoom++;
 
       if (this.dungeon.currentRoom > this.dungeon.finalRoom) {
-        this.awardBadge(BadgeType.SlimeDungeonClear, players);
-        this.dungeon = new Dungeon(Dungeon.SLIME_DUNGEON);
+        this.awardBadge(this.dungeon.completionBadge, players);
+        this.dungeon = Dungeon.createRandomDungeon();
+        this.dungeon.currentRoom++;
       }
 
       const encounter = this.dungeon.generateEncounter(this.dungeon.currentRoom);
@@ -390,6 +398,7 @@ export class Game {
       if (target.health <= 0) {
         target.active = false;
         target.updatePlayerClient();
+        this.awardBadge(BadgeType.FirstDeath, [target]);
         this.sendLog(`${target.name} is dead.`);
         this.emitToDisplays(Game.SocketEvents.PlayerDied, target.id);
         await sleep(LONG_WAIT);

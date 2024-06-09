@@ -1,9 +1,11 @@
 import { getRandomFromArray } from "../../shared/helpers";
+import { BadgeType } from "./badge";
 import { Monster, MonsterBase, MonsterData } from "./monster";
 import { Slime } from "./monsters/slime";
 
 export interface DungeonData {
   name: string;
+  completionBadge: BadgeType;
   scale: number;
   roomCount: number;
   monsterPool: MonsterBase[];
@@ -19,26 +21,13 @@ export class Dungeon {
     },
   };
 
-  static SLIME_DUNGEON: DungeonData = {
-    name: "Slime Castle",
-    scale: 5,
-    roomCount: 25,
-    bossCondition: Dungeon.CONDITIONS.multipleOf(5),
-    monsterPool: [Slime.BLUE_SLIME, Slime.GREEN_SLIME, Slime.RED_SLIME],
-    bossPool: [Slime.BOSS_SLIME],
-    finalBoss: Monster.generate(10, {
-      name: "King Bear Slime",
-      health: [50, 75],
-      attack: [2, 6],
-      defense: [2, 4],
-      heal: [1, 2],
-      color: "#AA66FF",
-      xp: [80, 100],
-      asset: "slime5.png",
-    }),
-  };
+  static createRandomDungeon() {
+    const dungeonData = getRandomFromArray(Object.values(DungeonMap))!;
+    return new Dungeon(dungeonData);
+  }
 
   name: string;
+  completionBadge: BadgeType;
   scale: number;
   currentRoom: number;
   roomCount: number;
@@ -50,6 +39,7 @@ export class Dungeon {
 
   constructor(data: DungeonData) {
     this.name = data.name;
+    this.completionBadge = data.completionBadge;
     this.scale = data.scale;
     this.currentRoom = 0;
     this.roomCount = data.roomCount;
@@ -107,3 +97,64 @@ export class Dungeon {
     return encounter;
   }
 }
+
+export const DungeonMap: { [DungeonKey: string]: DungeonData } = {
+  SLIME_DUNGEON: {
+    name: "Slime Castle",
+    completionBadge: BadgeType.SlimeDungeonClear,
+    scale: 5,
+    roomCount: 25,
+    bossCondition: Dungeon.CONDITIONS.multipleOf(5),
+    monsterPool: [Slime.BLUE_SLIME, Slime.GREEN_SLIME, Slime.RED_SLIME],
+    bossPool: [Slime.BOSS_SLIME],
+    finalBoss: Monster.generate(10, {
+      name: "King Slime",
+      health: [50, 75],
+      attack: [2, 6],
+      defense: [2, 4],
+      heal: [1, 2],
+      color: "#AA66FF",
+      xp: [80, 100],
+      asset: "slime5.png",
+    }),
+  },
+  SLIME_FOREST: {
+    name: "Slime Forest",
+    completionBadge: BadgeType.SlimeForestClear,
+    scale: 10,
+    roomCount: 25,
+    bossCondition: Dungeon.CONDITIONS.multipleOf(5),
+    monsterPool: [Slime.BLUE_SLIME, Slime.GREEN_SLIME, Slime.RED_SLIME],
+    bossPool: [Slime.BOSS_SLIME],
+    finalBoss: Monster.generate(10, {
+      name: "Great Willow Slime",
+      health: [50, 75],
+      attack: [2, 6],
+      defense: [2, 4],
+      heal: [1, 2],
+      color: "#AA66FF",
+      xp: [80, 100],
+      asset: "slime5.png",
+    }),
+  },
+
+  JELLY_CAVE: {
+    name: "Jelly Cave",
+    completionBadge: BadgeType.JellyCaveClear,
+    scale: 5,
+    roomCount: 50,
+    bossCondition: Dungeon.CONDITIONS.multipleOf(5),
+    monsterPool: [Slime.BLUE_SLIME, Slime.GREEN_SLIME, Slime.RED_SLIME],
+    bossPool: [Slime.BOSS_SLIME],
+    finalBoss: Monster.generate(10, {
+      name: "Beeg Obsidian Jelly",
+      health: [50, 75],
+      attack: [2, 6],
+      defense: [2, 4],
+      heal: [1, 2],
+      color: "#AA66FF",
+      xp: [80, 100],
+      asset: "slime5.png",
+    }),
+  },
+};

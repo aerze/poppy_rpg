@@ -22,6 +22,7 @@ export interface SavedPlayerData {
 export interface PlayerUserData extends Partial<SavedPlayerData> {
   name: string;
   action: string;
+  nextAction: string;
   color: string;
   job: keyof typeof Player.JOBS;
   active: boolean;
@@ -71,6 +72,7 @@ export class Player {
   job: keyof typeof Player.JOBS;
 
   action: string;
+  nextAction: string | null;
   maxHealth: number;
   health: number;
   attack: number;
@@ -89,6 +91,7 @@ export class Player {
     this.socket = socket;
     this.name = data.name ?? "Stranger";
     this.action = data.action ?? "attack";
+    this.nextAction = null;
     this.color = data.color ?? "#b00b1e";
     this.active = data.active ?? true;
     this.preset = data.preset ?? "a";
@@ -123,6 +126,7 @@ export class Player {
       id: this.id,
       name: this.name,
       action: this.action,
+      nextAction: this.nextAction,
       color: this.color,
       active: this.active,
       preset: this.preset,

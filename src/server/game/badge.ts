@@ -2,6 +2,10 @@ export enum BadgeType {
   Template,
   SlimeDungeonClear,
   InsideJoke,
+  SlimeForestClear,
+  JellyCaveClear,
+  FirstLevelUp,
+  FirstDeath,
 }
 
 export class Badge {

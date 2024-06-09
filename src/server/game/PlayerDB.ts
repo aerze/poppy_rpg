@@ -14,6 +14,7 @@ export class PlayerDB {
     return {
       name: sanitize(userData.name),
       action: sanitize(userData.action),
+      nextAction: sanitize(userData.nextAction),
       color: sanitize(userData.color),
       preset: sanitize(userData.preset),
       job: sanitize(userData.job),
@@ -21,10 +22,7 @@ export class PlayerDB {
     };
   }
 
-  static async create(
-    data: PlayerUserData,
-    socket: Socket
-  ): Promise<Player | null> {
+  static async create(data: PlayerUserData, socket: Socket): Promise<Player | null> {
     console.log(`Player:create ${data.name}`);
     const cleanData = PlayerDB.clean(data);
     const player = new Player(cleanData, socket);
@@ -43,9 +41,7 @@ export class PlayerDB {
   static async get(playerId: string, socket: Socket) {
     console.log(`Player:get ${playerId}`);
     try {
-      const playerData = await PlayerDB.db?.findOne<SavedPlayerData>(
-        new ObjectId(playerId)
-      );
+      const playerData = await PlayerDB.db?.findOne<SavedPlayerData>(new ObjectId(playerId));
       if (!playerData) return null;
       const player = new Player(playerData as SavedPlayerData, socket);
       player.id = playerId;
@@ -58,10 +54,7 @@ export class PlayerDB {
 
   static async save(player: Player) {
     try {
-      const result = await PlayerDB.db?.replaceOne(
-        { _id: new ObjectId(player.id) },
-        player.toJSON()
-      );
+      const result = await PlayerDB.db?.replaceOne({ _id: new ObjectId(player.id) }, player.toJSON());
       if (!result) return false;
 
       return Boolean(result.matchedCount);

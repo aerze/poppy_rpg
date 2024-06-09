@@ -84,6 +84,18 @@ export class GameScene extends Scene {
       b: "sprites/abby_test.png",
     };
 
+    if (this.$attackAction) {
+      this.$attackAction.disabled = Boolean(player.nextAction);
+    }
+
+    if (this.$defendAction) {
+      this.$defendAction.disabled = Boolean(player.nextAction);
+    }
+
+    if (this.$healAction) {
+      this.$healAction.disabled = Boolean(player.nextAction);
+    }
+
     if (this.$gameCharacter && this.localPlayer?.preset !== player.preset) {
       this.$gameCharacter.src = tempCharacterSpriteMap[player.preset];
     }
