@@ -7,7 +7,7 @@ import { getRandomFromArray, getRandomInt, sleep } from "../shared/helpers";
 import { Dungeon } from "./game/dungeon";
 import { PlayerDB } from "./game/PlayerDB";
 import { Server, Socket } from "socket.io";
-import { getLevelRequirement } from "../shared/xp";
+import { getLevelRequirement, scaleStat } from "../shared/xp";
 import { BadgeType } from "./game/badge";
 
 export class Game {
@@ -322,7 +322,8 @@ export class Game {
         this.emitToDisplays(Game.SocketEvents.PlayerHealed, { healer, target });
         await sleep(SHORT_WAIT);
 
-        const heal = healer.heal;
+        const heal = scaleStat(healer.level, healer.heal);
+
         target.health = Math.min(target.health + heal, target.maxHealth);
         target.updatePlayerClient();
         this.sendLog(`${healer.name} heals ${target.name} for ${heal}hp`);
@@ -347,7 +348,8 @@ export class Game {
       });
       await sleep(SHORT_WAIT);
 
-      const damage = attacker.attack;
+      const damage = scaleStat(attacker.level, attacker.attack);
+
       target.health = Math.max(target.health - damage, 0);
       this.sendLog(`${attacker.name} attacks ${target.name} for ${damage}hp`);
       this.emitToDisplays(Game.SocketEvents.PlayerAttacked, {
@@ -384,7 +386,11 @@ export class Game {
       await sleep(SHORT_WAIT);
 
       const isDefending = target.action === "defend";
-      const damage = isDefending ? Math.max(0, monster.attack - target.defense) : monster.attack;
+
+      const damage = isDefending
+        ? Math.max(0, monster.attack - scaleStat(target.level, target.defense))
+        : monster.attack;
+
       target.health = Math.max(target.health - damage, 0);
       target.updatePlayerClient();
       this.sendLog(`${monster.name} attacks ${target.name} for ${damage}hp`);
