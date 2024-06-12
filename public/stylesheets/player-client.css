@@ -1,11 +1,307 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: #41374b;
+  color: black;
+  font-family: Arial, Helvetica, sans-serif;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+#main {
+  background-color: #664488;
+  width: 100%;
+  height: 100%;
+  max-width: 400px;
+  max-height: 800px;
+  /* border: 2px solid black; */
+}
+
+.scene {
+  width: 100%;
+  height: 100%;
+}
+
+.player-display {
+  display: flex;
+  flex-direction: row;
+  height: 400px;
+  background: url(/images/mori_jungle.png);
+  background-size: cover;
+}
+
+.player-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1;
+}
+
+/* #region utils*/
+.flex {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
 .center {
-    justify-content: center;
-    align-items: center;
+  justify-content: center;
+  align-items: center;
 }
 
 .display-button {
-    padding: 1.2rem;
-    border: 2px solid black;
-    border-radius: 5px;
+  padding: 1.2rem;
+  border: 2px solid black;
+  border-radius: 5px;
 }
 
+.full-width {
+  width: 100%;
+  height: auto;
+}
+
+.light-gradient {
+  /* https://www.gradient-animator.com/ */
+  background: linear-gradient(134deg, #f4fffc, #eae2f8, #e5fafe);
+  background-size: 600% 600%;
+
+  -webkit-animation: LightGradient 30s ease infinite;
+  -moz-animation: LightGradient 30s ease infinite;
+  animation: LightGradient 30s ease infinite;
+}
+
+@-webkit-keyframes LightGradient {
+  0% {
+    background-position: 0% 10%;
+  }
+  50% {
+    background-position: 100% 91%;
+  }
+  100% {
+    background-position: 0% 10%;
+  }
+}
+
+@-moz-keyframes LightGradient {
+  0% {
+    background-position: 0% 10%;
+  }
+  50% {
+    background-position: 100% 91%;
+  }
+  100% {
+    background-position: 0% 10%;
+  }
+}
+
+@keyframes LightGradient {
+  0% {
+    background-position: 0% 10%;
+  }
+  50% {
+    background-position: 100% 91%;
+  }
+  100% {
+    background-position: 0% 10%;
+  }
+}
+/* #endregion*/
+
+/* #region main-scene */
+.main-scene {
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 5em;
+
+  /* https://www.gradient-animator.com/ */
+  /* background: linear-gradient(134deg, #f4fffc, #eae2f8, #e5fafe);
+  background-size: 600% 600%;
+
+  -webkit-animation: LightGradient 30s ease infinite;
+  -moz-animation: LightGradient 30s ease infinite;
+  animation: LightGradient 30s ease infinite; */
+}
+
+.main-scene header {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  position: relative;
+}
+
+.main-scene header img {
+  left: -50px;
+  position: absolute;
+  top: -160px;
+  z-index: 1;
+  width: 400px;
+}
+
+.main-scene header h1 {
+  z-index: 10;
+  font-size: 2.5em;
+  text-decoration: underline;
+  font-weight: 400;
+  text-align: center;
+}
+
+.main-scene .main-button-group {
+  z-index: 10;
+}
+
+.main-scene .main-button-group button {
+  -webkit-appearance: none;
+  border: none;
+  background: none;
+  padding: 1rem;
+  font-size: 1.8em;
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: left;
+}
+
+.main-scene .main-button-group button:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  cursor: pointer;
+}
+
+/* #endregion*/
+
+/* #region character-scene*/
+#character-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#character-scene .controls {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1;
+}
+
+#character-scene .controls label {
+  margin: 0.5rem 0;
+}
+
+#character-scene .player-form {
+  flex: 1 0;
+  background: url(/images/parchment.jpg);
+  background-size: cover;
+  padding: 0.2rem;
+  color: black;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  font-family: monospace;
+}
+/* #endregion*/
+
+/* #region game-scene */
+.player-display {
+  position: relative;
+}
+
+#game-view-character {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+}
+
+#game-scene .player-stats {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  border-radius: 5px;
+  background: linear-gradient(
+    137deg,
+    rgba(255, 255, 255, 0.6951155462184874) 0%,
+    rgba(255, 255, 255, 0.6979166666666667) 16%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+#game-scene .player-display h5 {
+  margin: 0;
+}
+
+#game-scene .player-display .hp {
+  display: flex;
+  flex-direction: column;
+}
+
+#player-name {
+  margin: 0;
+}
+
+#player-job {
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+#player-hp-text {
+  margin: 0;
+}
+
+#game-scene .player-controls {
+  flex: 0 0;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  padding-top: 0.5em;
+  padding-left: 0.5em;
+}
+
+#game-scene .player-controls .button-row {
+  flex: 1 1;
+}
+
+#game-scene .actions {
+  margin-right: 0.5em;
+  margin-bottom: 0.5em;
+  padding: 0.5em;
+  flex: 1 1;
+}
+
+#game-scene .tabs-container {
+  flex: 1 1;
+
+  padding: 0.5em 0.5em 0 0.5em;
+}
+
+#badge-content {
+  gap: 0.8em;
+  padding: 0.4em;
+  flex-wrap: wrap;
+}
+
+#game-scene .badge {
+  width: 50px;
+  height: auto;
+}
+
+#log {
+  padding: 0.6rem;
+  height: 100px;
+  overflow-y: scroll;
+}
+
+/* #endregion */

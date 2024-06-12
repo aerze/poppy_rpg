@@ -1,13 +1,14 @@
 import { SocketEvents } from "../../shared/events";
+import { PresetMap } from "../presets";
 import { Scene } from "../scene";
 
 export class CharacterScene extends Scene {
   html = `
-  <div id="character-screen" class="screen">
+  <div id="character-scene" class="scene flex column light-gradient">
     <form id="character-form">
       <div class="player-display">
         <div class="player-view">
-          <img id="player-character" />
+          <img id="player-character" class="full-width"/>
         </div>
       </div>
 
@@ -47,21 +48,30 @@ export class CharacterScene extends Scene {
   </div>
   `;
 
-  $form?: HTMLFormElement;
+  $form!: HTMLFormElement;
 
-  $characterName?: HTMLInputElement;
+  $characterName!: HTMLInputElement;
 
-  $characterImage?: HTMLImageElement;
+  $characterImage!: HTMLImageElement;
 
-  $characterPreset?: HTMLSelectElement;
+  $characterPreset!: HTMLSelectElement;
 
   create() {
     this.$form = document.getElementById("character-form") as HTMLFormElement;
     this.$characterName = document.getElementById("characterName") as HTMLInputElement;
     this.$characterImage = document.getElementById("player-character") as HTMLImageElement;
     this.$characterPreset = document.getElementById("preset") as HTMLSelectElement;
+    this.$characterPreset.addEventListener("change", this.handlePresetChange);
     this.$form.addEventListener("submit", this.handleFormSubmit);
+
+    const value = this.$characterPreset.value as keyof typeof PresetMap;
+    this.$characterImage.src = PresetMap[value];
   }
+
+  handlePresetChange = (event: Event) => {
+    const value = (event.target as HTMLSelectElement).value as keyof typeof PresetMap;
+    this.$characterImage.src = PresetMap[value];
+  };
 
   handleFormSubmit = (event: SubmitEvent) => {
     const socket = this.mini.network.socket;

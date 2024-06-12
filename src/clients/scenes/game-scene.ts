@@ -1,3 +1,4 @@
+import { BadgeType } from "../../server/game/badge";
 import { PlayerUserData } from "../../server/game/player";
 import { SocketEvents } from "../../shared/events";
 import { getLevelRequirement } from "../../shared/xp";
@@ -12,10 +13,10 @@ enum PlayerClientTabs {
 
 export class GameScene extends Scene {
   html = `
-  <div id="game-screen" class="screen">
+  <div id="game-scene" class="scene column light-gradient">
     <div class="player-display">
       <div class="player-view">
-        <img id="game-view-character" />
+        <img id="game-view-character" class="full-width"/>
       </div>
       <div class="player-stats">
         <h2 id="player-name">Anon</h2>
@@ -50,7 +51,9 @@ export class GameScene extends Scene {
         <button id="player-logs-tab" class="tab" disabled>Player Logs</button>
         <button id="battle-logs-tab" class="tab" disabled>Battle Logs</button>
       </div>
-      <div id="tab-content" class="tab-content flex"></div>
+      <div id="tab-content" class="tab-content flex">
+        <div id="badge-content" class="flex row" style="display: none;" />
+      </div>
     </div>
   </div>
   `;
@@ -72,6 +75,7 @@ export class GameScene extends Scene {
 
   $tabContent!: HTMLDivElement;
   $badgeTab!: HTMLButtonElement;
+  $badgeContent!: HTMLDivElement;
   $itemsTab!: HTMLButtonElement;
   $playerLogsTab!: HTMLButtonElement;
   $battleLogsTab!: HTMLButtonElement;
@@ -106,6 +110,7 @@ export class GameScene extends Scene {
 
     this.$tabContent = document.getElementById("tab-content") as HTMLDivElement;
     this.$badgeTab = document.getElementById("badge-tab") as HTMLButtonElement;
+    this.$badgeContent = document.getElementById("badge-content") as HTMLDivElement;
     this.$itemsTab = document.getElementById("items-tab") as HTMLButtonElement;
     this.$playerLogsTab = document.getElementById("player-logs-tab") as HTMLButtonElement;
     this.$battleLogsTab = document.getElementById("battle-logs-tab") as HTMLButtonElement;
@@ -115,22 +120,23 @@ export class GameScene extends Scene {
     this.$playerLogsTab.addEventListener("click", () => this.setTab(PlayerClientTabs.PlayerLogs));
     this.$battleLogsTab.addEventListener("click", () => this.setTab(PlayerClientTabs.BattleLogs));
 
-    this.renderBadgesTab();
+    this.$badgeContent.style.display = "flex";
 
     socket.on(SocketEvents.Update, this.handleUpdate);
     socket.on(SocketEvents.Log, this.handleLog);
   }
 
-  renderBadgesTab() {
-    if (this.activeTab != PlayerClientTabs.Badges) return;
+  badgeMap: Map<BadgeType, HTMLImageElement> = new Map();
 
-    this.$tabContent.innerHTML = "";
+  renderBadgesTab() {
     if (this.localPlayer?.banner?.length) {
       for (const badge of this.localPlayer.banner) {
+        if (this.badgeMap.has(badge.type)) return;
         const badgeElement = document.createElement("img");
         badgeElement.classList.add("badge");
         badgeElement.src = `images/badges${badge.type + 1}.png`;
-        this.$tabContent.appendChild(badgeElement);
+        this.$badgeContent.appendChild(badgeElement);
+        this.badgeMap.set(badge.type, badgeElement);
       }
     }
   }
