@@ -310,7 +310,7 @@ export class Game {
       if (player.xp >= levelRequirement) {
         this.awardBadge(BadgeType.FirstLevelUp, [player]);
         player.level += 1;
-        player.xp = -levelRequirement;
+        player.xp -= levelRequirement;
       }
 
       PlayerDB.save(player);
