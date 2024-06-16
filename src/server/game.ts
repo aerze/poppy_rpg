@@ -9,43 +9,12 @@ import { PlayerDB } from "./game/PlayerDB";
 import { Server, Socket } from "socket.io";
 import { getLevelRequirement, scaleStat } from "../shared/xp";
 import { BadgeType } from "./game/badge";
+import { SocketEvents } from "../shared/events";
+
+const SHORT_WAIT = 300;
+const LONG_WAIT = 700;
 
 export class Game {
-  static SocketEvents = {
-    // Incoming
-    DisplayConnected: "DisplayConnected",
-    DisplayDisconnected: "DisplayDisconnected",
-    PlayerConnected: "PlayerConnected",
-    PlayerDisconnected: "PlayerDisconnected",
-    AddMonsters: "AddMonsters",
-    AddBoss: "AddBoss",
-    PlayerAction: "PlayerAction",
-    PlayerRevive: "PlayerRevive",
-    DeleteMonsters: "DeleteMonsters",
-    ReviveParty: "ReviveParty",
-
-    // Outgoing
-    Log: "Log",
-    Snapshot: "Snapshot",
-    Update: "Update",
-    PlayerRegistered: "PlayerRegistered",
-
-    // Built-In
-    Connect: "connect",
-    Disconnect: "disconnect",
-
-    // Display Clients
-    PlayerStanceChange: "PlayerStanceChange",
-    PlayerRevived: "PlayerRevived",
-    PlayerHealed: "PlayerHealed",
-    PlayerAttacked: "PlayerAttacked",
-    MonsterAttacked: "MonsterAttacked",
-    PlayerDied: "PlayerDied",
-    MonsterDied: "MonsterDied",
-    Play: "Play",
-    Pause: "Pause",
-  };
-
   io?: Server;
   mongo: MongoClient;
   mongoConnected: Promise<boolean>;
@@ -101,7 +70,7 @@ export class Game {
 
   sendSnapshot(type = "unknown") {
     for (const socket of this.displays) {
-      socket.emit(Game.SocketEvents.Snapshot, [type, this.getSnapshot()]);
+      socket.emit(SocketEvents.Snapshot, [type, this.getSnapshot()]);
     }
   }
 
@@ -114,25 +83,25 @@ export class Game {
   /** @param {import('socket.io').Socket} socket */
   handleConnection = (socket: Socket) => {
     console.log(`>> New Connection c:${socket.id}`);
-    socket.once(Game.SocketEvents.DisplayConnected, this.registerDisplayClient.bind(this, socket));
-    socket.once(Game.SocketEvents.PlayerConnected, this.registerPlayerClient.bind(this, socket));
+    socket.once(SocketEvents.DisplayConnected, this.registerDisplayClient.bind(this, socket));
+    socket.once(SocketEvents.PlayerConnected, this.registerPlayerClient.bind(this, socket));
   };
 
   /** @param {import('socket.io').Socket} socket */
   registerDisplayClient(socket: Socket) {
     console.log(`>> c:${socket.id} -> Display`);
     this.displays.add(socket);
-    socket.once(Game.SocketEvents.Disconnect, this.unregisterDisplayClient.bind(this, socket));
+    socket.once(SocketEvents.Disconnect, this.unregisterDisplayClient.bind(this, socket));
 
-    socket.emit(Game.SocketEvents.Snapshot, ["initial", this.getSnapshot()]);
+    socket.emit(SocketEvents.Snapshot, ["initial", this.getSnapshot()]);
 
-    socket.on(Game.SocketEvents.AddMonsters, this.handleAddMonsters);
-    socket.on(Game.SocketEvents.AddBoss, this.handleAddBoss);
-    socket.on(Game.SocketEvents.DeleteMonsters, this.handleDeleteMonsters);
-    socket.on(Game.SocketEvents.ReviveParty, this.handleReviveParty);
+    socket.on(SocketEvents.AddMonsters, this.handleAddMonsters);
+    socket.on(SocketEvents.AddBoss, this.handleAddBoss);
+    socket.on(SocketEvents.DeleteMonsters, this.handleDeleteMonsters);
+    socket.on(SocketEvents.ReviveParty, this.handleReviveParty);
 
-    socket.on(Game.SocketEvents.Play, this.handlePlay);
-    socket.on(Game.SocketEvents.Pause, this.handlePause);
+    socket.on(SocketEvents.Play, this.handlePlay);
+    socket.on(SocketEvents.Pause, this.handlePause);
   }
 
   /** @param {import('socket.io').Socket} socket */
@@ -158,10 +127,10 @@ export class Game {
     }
 
     this.players.set(player.id, player);
-    socket.once(Game.SocketEvents.Disconnect, this.unregisterPlayerClient.bind(this, player, socket));
-    socket.on(Game.SocketEvents.PlayerAction, this.handlePlayerAction.bind(this, player));
-    socket.on(Game.SocketEvents.PlayerRevive, this.handlePlayerRevive.bind(this, player));
-    socket.emit(Game.SocketEvents.PlayerRegistered, { playerId: player.id });
+    socket.once(SocketEvents.Disconnect, this.unregisterPlayerClient.bind(this, player, socket));
+    socket.on(SocketEvents.PlayerAction, this.handlePlayerAction.bind(this, player));
+    socket.on(SocketEvents.PlayerRevive, this.handlePlayerRevive.bind(this, player));
+    socket.emit(SocketEvents.PlayerRegistered, { playerId: player.id });
     player.updatePlayerClient();
     // this.sendSnapshot();
   }
@@ -223,7 +192,7 @@ export class Game {
     player.nextAction = data.action;
     // player.action = data.action;
     player.updatePlayerClient();
-    this.emitToDisplays(Game.SocketEvents.PlayerStanceChange, [player.id, player.action]);
+    this.emitToDisplays(SocketEvents.PlayerStanceChange, [player.id, player.action]);
   };
 
   /** @param {Player} player */
@@ -232,11 +201,11 @@ export class Game {
     player.active = true;
     player.health = player.maxHealth;
     player.updatePlayerClient();
-    this.emitToDisplays(Game.SocketEvents.PlayerRevived, player);
+    this.emitToDisplays(SocketEvents.PlayerRevived, player);
   };
 
   sendLog(message: string) {
-    this.io?.emit(Game.SocketEvents.Log, message);
+    this.io?.emit(SocketEvents.Log, message);
   }
 
   async main() {
@@ -266,14 +235,18 @@ export class Game {
 
   votingPhase() {}
 
-  async promotePlayers(players: Player[]) {
-    // promote players
+  async determinePlayerActions(players: Player[]) {
     for (const player of players) {
       if (player.nextAction) {
         player.action = player.nextAction;
         player.nextAction = null;
       }
+    }
+  }
 
+  async promotePlayers(players: Player[]) {
+    // promote players
+    for (const player of players) {
       const levelRequirement = getLevelRequirement(player.level);
 
       if (player.xp >= levelRequirement) {
@@ -287,36 +260,7 @@ export class Game {
     }
   }
 
-  async loop() {
-    const SHORT_WAIT = 300;
-    const LONG_WAIT = 700;
-
-    this.frameCounter.next();
-
-    console.log(`>> loop (${this.frameCounter.count})`);
-
-    const players = this.players.toArray();
-    const activePlayers = players.filter(PlayerMap.Filters.Active);
-
-    // promote players
-    for (const player of players) {
-      if (player.nextAction) {
-        player.action = player.nextAction;
-        player.nextAction = null;
-      }
-
-      const levelRequirement = getLevelRequirement(player.level);
-
-      if (player.xp >= levelRequirement) {
-        this.awardBadge(BadgeType.FirstLevelUp, [player]);
-        player.level += 1;
-        player.xp -= levelRequirement;
-      }
-
-      PlayerDB.save(player);
-      player.updatePlayerClient();
-    }
-
+  async stepDungeon(players: Player[]) {
     // dungeon iteration
     if (!this.monsters.size) {
       this.dungeon.currentRoom++;
@@ -332,24 +276,20 @@ export class Game {
         this.monsters.create(this.connectionCounter.next(), monsterData);
       }
     }
+  }
 
-    this.sendSnapshot();
-
-    // players check
-    if (!activePlayers.length) {
-      this.sendLog(`The heros have gone missing.`);
-      return;
-    }
-
+  async playerHeals(activePlayers: Player[]) {
     // player heals
     const healers = activePlayers.filter(PlayerMap.Filters.Heal);
     const damaged = activePlayers.filter(PlayerMap.Filters.Damaged);
+
     if (damaged.length) {
       for (const healer of healers) {
         const target = getRandomFromArray(damaged);
         if (!target) continue;
 
-        this.emitToDisplays(Game.SocketEvents.PlayerHealed, { healer, target });
+        this.emitToDisplays(SocketEvents.PlayerHealed, { healer, target });
+        // Display.healPlayer(healer, target);
         await sleep(SHORT_WAIT);
 
         const heal = scaleStat(healer.level, healer.heal);
@@ -357,7 +297,7 @@ export class Game {
         target.health = Math.min(target.health + heal, target.maxHealth);
         target.updatePlayerClient();
         this.sendLog(`${healer.name} heals ${target.name} for ${heal}hp`);
-        this.emitToDisplays(Game.SocketEvents.PlayerHealed, {
+        this.emitToDisplays(SocketEvents.PlayerHealed, {
           healer,
           target,
           heal,
@@ -365,14 +305,16 @@ export class Game {
         await sleep(LONG_WAIT);
       }
     }
+  }
 
+  async playerAttacks(activePlayers: Player[]) {
     // player attacks
     const attackers = activePlayers.filter(PlayerMap.Filters.Attack);
     for (const attacker of attackers) {
       const target = this.monsters.getRandom();
       if (!target) continue;
 
-      this.emitToDisplays(Game.SocketEvents.PlayerAttacked, {
+      this.emitToDisplays(SocketEvents.PlayerAttacked, {
         attacker,
         target,
       });
@@ -382,7 +324,7 @@ export class Game {
 
       target.health = Math.max(target.health - damage, 0);
       this.sendLog(`${attacker.name} attacks ${target.name} for ${damage}hp`);
-      this.emitToDisplays(Game.SocketEvents.PlayerAttacked, {
+      this.emitToDisplays(SocketEvents.PlayerAttacked, {
         attacker,
         target,
         damage,
@@ -392,11 +334,13 @@ export class Game {
       if (target.health <= 0) {
         this.players.giveXP(target.xp);
         this.monsters.delete(target.id);
-        this.emitToDisplays(Game.SocketEvents.MonsterDied, target.id);
+        this.emitToDisplays(SocketEvents.MonsterDied, target.id);
         await sleep(LONG_WAIT);
       }
     }
+  }
 
+  async enemyAttacks(activePlayers: Player[]) {
     // monster actions
     const initialDefenders = activePlayers.filter(PlayerMap.Filters.Defend);
     const defenders = !initialDefenders.length
@@ -409,7 +353,7 @@ export class Game {
       const target = getRandomFromArray(defenders);
       if (!target) continue;
 
-      this.emitToDisplays(Game.SocketEvents.MonsterAttacked, {
+      this.emitToDisplays(SocketEvents.MonsterAttacked, {
         monster,
         target,
       });
@@ -424,11 +368,12 @@ export class Game {
       target.health = Math.max(target.health - damage, 0);
       target.updatePlayerClient();
       this.sendLog(`${monster.name} attacks ${target.name} for ${damage}hp`);
-      this.emitToDisplays(Game.SocketEvents.MonsterAttacked, {
+      this.emitToDisplays(SocketEvents.MonsterAttacked, {
         monster,
         target,
         damage,
       });
+
       await sleep(LONG_WAIT);
 
       if (target.health <= 0) {
@@ -436,9 +381,34 @@ export class Game {
         target.updatePlayerClient();
         this.awardBadge(BadgeType.FirstDeath, [target]);
         this.sendLog(`${target.name} is dead.`);
-        this.emitToDisplays(Game.SocketEvents.PlayerDied, target.id);
+        this.emitToDisplays(SocketEvents.PlayerDied, target.id);
         await sleep(LONG_WAIT);
       }
     }
+  }
+
+  async loop() {
+    this.frameCounter.next();
+
+    console.log(`>> loop (${this.frameCounter.count})`);
+
+    const players = this.players.toArray();
+    const activePlayers = players.filter(PlayerMap.Filters.Active);
+
+    // prep phase
+    this.determinePlayerActions(players);
+    this.stepDungeon(players);
+    this.sendSnapshot();
+
+    // players check
+    if (!activePlayers.length) return;
+
+    // damage phase
+    this.playerHeals(activePlayers);
+    this.playerAttacks(activePlayers);
+    this.enemyAttacks(activePlayers);
+
+    // results phase
+    this.promotePlayers(players);
   }
 }

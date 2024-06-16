@@ -8,6 +8,8 @@ export const SocketEvents = {
   AddBoss: "AddBoss",
   PlayerAction: "PlayerAction",
   PlayerRevive: "PlayerRevive",
+  DeleteMonsters: "DeleteMonsters",
+  ReviveParty: "ReviveParty",
 
   // Outgoing
   Log: "Log",
@@ -27,4 +29,6 @@ export const SocketEvents = {
   MonsterAttacked: "MonsterAttacked",
   PlayerDied: "PlayerDied",
   MonsterDied: "MonsterDied",
+  Play: "Play",
+  Pause: "Pause",
 };
