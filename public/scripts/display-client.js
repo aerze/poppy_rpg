@@ -16,6 +16,8 @@ const SocketEvents = {
   Snapshot: "Snapshot",
   Update: "Update",
   PlayerRegistered: "PlayerRegistered",
+  PlayerUpdate: "PlayerUpdate",
+  PlayerUpdated: "PlayerUpdated",
 
   // Built-In
   Connect: "connect",
@@ -24,13 +26,20 @@ const SocketEvents = {
   // Display Clients
   PlayerStanceChange: "PlayerStanceChange",
   PlayerRevived: "PlayerRevived",
+  ReadyPlayerHeal: "ReadyPlayerHeal",
   PlayerHealed: "PlayerHealed",
+  ReadyPlayerAttack: "ReadyPlayerAttack",
   PlayerAttacked: "PlayerAttacked",
+  ReadyEnemyAttack: "ReadyEnemyAttack",
   MonsterAttacked: "MonsterAttacked",
   PlayerDied: "PlayerDied",
   MonsterDied: "MonsterDied",
   Play: "Play",
   Pause: "Pause",
+  RoundStart: "RoundStart",
+  PlayerTurn: "PlayerTurn",
+  EnemyTurn: "EnemyTurn",
+  RoundEnd: "RoundEnd",
 };
 
 function getRandomInt(min, max) {
@@ -341,6 +350,7 @@ const scene = {
 };
 
 const dungeonInfo = document.getElementById("dungeon-info");
+const phaseLabel = document.getElementById("phase");
 const addButton = document.getElementById("add");
 const addBossButton = document.getElementById("add-boss");
 const deleteMonstersButton = document.getElementById("delete-monsters");
@@ -441,6 +451,12 @@ socket.on(SocketEvents.PlayerStanceChange, playerStanceChange);
 
 socket.on(SocketEvents.PlayerRevived, playerRevived);
 
+socket.on(SocketEvents.ReadyPlayerHeal, readyPlayerHeal);
+
+socket.on(SocketEvents.ReadyPlayerAttack, readyPlayerAttack);
+
+socket.on(SocketEvents.ReadyEnemyAttack, readyEnemyAttack);
+
 socket.on(SocketEvents.PlayerHealed, playerHealed);
 
 socket.on(SocketEvents.PlayerAttacked, playerAttacked);
@@ -450,6 +466,34 @@ socket.on(SocketEvents.MonsterAttacked, monsterAttacked);
 socket.on(SocketEvents.PlayerDied, playerDied);
 
 socket.on(SocketEvents.MonsterDied, monsterDied);
+
+socket.on(SocketEvents.RoundStart, handleRoundStart);
+
+socket.on(SocketEvents.PlayerTurn, handlePlayerTurn);
+
+socket.on(SocketEvents.EnemyTurn, handleEnemyTurn);
+
+socket.on(SocketEvents.RoundEnd, handleRoundEnd);
+
+function handleRoundStart() {
+  console.log(">>", "ROUND START");
+  phaseLabel.innerText = "ROUND START";
+}
+
+function handlePlayerTurn() {
+  console.log(">>", "PLAYER TURN");
+  phaseLabel.innerText = "PLAYER TURN";
+}
+
+function handleEnemyTurn() {
+  console.log(">>", "ENEMY TURN");
+  phaseLabel.innerText = "ENEMY TURN";
+}
+
+function handleRoundEnd() {
+  console.log(">>", "ROUND END");
+  phaseLabel.innerText = "ROUND END";
+}
 
 function createPlayer(player) {
   console.log(">> createPlayer", player);
@@ -508,38 +552,42 @@ function playerRevived(player) {
   scene.update(player.id, player);
 }
 
-function playerHealed({ healer, target, heal }) {
-  console.log(">> playerHealed");
-  playerMap.set(target.id, target);
+function readyPlayerHeal({ healer, target }) {
+  console.log(">> readyPlayerHeal");
   scene.update(target.id, target);
   scene.setPlayer(target.id);
   scene.setHealer(healer.id);
+}
 
-  if (heal) {
-    scene.animateText(target.id, heal, false, true);
-  }
+function playerHealed({ healer, target, heal }) {
+  console.log(">> playerHealed");
+  scene.update(target.id, target);
+  scene.animateText(target.id, heal, false, true);
+}
+
+function readyPlayerAttack({ attacker, target }) {
+  console.log(">> readyPlayerAttack");
+  scene.update(target.id, target);
+  scene.setPlayer(attacker.id);
+  scene.setMonster(target.id);
 }
 
 function playerAttacked({ attacker, target, damage }) {
   console.log(">> playerAttacked");
-  monsterMap.set(target.id, target);
   scene.update(target.id, target);
-  scene.setPlayer(attacker.id);
-  scene.setMonster(target.id);
-  if (damage) {
-    scene.animateText(target.id, damage, true, false);
-  }
+  scene.animateText(target.id, damage, true, false);
+}
+
+function readyEnemyAttack({ monster, target }) {
+  scene.update(target.id, target);
+  scene.setPlayer(target.id);
+  scene.setMonster(monster.id);
 }
 
 function monsterAttacked({ monster, target, damage }) {
   console.log(">> monsterAttacked");
-  playerMap.set(target.id, target);
   scene.update(target.id, target);
-  scene.setPlayer(target.id);
-  scene.setMonster(monster.id);
-  if (damage) {
-    scene.animateText(target.id, damage, true, true);
-  }
+  scene.animateText(target.id, damage, true, true);
 }
 
 function playerDied(playerId) {

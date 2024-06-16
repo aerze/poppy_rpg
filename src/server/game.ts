@@ -75,7 +75,7 @@ export class Game {
     }
   }
 
-  emitToDisplays(event: string, data: any) {
+  emitToDisplays(event: string, data?: any) {
     for (const socket of this.displays) {
       socket.emit(event, data);
     }
@@ -247,6 +247,7 @@ export class Game {
       if (player.nextAction) {
         player.action = player.nextAction;
         player.nextAction = null;
+        player.updatePlayerClient();
       }
     }
   }
@@ -295,8 +296,7 @@ export class Game {
         const target = getRandomFromArray(damaged);
         if (!target) continue;
 
-        this.emitToDisplays(SocketEvents.PlayerHealed, { healer, target });
-        // Display.healPlayer(healer, target);
+        this.emitToDisplays(SocketEvents.ReadyPlayerHeal, { healer, target });
         await sleep(SHORT_WAIT);
 
         const heal = scaleStat(healer.level, healer.heal);
@@ -304,11 +304,7 @@ export class Game {
         target.health = Math.min(target.health + heal, target.maxHealth);
         target.updatePlayerClient();
         this.sendLog(`${healer.name} heals ${target.name} for ${heal}hp`);
-        this.emitToDisplays(SocketEvents.PlayerHealed, {
-          healer,
-          target,
-          heal,
-        });
+        this.emitToDisplays(SocketEvents.PlayerHealed, { healer, target, heal });
         await sleep(LONG_WAIT);
       }
     }
@@ -321,21 +317,14 @@ export class Game {
       const target = this.monsters.getRandom();
       if (!target) continue;
 
-      this.emitToDisplays(SocketEvents.PlayerAttacked, {
-        attacker,
-        target,
-      });
+      this.emitToDisplays(SocketEvents.ReadyPlayerAttack, { attacker, target });
       await sleep(SHORT_WAIT);
 
       const damage = scaleStat(attacker.level, attacker.attack);
 
       target.health = Math.max(target.health - damage, 0);
       this.sendLog(`${attacker.name} attacks ${target.name} for ${damage}hp`);
-      this.emitToDisplays(SocketEvents.PlayerAttacked, {
-        attacker,
-        target,
-        damage,
-      });
+      this.emitToDisplays(SocketEvents.PlayerAttacked, { attacker, target, damage });
       await sleep(LONG_WAIT);
 
       if (target.health <= 0) {
@@ -360,10 +349,7 @@ export class Game {
       const target = getRandomFromArray(defenders);
       if (!target) continue;
 
-      this.emitToDisplays(SocketEvents.MonsterAttacked, {
-        monster,
-        target,
-      });
+      this.emitToDisplays(SocketEvents.ReadyEnemyAttack, { monster, target });
       await sleep(SHORT_WAIT);
 
       const isDefending = target.action === "defend";
@@ -375,11 +361,7 @@ export class Game {
       target.health = Math.max(target.health - damage, 0);
       target.updatePlayerClient();
       this.sendLog(`${monster.name} attacks ${target.name} for ${damage}hp`);
-      this.emitToDisplays(SocketEvents.MonsterAttacked, {
-        monster,
-        target,
-        damage,
-      });
+      this.emitToDisplays(SocketEvents.MonsterAttacked, { monster, target, damage });
 
       await sleep(LONG_WAIT);
 
@@ -395,27 +377,31 @@ export class Game {
   }
 
   async loop() {
+    this.emitToDisplays(SocketEvents.RoundStart);
     this.frameCounter.next();
-
     console.log(`>> loop (${this.frameCounter.count})`);
 
     const players = this.players.toArray();
     const activePlayers = players.filter(PlayerMap.Filters.Active);
 
     // prep phase
-    this.determinePlayerActions(players);
-    this.stepDungeon(players);
+    await this.determinePlayerActions(players);
+    await this.stepDungeon(players);
     this.sendSnapshot();
 
     // players check
     if (!activePlayers.length) return;
 
     // damage phase
-    this.playerHeals(activePlayers);
-    this.playerAttacks(activePlayers);
-    this.enemyAttacks(activePlayers);
+    this.emitToDisplays(SocketEvents.PlayerTurn);
+    await this.playerHeals(activePlayers);
+    await this.playerAttacks(activePlayers);
+
+    this.emitToDisplays(SocketEvents.EnemyTurn);
+    await this.enemyAttacks(activePlayers);
 
     // results phase
-    this.promotePlayers(players);
+    this.emitToDisplays(SocketEvents.RoundEnd);
+    await this.promotePlayers(players);
   }
 }

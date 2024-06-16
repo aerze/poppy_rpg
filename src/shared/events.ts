@@ -26,11 +26,18 @@ export const SocketEvents = {
   // Display Clients
   PlayerStanceChange: "PlayerStanceChange",
   PlayerRevived: "PlayerRevived",
+  ReadyPlayerHeal: "ReadyPlayerHeal",
   PlayerHealed: "PlayerHealed",
+  ReadyPlayerAttack: "ReadyPlayerAttack",
   PlayerAttacked: "PlayerAttacked",
+  ReadyEnemyAttack: "ReadyEnemyAttack",
   MonsterAttacked: "MonsterAttacked",
   PlayerDied: "PlayerDied",
   MonsterDied: "MonsterDied",
   Play: "Play",
   Pause: "Pause",
+  RoundStart: "RoundStart",
+  PlayerTurn: "PlayerTurn",
+  EnemyTurn: "EnemyTurn",
+  RoundEnd: "RoundEnd",
 };
