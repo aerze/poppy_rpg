@@ -80,7 +80,7 @@ export class Game {
       console.log(">> DB CONNECTED");
       resolve(null);
     } catch (e) {
-      console.log(">> FAILED TO CONNECT DUMMY");
+      console.log(">> FAILED TO CONNECT IDIOT");
       console.error(e);
       reject();
     }
@@ -130,6 +130,7 @@ export class Game {
     socket.on(Game.SocketEvents.AddBoss, this.handleAddBoss);
     socket.on(Game.SocketEvents.DeleteMonsters, this.handleDeleteMonsters);
     socket.on(Game.SocketEvents.ReviveParty, this.handleReviveParty);
+
     socket.on(Game.SocketEvents.Play, this.handlePlay);
     socket.on(Game.SocketEvents.Pause, this.handlePause);
   }
@@ -257,6 +258,35 @@ export class Game {
     }
   }
 
+  prepPhase() {}
+  prePlayerPhase() {}
+  playerPhase() {}
+  enemyPhase() {}
+  resultsPhase() {}
+
+  votingPhase() {}
+
+  async promotePlayers(players: Player[]) {
+    // promote players
+    for (const player of players) {
+      if (player.nextAction) {
+        player.action = player.nextAction;
+        player.nextAction = null;
+      }
+
+      const levelRequirement = getLevelRequirement(player.level);
+
+      if (player.xp >= levelRequirement) {
+        this.awardBadge(BadgeType.FirstLevelUp, [player]);
+        player.level += 1;
+        player.xp = player.xp - levelRequirement;
+      }
+
+      PlayerDB.save(player);
+      player.updatePlayerClient();
+    }
+  }
+
   async loop() {
     const SHORT_WAIT = 300;
     const LONG_WAIT = 700;
@@ -280,7 +310,7 @@ export class Game {
       if (player.xp >= levelRequirement) {
         this.awardBadge(BadgeType.FirstLevelUp, [player]);
         player.level += 1;
-        player.xp = levelRequirement - player.xp;
+        player.xp = -levelRequirement;
       }
 
       PlayerDB.save(player);

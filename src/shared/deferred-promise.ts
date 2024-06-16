@@ -1,9 +1,9 @@
 export class DeferredPromise<T> extends Promise<T> {
   static noop = () => {};
 
-  resolve?: (value: T) => void;
+  resolve!: (value: T) => void;
 
-  reject?: () => void;
+  reject!: () => void;
 
   constructor() {
     super((resolve, reject) => {

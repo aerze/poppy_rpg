@@ -65,7 +65,7 @@ function middleware(req: any, res: any, next: import("express").NextFunction) {
   const session = getSession(sessionid);
   // If there is an existing session set the user object
   // and continue the request
-  if (!!session) {
+  if (session) {
     req.user = session;
     return next();
   }
@@ -89,10 +89,7 @@ function middleware(req: any, res: any, next: import("express").NextFunction) {
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
-function login(
-  req: import("express").Request,
-  res: import("express").Response
-) {
+function login(req: import("express").Request, res: import("express").Response) {
   // Check if login with twitch was rejected
   if (req.query && req.query["error"]) {
     res.redirect("/");
