@@ -16,6 +16,8 @@ export const SocketEvents = {
   Snapshot: "Snapshot",
   Update: "Update",
   PlayerRegistered: "PlayerRegistered",
+  PlayerUpdate: "PlayerUpdate",
+  PlayerUpdated: "PlayerUpdated",
 
   // Built-In
   Connect: "connect",

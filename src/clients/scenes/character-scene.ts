@@ -41,7 +41,7 @@ export class CharacterScene extends Scene {
             <input type="color" id="color" name="color" />
           </label>
 
-          <button>Create</button>
+          <button id="character-submit">Create</button>
         </div>
       </div>
     </form>
@@ -51,20 +51,35 @@ export class CharacterScene extends Scene {
   $form!: HTMLFormElement;
 
   $characterName!: HTMLInputElement;
+  $preset!: HTMLSelectElement;
+  $job!: HTMLSelectElement;
+  $color!: HTMLInputElement;
+  $submit!: HTMLButtonElement;
 
   $characterImage!: HTMLImageElement;
-
-  $characterPreset!: HTMLSelectElement;
 
   create() {
     this.$form = document.getElementById("character-form") as HTMLFormElement;
     this.$characterName = document.getElementById("characterName") as HTMLInputElement;
+    this.$preset = document.getElementById("preset") as HTMLSelectElement;
+    this.$job = document.getElementById("job") as HTMLSelectElement;
+    this.$color = document.getElementById("color") as HTMLInputElement;
+    this.$submit = document.getElementById("character-submit") as HTMLButtonElement;
+
+    if (this.mini.player.localPlayer) {
+      const { localPlayer } = this.mini.player;
+      this.$characterName.value = localPlayer.name;
+      this.$preset.value = localPlayer.preset;
+      this.$job.value = localPlayer.job;
+      this.$color.value = localPlayer.color;
+      this.$submit.innerText = "Update";
+    }
+
     this.$characterImage = document.getElementById("player-character") as HTMLImageElement;
-    this.$characterPreset = document.getElementById("preset") as HTMLSelectElement;
-    this.$characterPreset.addEventListener("change", this.handlePresetChange);
+    this.$preset.addEventListener("change", this.handlePresetChange);
     this.$form.addEventListener("submit", this.handleFormSubmit);
 
-    const value = this.$characterPreset.value as keyof typeof PresetMap;
+    const value = this.$preset.value as keyof typeof PresetMap;
     this.$characterImage.src = PresetMap[value];
   }
 
@@ -83,19 +98,29 @@ export class CharacterScene extends Scene {
       return;
     }
 
-    socket.once(SocketEvents.PlayerRegistered, this.handlePlayerRegistered);
-    socket.emit(SocketEvents.PlayerConnected, {
-      name: data.characterName,
-      action: "attack",
-      color: data.color,
-      job: data.job,
-      preset: data.preset,
-      active: true,
-    });
+    if (this.mini.player.localPlayer) {
+      socket.once(SocketEvents.PlayerUpdated, this.handlePlayerRegistered);
+      socket.emit(SocketEvents.PlayerUpdate, {
+        playerId: this.mini.player.playerId,
+        name: data.characterName,
+        color: data.color,
+        job: data.job,
+        preset: data.preset,
+      });
+    } else {
+      socket.once(SocketEvents.PlayerRegistered, this.handlePlayerRegistered);
+      socket.emit(SocketEvents.PlayerConnected, {
+        name: data.characterName,
+        color: data.color,
+        job: data.job,
+        preset: data.preset,
+        active: true,
+      });
+    }
   };
 
   handlePlayerRegistered = ({ playerId }: { playerId: string }) => {
-    localStorage.setItem("playerId", playerId);
+    this.mini.player.setPlayerId(playerId);
     this.mini.scenes.open("game");
   };
 

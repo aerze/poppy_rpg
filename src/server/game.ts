@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 import { SafeCounter } from "../shared/safe-counter";
-import { Player, PlayerExistingData, PlayerUserData } from "./game/player";
+import { Player, PlayerExistingData, PlayerFormData, PlayerUserData } from "./game/player";
 import { MonsterMap } from "./game/monster-map";
 import { PlayerMap } from "./game/player-map";
 import { getRandomFromArray, getRandomInt, sleep } from "../shared/helpers";
@@ -10,6 +10,7 @@ import { Server, Socket } from "socket.io";
 import { getLevelRequirement, scaleStat } from "../shared/xp";
 import { BadgeType } from "./game/badge";
 import { SocketEvents } from "../shared/events";
+import sanitize from "mongo-sanitize";
 
 const SHORT_WAIT = 300;
 const LONG_WAIT = 700;
@@ -85,6 +86,7 @@ export class Game {
     console.log(`>> New Connection c:${socket.id}`);
     socket.once(SocketEvents.DisplayConnected, this.registerDisplayClient.bind(this, socket));
     socket.once(SocketEvents.PlayerConnected, this.registerPlayerClient.bind(this, socket));
+    socket.on(SocketEvents.PlayerUpdate, this.handlePlayerUpdate.bind(this, socket));
   };
 
   /** @param {import('socket.io').Socket} socket */
@@ -108,6 +110,19 @@ export class Game {
   unregisterDisplayClient(socket: Socket) {
     console.log(`>> c:${socket.id} Display Disconnected`);
     this.displays.delete(socket);
+  }
+
+  async handlePlayerUpdate(socket: Socket, data: PlayerFormData) {
+    const cleanPlayerId = sanitize(data.playerId);
+    const player = this.players.get(cleanPlayerId);
+    if (!player) return;
+    player.name = sanitize(data.name);
+    player.color = sanitize(data.color);
+    player.job = sanitize(data.job);
+    player.preset = sanitize(data.preset);
+    await PlayerDB.save(player);
+    socket.emit(SocketEvents.PlayerUpdated, { playerId: player.id });
+    player.updatePlayerClient();
   }
 
   /** @param {import('socket.io').Socket} socket */
@@ -226,14 +241,6 @@ export class Game {
       }
     }
   }
-
-  prepPhase() {}
-  prePlayerPhase() {}
-  playerPhase() {}
-  enemyPhase() {}
-  resultsPhase() {}
-
-  votingPhase() {}
 
   async determinePlayerActions(players: Player[]) {
     for (const player of players) {

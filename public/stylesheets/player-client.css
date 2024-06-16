@@ -209,6 +209,7 @@ body {
   letter-spacing: -0.2px;
   font-family: monospace;
 }
+
 /* #endregion*/
 
 /* #region game-scene */
@@ -304,4 +305,12 @@ body {
   overflow-y: scroll;
 }
 
+#character-scene-button {
+  width: 50px;
+  height: auto;
+  position: fixed;
+  right: 0;
+
+  border: 2px solid black;
+}
 /* #endregion */

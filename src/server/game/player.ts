@@ -28,6 +28,14 @@ export interface PlayerUserData extends Partial<SavedPlayerData> {
   active: boolean;
 }
 
+export interface PlayerFormData {
+  playerId: string;
+  name: string;
+  color: string;
+  job: keyof typeof Player.JOBS;
+  preset: string;
+}
+
 export interface PlayerExistingData {
   playerId: string;
 }

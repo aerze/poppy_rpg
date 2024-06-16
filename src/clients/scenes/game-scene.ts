@@ -31,6 +31,7 @@ export class GameScene extends Scene {
         <h5 id="player-heal">HEAL: 12</h5>
         <h5 id="player-action">ACT: ATTACK</h5>
       </div>
+      <img id="character-scene-button" src="/images/character-icon.png" />
     </div>
 
     <div class="player-controls">
@@ -81,9 +82,9 @@ export class GameScene extends Scene {
   $battleLogsTab!: HTMLButtonElement;
   activeTab: PlayerClientTabs = PlayerClientTabs.Badges;
 
-  $log!: HTMLDivElement;
+  characterSceneButton!: HTMLImageElement;
 
-  localPlayer?: Required<PlayerUserData>;
+  $log!: HTMLDivElement;
 
   create() {
     const socket = this.mini.network.socket;
@@ -102,11 +103,13 @@ export class GameScene extends Scene {
     this.$healAction = document.getElementById("heal-action") as HTMLButtonElement;
     this.$reviveAction = document.getElementById("revive-action") as HTMLButtonElement;
     this.$log = document.getElementById("log") as HTMLDivElement;
+    this.characterSceneButton = document.getElementById("character-scene-button") as HTMLImageElement;
 
     this.$attackAction?.addEventListener("click", this.handleAttack);
     this.$defendAction?.addEventListener("click", this.handleDefend);
     this.$healAction?.addEventListener("click", this.handleHeal);
     this.$reviveAction?.addEventListener("click", this.handleRevive);
+    this.characterSceneButton.addEventListener("click", this.handleCharacterSceneChange);
 
     this.$tabContent = document.getElementById("tab-content") as HTMLDivElement;
     this.$badgeTab = document.getElementById("badge-tab") as HTMLButtonElement;
@@ -128,9 +131,13 @@ export class GameScene extends Scene {
 
   badgeMap: Map<BadgeType, HTMLImageElement> = new Map();
 
+  handleCharacterSceneChange = () => {
+    this.mini.scenes.open("character");
+  };
+
   renderBadgesTab() {
-    if (this.localPlayer?.banner?.length) {
-      for (const badge of this.localPlayer.banner) {
+    if (this.mini.player.localPlayer?.banner?.length) {
+      for (const badge of this.mini.player.localPlayer.banner) {
         if (this.badgeMap.has(badge.type)) return;
         const badgeElement = document.createElement("img");
         badgeElement.classList.add("badge");
@@ -155,6 +162,8 @@ export class GameScene extends Scene {
     this.renderBattleLogsTab();
   }
 
+  tempCharacterSprite?: string;
+
   handleUpdate = (player: Required<PlayerUserData>) => {
     const tempCharacterSpriteMap: { [key: string]: string } = {
       a: "sprites/tay_test.png",
@@ -164,7 +173,10 @@ export class GameScene extends Scene {
     this.$attackAction.disabled = Boolean(player.nextAction);
     this.$defendAction.disabled = Boolean(player.nextAction);
     this.$healAction.disabled = Boolean(player.nextAction);
-    this.$gameCharacter.src = tempCharacterSpriteMap[player.preset];
+    if (this.tempCharacterSprite !== tempCharacterSpriteMap[player.preset]) {
+      this.$gameCharacter.src = tempCharacterSpriteMap[player.preset];
+      this.tempCharacterSprite = tempCharacterSpriteMap[player.preset];
+    }
     this.$playerName.innerText = player.name;
     this.$playerJob.innerText = `Lv:${player.level} ${player.job}`;
     this.$playerXPText.innerText = `XP: ${player.xp}/${getLevelRequirement(player.level)}`;
@@ -176,7 +188,7 @@ export class GameScene extends Scene {
     this.$playerHeal.innerText = `HEAL: ${player.heal}`;
     this.$reviveAction.disabled = player.active;
     this.$playerAction.innerText = `ACT: ${player.action?.toUpperCase()}`;
-    this.localPlayer = player;
+    this.mini.player.localPlayer = player;
 
     this.renderBadgesTab();
     this.renderItemsTab();
@@ -194,25 +206,25 @@ export class GameScene extends Scene {
 
   handleAttack = (event: MouseEvent) => {
     event.preventDefault();
-    if (this.localPlayer?.action === "attack") return;
+    if (this.mini.player.localPlayer?.action === "attack") return;
     this.mini.network.socket.emit(SocketEvents.PlayerAction, { action: "attack" });
   };
 
   handleDefend = (event: MouseEvent) => {
     event.preventDefault();
-    if (this.localPlayer?.action === "defend") return;
+    if (this.mini.player.localPlayer?.action === "defend") return;
     this.mini.network.socket.emit(SocketEvents.PlayerAction, { action: "defend" });
   };
 
   handleHeal = (event: MouseEvent) => {
     event.preventDefault();
-    if (this.localPlayer?.action === "heal") return;
+    if (this.mini.player.localPlayer?.action === "heal") return;
     this.mini.network.socket.emit(SocketEvents.PlayerAction, { action: "heal" });
   };
 
   handleRevive = (event: MouseEvent) => {
     event.preventDefault();
-    if (this.localPlayer?.action === "revive") return;
+    if (this.mini.player.localPlayer?.action === "revive") return;
     this.mini.network.socket.emit(SocketEvents.PlayerRevive);
   };
 
