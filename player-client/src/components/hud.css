@@ -1,0 +1,23 @@
+.hud {
+  position: absolute;
+  /* border: 2px solid black; */
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  pointer-events: none;
+}
+
+.hud .button-group {
+  height: 70px;
+  pointer-events: auto;
+}
+
+.hud .button-group .hud-button {
+  width: 80px;
+  height: 100%;
+  font-size: 2em;
+}
