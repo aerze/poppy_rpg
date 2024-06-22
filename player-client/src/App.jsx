@@ -36,7 +36,7 @@ function App() {
     return (
       <SceneProvider>
         <HUD />
-        <div class="scene-container">
+        <div className="scene-container">
           <SceneManager />
         </div>
       </SceneProvider>

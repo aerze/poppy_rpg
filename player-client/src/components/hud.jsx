@@ -14,7 +14,7 @@ export function HUD() {
 
   return (
     <div class="hud">
-      <div class="button-group">
+      <div class="hud-button-group">
         <button class="hud-button" onClick={makeHandleSceneChange(1)}>
           🤔
         </button>

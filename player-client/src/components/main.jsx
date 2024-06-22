@@ -11,13 +11,13 @@ export function Main({ setConnected }) {
   }
 
   return (
-    <div id="main-scene" class="scene main-scene flex light-gradient">
-      <header class="flex">
+    <div id="main-scene" className="scene main-scene flex light-gradient">
+      <header className="flex">
         <img src="images/frorg.png" />
         <h1>Poppy's Idle RPG</h1>
       </header>
 
-      <div class="flex main-button-group">
+      <div className="flex main-button-group">
         <button id="connect" onClick={handleStartGame}>
           Start Game
         </button>
