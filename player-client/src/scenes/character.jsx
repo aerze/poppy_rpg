@@ -1,4 +1,4 @@
-import "./character.css";
+import "./character.scss";
 
 export function CharacterScene() {
   function handleFormSubmit(event) {

@@ -1,5 +1,5 @@
+import "./hud.scss";
 import { useContext } from "react";
-import "./hud.css";
 import { SceneContext } from "../context/scene";
 export function HUD() {
   const { scene, setScene } = useContext(SceneContext);
@@ -25,7 +25,7 @@ export function HUD() {
           ⚔️
         </button>
         <button class="hud-button" onClick={makeHandleSceneChange(3)}>
-          🏪
+          🛍️
         </button>
         <button class="hud-button" onClick={makeHandleSceneChange(4)}>
           ⚙️

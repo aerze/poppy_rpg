@@ -1,0 +1,39 @@
+.field-scene {
+    height: 100%;
+
+    .battle-screen {
+        height: 300px;
+        position: relative;
+        border: 16px solid #333;
+    }
+
+    .battle-controls {
+        height: calc(100% - 300px);
+        display: flex;
+        flex-direction: column;
+
+        .turn-indicator {
+            width: 100%;
+            padding: 0 1em;
+
+            .turn-progress {
+                height: 32px;
+                width: 100%;
+            }
+        }
+
+        .battle-button-group {
+            flex: 1 0;
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            padding: 2em;
+
+            .battle-button {
+                flex: 1 0 50%;
+                height: 2em
+            }
+        }
+    }
+}
