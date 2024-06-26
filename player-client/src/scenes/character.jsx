@@ -90,12 +90,105 @@ export function CharacterInfoOverlay({ xp }) {
   );
 }
 
-export function CharacterScene() {
-  const [tabState, setTabState] = useState(0);
+export function CharacterInfoForm() {
   function handleFormSubmit(event) {
     event.preventDefault();
   }
 
+  return (
+    <form class="character-form column align-center" onSubmit={handleFormSubmit}>
+      <div class="character-button-group column align-center">
+        <label>Preset</label>
+        <div class="preset-container row align-center">
+          <button class="arrow left-arrow">◀️</button>
+          <input type="text" name="preset" id="preset" />
+          <button class="arrow right-arrow">▶️</button>
+        </div>
+      </div>
+      <div class="character-button-group">
+        <label>Name</label>
+        <input type="text" name="name" id="name" />
+      </div>
+      <div class="character-button-group">
+        <label>Color</label>
+        <input type="color" name="color" id="color" />
+      </div>
+      <div class="character-button-group">
+        <button type="submit">Save</button>
+      </div>
+    </form>
+  );
+}
+
+const skillList = {
+  Fireball: {
+    image: "🔥",
+    name: "Fireball",
+    desc: "Shoots a ball of flame",
+  },
+  FrogBall: {
+    image: "🐸",
+    name: "FrogBall",
+    desc: "Shoots a ball of flame",
+  },
+  SparkleBall: {
+    image: "✨",
+    name: "SparkleBall",
+    desc: "Shoots a ball of flame",
+  },
+  Rock: {
+    image: "💎",
+    name: "Rock",
+    desc: "Shoots a ball of flame",
+  },
+  RTFM: {
+    image: "📚",
+    name: "RTFM",
+    desc: "Read the fucking manual",
+  },
+  Pizza: {
+    image: "🍕",
+    name: "Pizza",
+    desc: "Shoots a ball of flame",
+  },
+  Juice: {
+    image: "🧃",
+    name: "Juice",
+    desc: "Shoots a ball of flame",
+  },
+};
+
+export function CharacterSkillItem({ skill }) {
+  return (
+    <div className="skill-item">
+      <div className="skill-image">{skill.image}</div>
+      <div className="skill-name">{skill.name}</div>
+      <div className="skill-description">{skill.desc}</div>
+    </div>
+  );
+}
+
+export function CharacterSkillList() {
+  return (
+    <div className="skill-content">
+      <div className="skill-description">
+        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Alias maiores, illum necessitatibus odio possimus
+        error accusamus ullam excepturi fuga dolore asperiores corrupti aliquam sapiente voluptate quas minima. Qui,
+        nemo quidem.
+      </div>
+      <div className="skill-list-container">
+        <div className="skill-list">
+          {Object.values(skillList).map((skill) => (
+            <CharacterSkillItem skill={skill} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function CharacterScene() {
+  const [tabState, setTabState] = useState(0);
   return (
     <div class="character-scene column full-height">
       <div class="character-view row">
@@ -116,28 +209,10 @@ export function CharacterScene() {
           Equipment
         </button>
       </div>
-      <div class="character-controls">
-        <form class="character-form column align-center" onSubmit={handleFormSubmit}>
-          <div class="character-button-group column align-center">
-            <label>Preset</label>
-            <div class="preset-container row align-center">
-              <button class="arrow left-arrow">◀️</button>
-              <input type="text" name="preset" id="preset" />
-              <button class="arrow right-arrow">▶️</button>
-            </div>
-          </div>
-          <div class="character-button-group">
-            <label>Name</label>
-            <input type="text" name="name" id="name" />
-          </div>
-          <div class="character-button-group">
-            <label>Color</label>
-            <input type="color" name="color" id="color" />
-          </div>
-          <div class="character-button-group">
-            <button type="submit">Save</button>
-          </div>
-        </form>
+
+      <div class="character-content">
+        {tabState === 0 && <CharacterInfoForm />}
+        {tabState === 1 && <CharacterSkillList />}
       </div>
     </div>
   );
