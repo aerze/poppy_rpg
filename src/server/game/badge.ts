@@ -6,6 +6,7 @@ export enum BadgeType {
   JellyCaveClear,
   FirstLevelUp,
   FirstDeath,
+  SlimeHell,
 }
 
 export class Badge {

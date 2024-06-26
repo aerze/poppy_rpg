@@ -43,8 +43,8 @@ app.post("/heal-party", (request, response) => {
   response.send("ok");
 });
 
-app.get("/heal-party", (request, response) => {
-  game.handleReviveParty();
+app.post("/skip-dungeon", (request, response) => {
+  game.skipDungeon();
   response.send("ok");
 });
 

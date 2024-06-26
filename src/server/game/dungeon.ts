@@ -118,6 +118,7 @@ export const DungeonMap: { [DungeonKey: string]: DungeonData } = {
       asset: "slime5.png",
     }),
   },
+
   SLIME_FOREST: {
     name: "Slime Forest",
     completionBadge: BadgeType.SlimeForestClear,
@@ -154,6 +155,26 @@ export const DungeonMap: { [DungeonKey: string]: DungeonData } = {
       heal: [1, 2],
       color: "#AA66FF",
       xp: [80, 100],
+      asset: "slime5.png",
+    }),
+  },
+
+  SLIME_HELL: {
+    name: "SLIME HELL",
+    completionBadge: BadgeType.SlimeHell,
+    scale: 5,
+    roomCount: 5000,
+    bossCondition: Dungeon.CONDITIONS.multipleOf(5),
+    monsterPool: [Slime.BLUE_SLIME, Slime.GREEN_SLIME, Slime.RED_SLIME],
+    bossPool: [Slime.BOSS_SLIME],
+    finalBoss: Monster.generate(100, {
+      name: "HELL JELLY FROM HELL",
+      health: [5000, 6000],
+      attack: [20, 50],
+      defense: [40, 60],
+      heal: [50, 51],
+      color: "#AB00B5",
+      xp: [10000, 50000],
       asset: "slime5.png",
     }),
   },

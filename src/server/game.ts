@@ -268,7 +268,25 @@ export class Game {
     }
   }
 
+  skipCurrentDungeon = false;
+
+  async skipDungeon() {
+    this.skipCurrentDungeon = true;
+  }
+
   async stepDungeon(players: Player[]) {
+    if (this.skipCurrentDungeon) {
+      this.skipCurrentDungeon = false;
+      this.dungeon = Dungeon.createRandomDungeon();
+      this.dungeon.currentRoom++;
+
+      const encounter = this.dungeon.generateEncounter(this.dungeon.currentRoom);
+      for (const monsterData of encounter) {
+        this.monsters.create(this.connectionCounter.next(), monsterData);
+      }
+      return;
+    }
+
     // dungeon iteration
     if (!this.monsters.size) {
       this.dungeon.currentRoom++;
