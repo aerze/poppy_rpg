@@ -1,12 +1,126 @@
 .character-scene {
-
   .character-view {
-    height: 400px;
+    height: 250px;
     background: url(../../public/images/mori_jungle.png);
-    background-size: cover;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: relative;
+    justify-content: center;
 
-    .character {
-      flex: 1 1;
+    .character-image {
+      position: absolute;
+      height: 250px;
+      width: auto;
+    }
+
+    .info-overlay {
+      height: 100px;
+      width: 100%;
+      position: absolute;
+      bottom: 0px;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      background-color: #33333399;
+      padding: 0.6em;
+      color: #eee;
+      .stat-group {
+        .stat-label {
+          font-size: 12px;
+          border-bottom: 1px solid white;
+        }
+
+        .stat-value {
+          font-size: 16px;
+        }
+      }
+    }
+
+    .skill-overlay {
+      height: 100px;
+      width: 100%;
+      position: absolute;
+      bottom: 0px;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      background-color: #33333399;
+
+      .skill-group {
+        flex: 1 0 50%;
+        height: 50%;
+        // border: 1px solid white;
+        padding: 4px;
+
+        .skill-slot {
+          height: 100%;
+          width: 100%;
+          border: 1px dotted #eee;
+        }
+      }
+    }
+
+    .equipment-overlay {
+      height: 100%;
+      width: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      background-color: #33333399;
+
+      .equipment {
+        height: 100%;
+        flex: 1 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+
+        .equipment-group {
+          padding: 0 6px;
+          width: 100%;
+          height: 50px;
+          display: flex;
+          flex-direction: row;
+
+          .equipment-slot {
+            width: 50px;
+            height: 50px;
+            border: 1px dotted #eee;
+          }
+
+          .equipment-label {
+            .label-text {
+              font-size: 12px;
+              color: #eee;
+              padding: 0 0.5em;
+              border-bottom: 1px solid #eee;
+            }
+          }
+        }
+
+        &.right-equipment {
+          margin-left: auto;
+          align-items: flex-end;
+
+          .equipment-group {
+            flex-direction: row-reverse;
+
+            text-align: right;
+          }
+        }
+      }
+    }
+  }
+
+  .character-tab-group {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+
+    .tab-button {
+      flex: 1 0;
+      height: 26px;
     }
   }
 
@@ -32,7 +146,8 @@
         font-size: 2em;
       }
 
-      .preset-container {}
+      .preset-container {
+      }
     }
   }
 }
