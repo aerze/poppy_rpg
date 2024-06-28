@@ -8,6 +8,10 @@ import { CharacterScene } from "./scenes/character";
 import { HomeScene } from "./scenes/home";
 import { ShopScene } from "./scenes/shop";
 import { ConfigScene } from "./scenes/config";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { TouchBackend } from "react-dnd-touch-backend";
+import { Preview } from "react-dnd-preview";
 
 function SceneManager() {
   const { scene } = useContext(SceneContext);
@@ -27,6 +31,31 @@ function SceneManager() {
   }
 }
 
+const hasNative = document && (document.elementsFromPoint || document.msElementsFromPoint);
+
+function getDropTargetElementsAtPoint(x, y, dropTargets) {
+  return dropTargets.filter((t) => {
+    const rect = t.getBoundingClientRect();
+    return x >= rect.left && x <= rect.right && y <= rect.bottom && y >= rect.top;
+  });
+}
+
+// use custom function only if elementsFromPoint is not supported
+const backendOptions = {
+  enableMouseEvents: true,
+  getDropTargetElementsAtPoint: !hasNative && getDropTargetElementsAtPoint,
+};
+
+function generatePreview({ itemType, item, style }) {
+  return (
+    <div style={{ ...style, zIndex: 1000, border: "2px solid black", background: "white" }}>
+      <div style={{ width: "50px", height: "50px" }}>{item.image}</div>
+    </div>
+  );
+
+  // return <img style={{ ...style, zIndex: 100 }} src="/images/fire_skill.png" />;
+}
+
 function App() {
   const [connected, setConnected] = useState(false);
 
@@ -35,10 +64,13 @@ function App() {
   } else {
     return (
       <SceneProvider>
-        <HUD />
-        <div className="scene-container">
-          <SceneManager />
-        </div>
+        <DndProvider debugMode={true} backend={TouchBackend} options={backendOptions}>
+          <Preview generator={generatePreview} />
+          <HUD />
+          <div className="scene-container">
+            <SceneManager />
+          </div>
+        </DndProvider>
       </SceneProvider>
     );
   }

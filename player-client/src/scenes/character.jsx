@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DragPreviewImage, useDrag, useDrop } from "react-dnd";
 import "./character.scss";
 
 export function CharacterEquipmentOverlay() {
@@ -55,25 +56,6 @@ export function CharacterEquipmentOverlay() {
             <label className="label-text">EX 2</label>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-export function CharacterSkillOverlay() {
-  return (
-    <div className="skill-overlay">
-      <div className="skill-group">
-        <div className="skill-slot"></div>
-      </div>
-      <div className="skill-group">
-        <div className="skill-slot"></div>
-      </div>
-      <div className="skill-group">
-        <div className="skill-slot"></div>
-      </div>
-      <div className="skill-group">
-        <div className="skill-slot"></div>
       </div>
     </div>
   );
@@ -158,12 +140,64 @@ const skillList = {
   },
 };
 
-export function CharacterSkillItem({ skill }) {
+export function SkillSlot() {
+  const [{ canDrop, isOver }, drop] = useDrop(() => ({
+    accept: "SKILL",
+    drop(item, monitor) {
+      console.log(item);
+    },
+    collect: (monitor) => ({
+      canDrop: monitor.canDrop(),
+      isOver: monitor.isOver(),
+    }),
+  }));
+
   return (
-    <div className="skill-item">
-      <div className="skill-image">{skill.image}</div>
-      <div className="skill-name">{skill.name}</div>
-      <div className="skill-description">{skill.desc}</div>
+    <div className="skill-slot" ref={drop} style={{ backgroundColor: isOver ? "#33333390" : "initial" }}>
+      Place a Skill here
+    </div>
+  );
+}
+
+export function CharacterSkillOverlay() {
+  return (
+    <div className="skill-overlay">
+      <div className="skill-group">
+        <SkillSlot />
+      </div>
+      <div className="skill-group">
+        <SkillSlot />
+      </div>
+      <div className="skill-group">
+        <SkillSlot />
+      </div>
+      <div className="skill-group">
+        <SkillSlot />
+      </div>
+    </div>
+  );
+}
+
+export function CharacterSkillItem({ skill }) {
+  const [{ isDragging }, drag, preview] = useDrag(() => ({
+    type: "SKILL",
+    previewOptions: {},
+    item: skill,
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  }));
+
+  return (
+    <div className="skill-item" style={{ opacity: isDragging ? 0.5 : 1 }}>
+      <DragPreviewImage connect={preview} src="/images/fire_skill.png" />
+      <div className="item-image" ref={drag}>
+        {skill.image}
+      </div>
+      <div className="item-text">
+        <div className="item-name">{skill.name}</div>
+        <div className="item-description">{skill.desc}</div>
+      </div>
     </div>
   );
 }
