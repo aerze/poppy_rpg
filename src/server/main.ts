@@ -13,7 +13,12 @@ app.set("port", port);
  * Create HTTP server.
  */
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3001",
+    methods: ["GET", "POST"],
+  },
+});
 game.io = io;
 io.on("connection", game.handleConnection);
 
@@ -28,7 +33,7 @@ game.mongoConnected.then(() => {
  */
 
 function normalizePort(val: any) {
-  var port = parseInt(val, 10);
+  const port = parseInt(val, 10);
 
   if (isNaN(port)) {
     // named pipe
@@ -52,7 +57,7 @@ function onError(error: any) {
     throw error;
   }
 
-  var bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
+  const bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -74,10 +79,10 @@ function onError(error: any) {
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+  const addr = server.address();
+  const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
 
-  for (let line of startupMessage.split("\n")) {
+  for (const line of startupMessage.split("\n")) {
     console.log(line);
   }
 

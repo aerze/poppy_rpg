@@ -11,6 +11,7 @@ import { getLevelRequirement, scaleStat } from "../shared/xp";
 import { BadgeType } from "./game/badge";
 import { SocketEvents } from "../shared/events";
 import sanitize from "mongo-sanitize";
+import { registerPlayerClient } from "../rpg-server";
 
 const SHORT_WAIT = 300;
 const LONG_WAIT = 700;
@@ -86,6 +87,7 @@ export class Game {
     console.log(`>> New Connection c:${socket.id}`);
     socket.once(SocketEvents.DisplayConnected, this.registerDisplayClient.bind(this, socket));
     socket.once(SocketEvents.PlayerConnected, this.registerPlayerClient.bind(this, socket));
+    socket.once("RPG:CLIENT_CONNECT", registerPlayerClient.bind(this, socket));
     socket.on(SocketEvents.PlayerUpdate, this.handlePlayerUpdate.bind(this, socket));
   };
 

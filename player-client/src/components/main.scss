@@ -6,7 +6,7 @@
   flex-direction: column;
 
   .top {
-    flex: 0 0 350px;
+    flex: 0 0 250px;
 
     header {
       font-family: Georgia, "Times New Roman", Times, serif;
@@ -19,24 +19,33 @@
       img {
         position: absolute;
         width: 400px;
+        opacity: 0.5;
       }
 
       h1 {
         z-index: 10;
-        font-size: 2.5em;
-        text-decoration: underline;
-        font-weight: 400;
+        font-size: 41px;
         text-align: center;
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 700;
+        border-bottom: 3px solid black;
+        line-height: 36px;
+        letter-spacing: -2px;
+        width: 100%;
+        margin: 0 18px;
       }
     }
   }
 
   .middle {
     flex: 1 0;
+    position: relative;
 
     .studio-logo {
       margin-top: 30px;
       width: 80%;
+      position: relative;
+      z-index: 10;
 
       .title {
         margin-left: 20px;
@@ -54,6 +63,19 @@
         margin-left: 30px;
         font-size: 20px;
         font-weight: 600;
+      }
+    }
+
+    .illustration {
+      position: absolute;
+      z-index: 0;
+      bottom: 0px;
+      right: 0;
+      height: 100%;
+      animation: pulse-opacity 8s infinite;
+
+      img {
+        height: 100%;
       }
     }
   }
@@ -84,5 +106,19 @@
         padding-left: 24px;
       }
     }
+  }
+}
+
+@keyframes pulse-opacity {
+  0% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+
+  100% {
+    opacity: 0.3;
   }
 }
