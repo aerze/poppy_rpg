@@ -12,6 +12,7 @@ import { BadgeType } from "./game/badge";
 import { SocketEvents } from "../shared/events";
 import sanitize from "mongo-sanitize";
 import { registerPlayerClient } from "../rpg-server";
+import { PlayerCollection } from "../rpg-server/player-collection";
 
 const SHORT_WAIT = 300;
 const LONG_WAIT = 700;
@@ -59,6 +60,8 @@ export class Game {
     this.main();
     const db = this.mongo.db("poppyrpg");
     PlayerDB.db = db.collection("players");
+
+    PlayerCollection.init(db);
     // this.dungeonDB = db.collection('dungeons');
   }
 

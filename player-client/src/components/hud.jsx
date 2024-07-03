@@ -1,8 +1,10 @@
 import "./hud.scss";
 import { useContext } from "react";
 import { SceneContext } from "../context/scene";
+import { SocketContext } from "../context/socket";
 export function HUD() {
   const { scene, setScene } = useContext(SceneContext);
+  const { isNewPlayer } = useContext(SocketContext);
 
   function makeHandleSceneChange(targetScene) {
     return () => {
@@ -12,22 +14,24 @@ export function HUD() {
     };
   }
 
+  const disabled = isNewPlayer;
+
   return (
     <div class="hud">
       <div class="hud-button-group">
-        <button class="hud-button" onClick={makeHandleSceneChange(1)}>
+        <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(1)}>
           🤔
         </button>
-        <button class="hud-button" onClick={makeHandleSceneChange(2)}>
+        <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(2)}>
           🏠
         </button>
-        <button class="hud-button" onClick={makeHandleSceneChange(0)}>
+        <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(0)}>
           ⚔️
         </button>
-        <button class="hud-button" onClick={makeHandleSceneChange(3)}>
+        <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(3)}>
           🛍️
         </button>
-        <button class="hud-button" onClick={makeHandleSceneChange(4)}>
+        <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(4)}>
           ⚙️
         </button>
       </div>

@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { DragPreviewImage, useDrag, useDrop } from "react-dnd";
 import "./character.scss";
 import { PlayerContext } from "../context/player";
+import { SocketContext } from "../context/socket";
 
 export function CharacterEquipmentOverlay() {
   const { player } = useContext(PlayerContext);
@@ -74,31 +75,76 @@ export function CharacterInfoOverlay({ xp }) {
   );
 }
 
-export function CharacterInfoForm() {
+export function CharacterInfoForm({ presetId, setPresetId }) {
+  const [disabled, setDisabled] = useState(false);
+  const { socket, player } = useContext(SocketContext);
+
+  console.log(">> char info", player);
   function handleFormSubmit(event) {
     event.preventDefault();
+
+    const data = Object.fromEntries(new FormData(event.target).entries());
+    const formData = { ...data, presetId };
+    console.log(formData);
+    if (!data.name.trim() || !socket) {
+      return;
+    }
+    setDisabled(true);
+
+    if (player?.id) {
+      console.log(">> has player id", socket);
+      socket.emit("RPG:UPDATE_PLAYER_INFO", { ...formData, id: player.id });
+
+      socket.once("RPG:PLAYER_INFO_UPDATED", () => {
+        setDisabled(false);
+      });
+    } else {
+      socket.emit("RPG:HANDLE_SIGN_UP", formData);
+      socket.once("RPG:COMPLETED_SIGN_UP", () => {
+        setDisabled(false);
+      });
+    }
+  }
+
+  function handleLeftClick() {
+    setPresetId(Math.max(presetId - 1, 0));
+  }
+
+  function handleRightClick() {
+    setPresetId(Math.min(presetId + 1, 1));
   }
 
   return (
-    <form class="character-form column align-center" onSubmit={handleFormSubmit}>
-      <div class="character-button-group column align-center">
-        <label>Preset</label>
-        <div class="preset-container row align-center">
-          <button class="arrow left-arrow">◀️</button>
-          <input type="text" name="preset" id="preset" />
-          <button class="arrow right-arrow">▶️</button>
+    <form className="character-form" onSubmit={handleFormSubmit}>
+      <div className="character-button-group">
+        <label>Name</label>
+        <input type="text" name="name" id="name" defaultValue={player?.name} autoComplete="off" />
+      </div>
+      <div className="character-button-group">
+        <label>Color</label>
+        <input type="color" name="color" id="color" defaultValue={player?.color} />
+      </div>
+      <div className="character-button-group">
+        <label>Preset Character (char: {presetId})</label>
+        <div className="preset-container">
+          <button type="button" className="arrow left-arrow" onClick={handleLeftClick}>
+            ◀️
+          </button>
+          <button type="button" className="arrow right-arrow" onClick={handleRightClick}>
+            ▶️
+          </button>
         </div>
       </div>
-      <div class="character-button-group">
-        <label>Name</label>
-        <input type="text" name="name" id="name" />
+      <div className="character-button-group">
+        <label>Backstory (tragedy optional)</label>
+        <div className="preset-container">
+          <textarea defaultValue={player.backstory} name="backstory" id="backstory" rows={3} />
+        </div>
       </div>
-      <div class="character-button-group">
-        <label>Color</label>
-        <input type="color" name="color" id="color" />
-      </div>
-      <div class="character-button-group">
-        <button type="submit">Save</button>
+      <div className="character-button-group">
+        <button disabled={disabled} className="submit-button" type="submit">
+          Save
+        </button>
       </div>
     </form>
   );
@@ -223,13 +269,22 @@ export function CharacterSkillList() {
   );
 }
 
+const CHARACTER_SPRITE_MAP = {
+  0: "/images/tay_test.png",
+  1: "/images/abby_test.png",
+};
+
 export function CharacterScene() {
+  const { isNewPlayer, player } = useContext(SocketContext);
   const [tabState, setTabState] = useState(0);
+  const [presetId, setPresetId] = useState(player?.presetId ?? 0);
+  const disabled = isNewPlayer;
+
   return (
-    <div class="character-scene column full-height">
-      <div class="character-view row">
-        <img class="character-image column full-width" src="/images/abby_test.png" />
-        {tabState === 0 && <CharacterInfoOverlay xp={"1000/2000"} />}
+    <div className="character-scene column full-height">
+      <div className="character-view row">
+        <img className="character-image column full-width" src={CHARACTER_SPRITE_MAP[presetId]} />
+        {tabState === 0 && <CharacterInfoOverlay />}
         {tabState === 1 && <CharacterSkillOverlay />}
         {tabState === 2 && <CharacterEquipmentOverlay />}
       </div>
@@ -238,16 +293,16 @@ export function CharacterScene() {
         <button className="tab-button" onClick={(e) => setTabState(0)}>
           Info
         </button>
-        <button className="tab-button" onClick={(e) => setTabState(1)}>
+        <button disabled={disabled} className="tab-button" onClick={(e) => setTabState(1)}>
           Skills
         </button>
-        <button className="tab-button" onClick={(e) => setTabState(2)}>
+        <button disabled={disabled} className="tab-button" onClick={(e) => setTabState(2)}>
           Equipment
         </button>
       </div>
 
-      <div class="character-content">
-        {tabState === 0 && <CharacterInfoForm />}
+      <div className="character-content">
+        {tabState === 0 && <CharacterInfoForm presetId={presetId} setPresetId={setPresetId} />}
         {tabState === 1 && <CharacterSkillList />}
       </div>
     </div>

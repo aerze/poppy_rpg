@@ -23,6 +23,12 @@ function generatePreview({ itemType, item, style }) {
 
 function SceneManager() {
   const { scene } = useContext(SceneContext);
+  const { isNewPlayer } = useContext(SocketContext);
+
+  if (isNewPlayer) {
+    return <CharacterScene />;
+  }
+
   switch (scene) {
     case 0:
       return <FieldScene />;
@@ -91,7 +97,7 @@ export function Main() {
       </div>
       <div className="bottom">
         <div className="menu-item" onClick={handleStartGame}>
-          START GAME
+          {player ? "CONTINUE" : "START GAME"}
         </div>
         <div className="menu-item" onClick={handleOpen}>
           POP OUT ↗
