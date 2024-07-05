@@ -1,5 +1,5 @@
 import createError from "http-errors";
-import express from "express";
+import express, { response } from "express";
 import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
@@ -23,6 +23,20 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+app.post("/dungeon-floor", (request, response) => {
+  const floor = Number.parseInt((request.query?.floor as string) ?? "");
+  if (!Number.isNaN(floor)) {
+    game.jumpToFloor(floor);
+  }
+  response.send("ok");
+});
+
+app.post("/force-rescale", (request, response) => {
+  game.promotePlayers(game.players.toArray(), true);
+  response.send("ok");
+});
+
 app.use(express.static(path.join(__dirname, "../../public")));
 app.use(express.static(path.join(__dirname, "../../dist/builds")));
 

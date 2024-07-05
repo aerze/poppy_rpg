@@ -252,7 +252,7 @@ export class Game {
     }
   }
 
-  async promotePlayers(players: Player[]) {
+  async promotePlayers(players: Player[], forceRescale = false) {
     // promote players
     for (const player of players) {
       const levelRequirement = getLevelRequirement(player.level);
@@ -261,6 +261,18 @@ export class Game {
         this.awardBadge(BadgeType.FirstLevelUp, [player]);
         player.level += 1;
         player.xp = player.xp - levelRequirement;
+        player.maxHealth = scaleStat(player.level, Player.JOBS[player.job].health);
+        player.health = player.maxHealth;
+        player.defense = scaleStat(player.level, Player.JOBS[player.job].defense);
+        player.attack = scaleStat(player.level, Player.JOBS[player.job].attack);
+        player.heal = scaleStat(player.level, Player.JOBS[player.job].heal);
+      }
+
+      if (forceRescale) {
+        player.maxHealth = scaleStat(player.level, Player.JOBS[player.job].health);
+        player.defense = scaleStat(player.level, Player.JOBS[player.job].defense);
+        player.attack = scaleStat(player.level, Player.JOBS[player.job].attack);
+        player.heal = scaleStat(player.level, Player.JOBS[player.job].heal);
       }
 
       PlayerDB.save(player);
@@ -272,6 +284,16 @@ export class Game {
 
   async skipDungeon() {
     this.skipCurrentDungeon = true;
+  }
+
+  async jumpToFloor(floor: number) {
+    this.monsters.clear();
+    this.dungeon.currentRoom = floor;
+    const encounter = this.dungeon.generateEncounter(this.dungeon.currentRoom);
+    for (const monsterData of encounter) {
+      this.monsters.create(this.connectionCounter.next(), monsterData);
+    }
+    return;
   }
 
   async stepDungeon(players: Player[]) {
@@ -317,7 +339,7 @@ export class Game {
         this.emitToDisplays(SocketEvents.ReadyPlayerHeal, { healer, target });
         await sleep(SHORT_WAIT);
 
-        const heal = scaleStat(healer.level, healer.heal);
+        const heal = healer.heal;
 
         target.health = Math.min(target.health + heal, target.maxHealth);
         target.updatePlayerClient();
@@ -338,7 +360,7 @@ export class Game {
       this.emitToDisplays(SocketEvents.ReadyPlayerAttack, { attacker, target });
       await sleep(SHORT_WAIT);
 
-      const damage = scaleStat(attacker.level, attacker.attack);
+      const damage = attacker.attack;
 
       target.health = Math.max(target.health - damage, 0);
       this.sendLog(`${attacker.name} attacks ${target.name} for ${damage}hp`);
@@ -372,9 +394,7 @@ export class Game {
 
       const isDefending = target.action === "defend";
 
-      const damage = isDefending
-        ? Math.max(0, monster.attack - scaleStat(target.level, target.defense))
-        : monster.attack;
+      const damage = isDefending ? Math.max(0, monster.attack - target.defense) : monster.attack;
 
       target.health = Math.max(target.health - damage, 0);
       target.updatePlayerClient();
