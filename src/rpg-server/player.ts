@@ -1,4 +1,5 @@
-import { Badge, Equipment, Item, Pet, Quest, Skill, Stats, Title } from "./types";
+import { SkillType, Skills } from "./data/skills";
+import { Badge, Equipment, Item, Pet, Quest, Ability, Stats, Title } from "./types";
 
 export interface BasePlayerInfo {
   name: string;
@@ -11,6 +12,7 @@ export interface BasePlayerInfo {
 
 export interface Player {
   id: string;
+  type: "PLAYER";
   name: string;
   color: string;
   presetId: number;
@@ -22,8 +24,9 @@ export interface Player {
   level: number;
   xp: number;
   stats: Stats;
-  abilities: { [abilityName: string]: number };
-  skills: Skill[];
+  skills: Skills;
+  abilities: Ability[];
+  activeAbilities: Ability[];
   equipment: {
     head: Equipment | null;
     face: Equipment | null;
@@ -45,14 +48,15 @@ export interface Player {
 
 export const DefaultPlayer: Player = {
   id: "",
+  type: "PLAYER",
   name: "Unknown",
   color: "#A80085",
   presetId: 0,
   backstory: "From another world.",
-  maxHealth: 1000,
-  health: 1000,
-  maxMana: 1000,
-  mana: 1000,
+  maxHealth: 400,
+  health: 400,
+  maxMana: 400,
+  mana: 400,
   level: 1,
   xp: 0,
   stats: {
@@ -67,11 +71,12 @@ export const DefaultPlayer: Player = {
     // add dungeon modifier for tuning
     luck: 1,
   },
-  abilities: {
-    Emoting: 1,
-    Slapping: 1,
+  skills: {
+    [SkillType.Emoting]: 1,
+    [SkillType.Slapping]: 1,
   },
-  skills: [],
+  abilities: [],
+  activeAbilities: [],
   equipment: {
     head: null,
     face: null,

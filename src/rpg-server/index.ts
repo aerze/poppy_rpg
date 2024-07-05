@@ -11,7 +11,7 @@ export async function registerPlayerClient(socket: Socket, playerId?: string) {
 
     socket.emit("RPG:SIGN_IN", player);
     console.log(">> binding event");
-    socket.on("RPG:UPDATE_PLAYER_INFO", handlePlayerUpdate.bind(null, socket));
+    initializeConnectedPlayer(socket);
   } else {
     // respond to the client that it needs to create new character
     socket.emit("RPG:SIGN_UP");
@@ -27,7 +27,7 @@ export async function handlePlayerSignup(socket: Socket, basePlayerInfo: BasePla
   }
 
   socket.emit("RPG:COMPLETED_SIGN_UP", player);
-  socket.on("RPG:UPDATE_PLAYER_INFO", handlePlayerUpdate.bind(null, socket));
+  initializeConnectedPlayer(socket);
 }
 
 export async function handlePlayerUpdate(socket: Socket, basePlayerInfo: BasePlayerInfo & { id: string }) {
@@ -38,4 +38,9 @@ export async function handlePlayerUpdate(socket: Socket, basePlayerInfo: BasePla
   if (await PlayerCollection.update(socket, basePlayerInfo, basePlayerInfo.id)) {
     socket.emit("RPG:PLAYER_INFO_UPDATED", basePlayerInfo);
   }
+}
+
+export async function initializeConnectedPlayer(socket: Socket) {
+  socket.on("RPG:UPDATE_PLAYER_INFO", handlePlayerUpdate.bind(null, socket));
+  socket.on("RPG:DEV:START_BATTLE", () => {});
 }

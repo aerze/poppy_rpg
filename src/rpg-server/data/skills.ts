@@ -1,14 +1,25 @@
-import { Skill, SkillType } from "../types";
+export enum SkillType {
+  Emoting,
+  Slapping,
+  // collecting
+  Gathering,
+  Herbalism,
+  Enchanting,
+  Fishing,
+  Ranching,
+  Lumbering,
+  Mining,
+  // making
+  Alchemy,
+  Crafting,
+  Cooking,
+  WorkWorking,
+  Metalworking,
+  Tailor,
+  // other
+  PetCare,
+}
 
-export const SKILLS: Record<string, Skill> = {
-  CHOP: {
-    name: "chop",
-    type: SkillType.Physical,
-    effect: (p) => p.stats.attack * 1.02,
-  },
-  FIRST_AID: {
-    name: "First Aid",
-    type: SkillType.Physical,
-    effect: (p) => (p.health += 100),
-  },
+export type Skills = {
+  [type in SkillType]?: number;
 };

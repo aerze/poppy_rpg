@@ -1,25 +1,14 @@
-export enum Ability {
-  Emoting,
-  Slapping,
-  // collecting
-  Gathering,
-  Herbalism,
-  Enchanting,
-  Fishing,
-  Ranching,
-  Lumbering,
-  Mining,
-  // making
-  Alchemy,
-  Crafting,
-  Cooking,
-  WorkWorking,
-  Metalworking,
-  Tailor,
-  // other
-  PetCare,
-}
+import { Ability, AbilityType } from "../types";
 
-export type Abilities = {
-  [type in Ability]?: number;
+export const SKILLS: Record<string, Ability> = {
+  CHOP: {
+    name: "chop",
+    type: AbilityType.Physical,
+    effect: (p) => p.stats.attack * 1.02,
+  },
+  FIRST_AID: {
+    name: "First Aid",
+    type: AbilityType.Physical,
+    effect: (p) => (p.health += 100),
+  },
 };

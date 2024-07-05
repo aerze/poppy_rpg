@@ -1,5 +1,5 @@
 import { Equipment } from "../types";
-import { Ability } from "./abilities";
+import { SkillType } from "./skills";
 
 export const FISHING_CAP: Equipment = {
   name: "Fishing Cap",
@@ -9,6 +9,6 @@ export const FISHING_CAP: Equipment = {
     speed: -1,
   },
   abilities: {
-    [Ability.Fishing]: 1,
+    [SkillType.Fishing]: 1,
   },
 };

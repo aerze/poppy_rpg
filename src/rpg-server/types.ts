@@ -1,17 +1,18 @@
-import { Abilities } from "./data/abilities";
-import { Player } from "./player";
+import { Skills } from "./data/skills";
 
-export enum SkillType {
+export enum AbilityType {
   Core,
   Physical,
   Magical,
   Utility,
 }
 
-export interface Skill {
+export interface Ability {
   name: string;
-  type: SkillType;
-  effect: (player: Player, t: Combatant) => void;
+  type: AbilityType;
+  effect: (source: Combatant, target: Combatant) => void;
+  weight?: number;
+  condition?: (target: Combatant) => boolean;
 }
 
 export interface Stats {
@@ -25,8 +26,23 @@ export interface Stats {
   luck: number;
 }
 
+export interface Monster {
+  id: string;
+  type: string;
+  name: string;
+  imageUrl: string;
+  maxHealth: number;
+  health: number;
+  maxMana: number;
+  mana: number;
+  xp: number;
+  stats: Stats;
+  activeSkills: Ability[];
+}
+
 export interface Combatant {
   id: string;
+  type: string;
   name: string;
   maxHealth: number;
   health: number;
@@ -39,7 +55,7 @@ export interface Equipment {
   name: string;
   imageUrl: string;
   stats?: Partial<Stats>;
-  abilities?: Abilities;
+  abilities?: Skills;
 }
 
 export interface Badge {
@@ -51,7 +67,7 @@ export interface Title {
   name: string;
   date: Date;
   stats?: Partial<Stats>;
-  abilities?: Partial<Abilities>;
+  abilities?: Partial<Skills>;
 }
 
 export interface Quest {
@@ -67,7 +83,7 @@ export interface BaseItem {
   description: string;
   quantity?: number;
   stats?: Ranged<Stats>;
-  abilities?: Ranged<Abilities>;
+  abilities?: Ranged<Skills>;
   durationMs?: number;
   price?: number;
 }
