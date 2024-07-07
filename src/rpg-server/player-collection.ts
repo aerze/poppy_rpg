@@ -5,10 +5,10 @@ import { BasePlayerInfo, DefaultPlayer, Player } from "./player";
 // import { Player, PlayerUserData, SavedPlayerData } from "./player";
 
 export class PlayerCollection {
-  static collection: Collection | null = null;
+  static collection: Collection<Player> | null = null;
 
   static init(mongoDb: Db) {
-    this.collection = mongoDb.collection("rpg_players");
+    this.collection = mongoDb.collection<Player>("rpg_players");
   }
 
   static clean(playerInfo: BasePlayerInfo) {

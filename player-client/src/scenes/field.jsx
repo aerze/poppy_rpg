@@ -5,38 +5,50 @@ import { SocketContext } from "../context/socket";
 export class FieldScene extends Component {
   state = {
     screen: "DEV_MENU",
+    battle: {},
   };
 
   renderDevMenu() {
     return (
       <>
-        <button>Start Battle</button>
-        <button>Go to Dungeon</button>
-        <button>Equip Weapons</button>
-        <button>Full Heal</button>
+        <button onClick={this.joinDungeon}>Join Dungeon</button>
+        <button onClick={this.startBattle}>Start Battle</button>
+        <button onClick={this.equipWeapon}>Equip Weapons</button>
+        <button onClick={this.fullHeal}>Full Heal</button>
       </>
     );
   }
 
-  startBattle(event) {
+  joinDungeon = (event) => {
+    event.preventDefault();
+    this.context.socket.emit("RPG:DEV:JOIN_DUNGEON");
+    this.context.socket.once("RPG:DEV:DUNGEON_JOINED", this.handleBattleJoined);
+    this.context.socket.on("RPG:DEV:TURN_ACTIONS", this.handleTurnActions);
+  };
+
+  handleBattleJoined = ({ battle }) => {
+    console.log(">> battle", battle);
+    this.setState({ battle });
+  };
+
+  handleTurnActions = (actions) => {
+    console.log(actions);
+  };
+
+  startBattle = (event) => {
     event.preventDefault();
     this.context.socket.emit("RPG:DEV:START_BATTLE");
-  }
+  };
 
-  goToDungeon(event) {
-    event.preventDefault();
-    this.context.socket.emit("RPG:DEV:GO_TO_DUNGEON");
-  }
-
-  equipWeapon(event) {
+  equipWeapon = (event) => {
     event.preventDefault();
     this.context.socket.emit("RPG:DEV:EQUIP_WEAPON");
-  }
+  };
 
-  fullHeal(event) {
+  fullHeal = (event) => {
     event.preventDefault();
     this.context.socket.emit("RPG:DEV:FULL_HEAL");
-  }
+  };
 
   renderBattle() {
     return (
@@ -62,9 +74,19 @@ export class FieldScene extends Component {
     return (
       <div className="field-scene">
         <div className="battle-screen">
-          <pre>
+          <pre style={{ fontSize: "12px" }}>
             {w}x{h} r:{r}
           </pre>
+          {this.state.battle?.turnOrder?.map((id) => {
+            const combatant = this.state.battle.combatants[id];
+            return (
+              <div key={combatant.id} className="combantant">
+                <pre>
+                  {combatant.name}: {combatant.health}/{combatant.maxHealth}hp
+                </pre>
+              </div>
+            );
+          })}
         </div>
         <div className="battle-controls">
           {this.state.screen === "DEV_MENU" && this.renderDevMenu()}

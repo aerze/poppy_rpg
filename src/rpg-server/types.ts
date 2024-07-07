@@ -37,6 +37,7 @@ export interface Monster {
   mana: number;
   xp: number;
   stats: Stats;
+  defaultAction: Action;
   activeSkills: Ability[];
 }
 
@@ -49,6 +50,14 @@ export interface Combatant {
   maxMana: number;
   mana: number;
   stats: Stats;
+  xp: number;
+  defaultAction: Action;
+}
+
+export interface Status {
+  name: string;
+  weight: number;
+  statsMod: Partial<Stats>;
 }
 
 export interface Equipment {
@@ -97,4 +106,14 @@ export interface Pet {
   id: string;
   name: string;
   type: string;
+}
+
+export enum Action {
+  ATTACK,
+  DEFEND,
+  ITEM,
+  ABILITY_1,
+  ABILITY_2,
+  ABILITY_3,
+  ABILITY_4,
 }

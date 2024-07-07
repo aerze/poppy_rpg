@@ -1,27 +1,28 @@
 import { attack, heal } from "../behavior/combat";
-import { Monster, AbilityType } from "../types";
+import { Monster, AbilityType, Action } from "../types";
 
-export const MONSTERS: Record<string, Monster> = {
-  SLIME: {
-    id: "",
+export const MONSTERS = {
+  SLIME: (id: string): Monster => ({
+    id,
     type: "SLIME",
     name: "Slime",
     imageUrl: "🍮",
-    maxHealth: 100,
-    health: 100,
+    maxHealth: 50,
+    health: 50,
     maxMana: 100,
     mana: 100,
-    xp: 100,
+    xp: 50,
     stats: {
-      health: 1,
-      attack: 10,
+      health: 2,
+      attack: 3,
       defense: 1,
-      mana: 1,
-      magic: 1,
+      mana: 2,
+      magic: 2,
       resist: 1,
-      speed: 1,
+      speed: 2,
       luck: 2,
     },
+    defaultAction: Action.ATTACK,
     activeSkills: [
       {
         name: "Tackle",
@@ -35,5 +36,5 @@ export const MONSTERS: Record<string, Monster> = {
         condition: (t) => t.type === "SLIME",
       },
     ],
-  },
+  }),
 };

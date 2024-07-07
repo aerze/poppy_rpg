@@ -1,17 +1,31 @@
 import { Socket } from "socket.io";
 import { PlayerCollection } from "./player-collection";
-import { BasePlayerInfo } from "./player";
+import { BasePlayerInfo, Player, DefaultPlayer } from "./player";
+import { Dungeon } from "./behavior/dungeon";
+
+function debug(socket: Socket, message: string) {
+  socket.emit("RPG:ALERT", message);
+}
+
+const dungeon = new Dungeon();
+dungeon.spawnMonsters();
 
 export async function registerPlayerClient(socket: Socket, playerId?: string) {
   if (playerId) {
-    const player = await PlayerCollection.get(socket, playerId);
+    let player = await PlayerCollection.get(socket, playerId);
     if (!player) {
       return;
     }
 
+    player = { ...DefaultPlayer, ...player };
+    const playerNoId: any = { ...player };
+    delete playerNoId._id;
+    delete playerNoId.id;
+    PlayerCollection.update(socket, playerNoId, player.id);
+
     socket.emit("RPG:SIGN_IN", player);
-    console.log(">> binding event");
-    initializeConnectedPlayer(socket);
+
+    initializeConnectedPlayer(socket, player);
   } else {
     // respond to the client that it needs to create new character
     socket.emit("RPG:SIGN_UP");
@@ -27,7 +41,7 @@ export async function handlePlayerSignup(socket: Socket, basePlayerInfo: BasePla
   }
 
   socket.emit("RPG:COMPLETED_SIGN_UP", player);
-  initializeConnectedPlayer(socket);
+  initializeConnectedPlayer(socket, player);
 }
 
 export async function handlePlayerUpdate(socket: Socket, basePlayerInfo: BasePlayerInfo & { id: string }) {
@@ -40,7 +54,21 @@ export async function handlePlayerUpdate(socket: Socket, basePlayerInfo: BasePla
   }
 }
 
-export async function initializeConnectedPlayer(socket: Socket) {
+export async function initializeConnectedPlayer(socket: Socket, player: Player) {
   socket.on("RPG:UPDATE_PLAYER_INFO", handlePlayerUpdate.bind(null, socket));
-  socket.on("RPG:DEV:START_BATTLE", () => {});
+  debug(socket, `Initializing Connection for ${player.id}`);
+
+  socket.on("Disconnect", () => {
+    dungeon.leave(socket, player);
+  });
+
+  socket.on("RPG:DEV:JOIN_DUNGEON", () => {
+    if (dungeon.join(socket, player)) {
+      socket.emit("RPG:DEV:DUNGEON_JOINED", { battle: dungeon.battle });
+    }
+  });
+
+  socket.on("RPG:DEV:START_BATTLE", () => {
+    dungeon.battle.start();
+  });
 }

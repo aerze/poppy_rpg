@@ -1,5 +1,5 @@
 import { SkillType, Skills } from "./data/skills";
-import { Badge, Equipment, Item, Pet, Quest, Ability, Stats, Title } from "./types";
+import { Badge, Equipment, Item, Pet, Quest, Ability, Stats, Title, Status, Action } from "./types";
 
 export interface BasePlayerInfo {
   name: string;
@@ -27,6 +27,8 @@ export interface Player {
   skills: Skills;
   abilities: Ability[];
   activeAbilities: Ability[];
+  statuses: Status[];
+  defaultAction: Action;
   equipment: {
     head: Equipment | null;
     face: Equipment | null;
@@ -77,6 +79,8 @@ export const DefaultPlayer: Player = {
   },
   abilities: [],
   activeAbilities: [],
+  statuses: [],
+  defaultAction: Action.ATTACK,
   equipment: {
     head: null,
     face: null,

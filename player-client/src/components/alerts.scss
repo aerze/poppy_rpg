@@ -1,0 +1,20 @@
+.alerts-container {
+  z-index: 1000;
+  position: absolute;
+  top: 0px;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 2em;
+
+  .alert {
+    pointer-events: auto;
+    margin-top: 1em;
+    border: 2px solid white;
+    border-radius: 5px;
+    background: #3643f62e;
+    padding: 1em;
+    font-size: 14px;
+  }
+}

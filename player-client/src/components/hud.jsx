@@ -2,6 +2,8 @@ import "./hud.scss";
 import { useContext } from "react";
 import { SceneContext } from "../context/scene";
 import { SocketContext } from "../context/socket";
+import { Alerts } from "./alerts";
+
 export function HUD() {
   const { scene, setScene } = useContext(SceneContext);
   const { isNewPlayer } = useContext(SocketContext);
@@ -18,6 +20,8 @@ export function HUD() {
 
   return (
     <div class="hud">
+      <Alerts />
+
       <div class="hud-button-group">
         <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(1)}>
           🤔
