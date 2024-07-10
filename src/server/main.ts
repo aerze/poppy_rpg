@@ -2,9 +2,11 @@
 require("dotenv").config();
 
 import { Server } from "socket.io";
-import { app, game } from "./app";
+import { app } from "./app";
+import { Claire } from "../rpg-server/claire";
+import http from "http";
+import { MongoClient } from "mongodb";
 
-const http = require("http");
 const port = normalizePort(process.env.PORT || "3000");
 
 app.set("port", port);
@@ -19,13 +21,14 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   },
 });
-game.io = io;
-io.on("connection", game.handleConnection);
+const mongo = new MongoClient(process.env.MONGODB_URL as string);
 
-game.mongoConnected.then(() => {
-  server.listen(port);
-  server.on("error", onError);
-  server.on("listening", onListening);
+// game.io = io;
+// io.on("connection", game.handleConnection);
+Claire.initialize(io, server, mongo).then((claire: Claire) => {
+  claire.http.listen(port);
+  claire.http.on("error", onError);
+  claire.http.on("listening", onListening);
 });
 
 /**
@@ -80,13 +83,13 @@ function onError(error: any) {
 
 function onListening() {
   const addr = server.address();
-  const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
+  const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr?.port;
 
   for (const line of startupMessage.split("\n")) {
     console.log(line);
   }
 
-  console.log("Server listening on " + bind + " 🚀");
+  console.log("CLAIRE: Server listening on " + bind + " 🚀");
 }
 
-const startupMessage = `Server Started 🦈`;
+const startupMessage = `CLAIRE: Server Started 🦈`;

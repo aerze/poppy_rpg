@@ -4,7 +4,23 @@ import { Player } from "../player";
 import { Action, Combatant } from "../types";
 import { getRandomFromArray } from "../../shared/helpers";
 
+export enum DungeonType {
+  Normal,
+  LimitedTimeEvent,
+  SpecialEvent,
+}
+
 export class Dungeon {
+  id: number;
+  name: string;
+  type: DungeonType;
+
+  constructor(id: number, name: string, type = DungeonType.Normal) {
+    this.id = id;
+    this.name = name;
+    this.type = type;
+  }
+
   battle: Battle = new Battle(this);
 
   connectedPlayers: Map<Player, Socket> = new Map();
@@ -23,6 +39,12 @@ export class Dungeon {
     if (this.connectedPlayers.has(player)) return false;
     this.connectedPlayers.set(player, socket);
     this.battle.addCombatant(TeamFlag.BLUE, player, true);
+
+    this.battle.start();
+
+    // TODO remove if dungeon ends
+    socket.once("disconnect", this.leave.bind(this, socket, player));
+
     return true;
   }
 
@@ -142,10 +164,15 @@ class Battle {
     this.actions.set(combatant.id, action);
   }
 
+  turn: number = 0;
+
   start() {
     console.log(">>> battle.start");
+    if (this.phase >= Phase.START) return;
+    this.dungeon.spawnMonsters();
+
     this.phase = Phase.START;
-    this.dungeon.emit("RPG:DEV:START_BATTLE", { battle: { phase: this.phase } });
+    this.dungeon.emit("RPG:BATTLE", { battle: { phase: this.phase } });
 
     setTimeout(() => {
       this.phase = Phase.BATTLE;
@@ -155,6 +182,7 @@ class Battle {
 
   loop = () => {
     if (this.phase !== Phase.BATTLE) return;
+    this.turn += 1;
 
     setTimeout(this.loop, 5000);
     // lock actions
@@ -185,7 +213,13 @@ class Battle {
       actions.push(message);
     }
 
-    this.dungeon.emit("RPG:DEV:TURN_ACTIONS", actions);
+    const turnInfo = {
+      turn: this.turn,
+      actions,
+    };
+
+    console.log(">>", turnInfo);
+    this.dungeon.emit("RPG:DEV:TURN_DATA", turnInfo);
     // cleanup
   };
 }

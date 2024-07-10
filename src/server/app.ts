@@ -3,17 +3,14 @@ import express from "express";
 import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
-import { MongoClient } from "mongodb";
 // import twitchAuthMiddleware from "./auth";
-import { Game } from "./game";
 import cors from "cors";
 
 if (!process.env.MONGODB_URL) {
   throw Error("Failed to locate MongoURL");
 }
 
-const client = new MongoClient(process.env.MONGODB_URL);
-export const game = new Game(client);
+// export const game = new Game(client);
 export const app = express();
 
 app.use(cors());
@@ -42,12 +39,12 @@ app.use(express.static(path.join(__dirname, "../../dist/builds")));
 // });
 
 app.post("/heal-party", (request, response) => {
-  game.handleReviveParty();
+  // game.handleReviveParty();
   response.send("ok");
 });
 
 app.get("/heal-party", (request, response) => {
-  game.handleReviveParty();
+  // game.handleReviveParty();
   response.send("ok");
 });
 

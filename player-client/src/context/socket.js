@@ -4,11 +4,22 @@ import { local } from "../lib/local";
 
 export const SocketContext = createContext(null);
 
+/**
+ * @readonly
+ * @enum {number}
+ */
+export const DataType = {
+  DUNGEON_LIST: 0,
+  DUNGEON_INFO: 1,
+  JOIN_DUNGEON: 2,
+};
+
 export class SocketProvider extends Component {
   state = {
     connected: false,
     newPlayer: null,
     player: local.get("player") ?? null,
+    dungeons: [],
   };
 
   socket = null;
@@ -23,6 +34,15 @@ export class SocketProvider extends Component {
       this.socket.connect();
     }
   };
+
+  /**
+   * @param {DataType} dataType
+   * @param {*} options
+   * @param {*} callback
+   */
+  getData(dataType, options = null, callback) {
+    this.socket.emit("RPG:GET_DATA", dataType, options, callback);
+  }
 
   handleConnect = () => {
     console.log("handleConnect");
@@ -87,6 +107,7 @@ export class SocketProvider extends Component {
       connect: this.connect,
       isNewPlayer: this.state.newPlayer,
       player: this.state.player,
+      get: this.getData,
     };
 
     return <SocketContext.Provider value={value}>{this.props.children}</SocketContext.Provider>;

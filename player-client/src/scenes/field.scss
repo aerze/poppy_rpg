@@ -1,39 +1,106 @@
 .field-scene {
+  height: 100%;
+
+  .battle-screen {
+    height: 300px;
+    position: relative;
+  }
+
+  .battle-controls {
+    height: calc(100% - 300px);
+    display: flex;
+    flex-direction: column;
+
+    .turn-indicator {
+      width: 100%;
+      padding: 0 1em;
+
+      .turn-progress {
+        height: 32px;
+        width: 100%;
+      }
+    }
+
+    .battle-button-group {
+      flex: 1 0;
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      padding: 2em;
+
+      .battle-button {
+        flex: 1 0 50%;
+        height: 2em;
+      }
+    }
+  }
+
+  .dungeon-info-container {
+    position: relative;
     height: 100%;
+    background-color: #d7bee8;
 
-    .battle-screen {
-        height: 300px;
-        position: relative;
-        border: 16px solid #333;
+    .dungeon-info {
+      position: absolute;
+      bottom: 0px;
+      left: 0;
+      width: 50%;
+      padding: 1em;
+      border-bottom: 2px solid black;
+
+      .dungeon-title {
+        font-size: 30px;
+      }
     }
 
-    .battle-controls {
-        height: calc(100% - 300px);
-        display: flex;
-        flex-direction: column;
+    .join-dungeon {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      border: 2px solid black;
+      border-top-left-radius: 35px;
+      border-bottom-left-radius: 35px;
+      padding: 1em;
 
-        .turn-indicator {
-            width: 100%;
-            padding: 0 1em;
-
-            .turn-progress {
-                height: 32px;
-                width: 100%;
-            }
-        }
-
-        .battle-button-group {
-            flex: 1 0;
-            width: 100%;
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            padding: 2em;
-
-            .battle-button {
-                flex: 1 0 50%;
-                height: 2em
-            }
-        }
+      &:active {
+        background-color: #333;
+      }
     }
+  }
+
+  .dungeon-list {
+    height: 100%;
+    overflow-y: auto;
+
+    .dungeon-item {
+      border: 2px solid black;
+      border-top-left-radius: 35px;
+      border-bottom-left-radius: 35px;
+      height: 70px;
+      margin: 1em 0 1em 1em;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+
+      &:active {
+        background-color: #333;
+      }
+
+      .dungeon-title {
+      }
+
+      .dungeon-tag {
+        position: absolute;
+        left: -13px;
+        top: -15px;
+        padding: 0.4em;
+        border-radius: 30px;
+        border: 2px solid white;
+        background: #8127ff;
+        color: white;
+      }
+    }
+  }
 }

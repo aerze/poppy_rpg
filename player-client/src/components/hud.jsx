@@ -36,7 +36,7 @@ export function HUD() {
           🛍️
         </button>
         <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(4)}>
-          ⚙️
+          🪅
         </button>
       </div>
     </div>
