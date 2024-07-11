@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 import { PlayerCollection } from "./player-collection";
-import { BasePlayerInfo, Player, DefaultPlayer } from "./player";
+import { BasePlayerInfo, Player, DefaultPlayer } from "./data/player";
 import { claire } from "./claire";
 
 function debug(socket: Socket, message: string) {

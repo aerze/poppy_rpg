@@ -1,8 +1,9 @@
 import { Socket } from "socket.io";
 import { MONSTERS } from "../data/monsters";
-import { Player } from "../player";
-import { Action, Combatant } from "../types";
+import { Player } from "../data/player";
+import { Action, Combatant, Monster } from "../types";
 import { getRandomFromArray } from "../../shared/helpers";
+import { MonsterToCombatant, PlayerToCombatant } from "../data/combatant";
 
 export enum DungeonType {
   Normal,
@@ -29,16 +30,19 @@ export class Dungeon {
     const monsterA = MONSTERS.SLIME("monsterA");
     const monsterB = MONSTERS.SLIME("monsterB");
     const monsterC = MONSTERS.SLIME("monsterC");
-    this.battle.addCombatant(TeamFlag.RED, monsterA);
-    this.battle.addCombatant(TeamFlag.RED, monsterB);
-    this.battle.addCombatant(TeamFlag.RED, monsterC);
+    this.battle.addMonsterCombatant(monsterA, TeamFlag.RED);
+    this.battle.addMonsterCombatant(monsterB, TeamFlag.RED);
+    this.battle.addMonsterCombatant(monsterC, TeamFlag.RED);
     return this.battle;
   }
 
   join(socket: Socket, player: Player) {
     if (this.connectedPlayers.has(player)) return false;
     this.connectedPlayers.set(player, socket);
-    this.battle.addCombatant(TeamFlag.BLUE, player, true);
+
+    this.battle.addPlayerCombatant(player, TeamFlag.BLUE);
+    socket.emit("RPG:BATTLE", { battle: this.battle });
+    // this.battle.addCombatant(TeamFlag.BLUE, player, true);
 
     this.battle.start();
 
@@ -50,7 +54,7 @@ export class Dungeon {
 
   leave(socket: Socket, player: Player) {
     this.connectedPlayers.delete(player);
-    this.battle.removeCombatant(TeamFlag.BLUE, player);
+    this.battle.removeCombatant(TeamFlag.BLUE, player.id);
   }
 
   emit(eventName: string, data?: any) {
@@ -60,7 +64,7 @@ export class Dungeon {
   }
 }
 
-enum TeamFlag {
+export enum TeamFlag {
   RED,
   BLUE,
 }
@@ -80,6 +84,7 @@ class Battle {
   phase: Phase = Phase.INIT;
 
   combatants: Map<string, Combatant> = new Map();
+  lockedCombatants: Map<string, Combatant> = new Map();
 
   actions: Map<string, Action> = new Map();
   lockedActions: Map<string, Action> = new Map();
@@ -88,13 +93,12 @@ class Battle {
   lockedTargets: Map<string, string> = new Map();
 
   turnOrder: string[] = [];
+  lockedTurnOrder: string[] = [];
 
-  teams: Record<TeamFlag, Set<string>> = {
-    [TeamFlag.RED]: new Set(),
-    [TeamFlag.BLUE]: new Set(),
+  teams: Record<TeamFlag, string[]> = {
+    [TeamFlag.RED]: [],
+    [TeamFlag.BLUE]: [],
   };
-
-  teamMap: Map<string, TeamFlag> = new Map();
 
   dungeon: Dungeon;
 
@@ -102,15 +106,9 @@ class Battle {
     this.dungeon = dungeon;
   }
 
-  teamArrays() {
-    return {
-      [TeamFlag.RED]: Array.from(this.teams[TeamFlag.RED].values()),
-      [TeamFlag.BLUE]: Array.from(this.teams[TeamFlag.BLUE].values()),
-    };
-  }
-
+  // TODO remove partial
   getCleanCombatants() {
-    const cleanCombatants: Record<string, Combatant> = {};
+    const cleanCombatants: Record<string, Partial<Combatant>> = {};
     for (const combatant of this.combatants.values()) {
       cleanCombatants[combatant.id] = {
         id: combatant.id,
@@ -123,6 +121,7 @@ class Battle {
         stats: combatant.stats,
         xp: combatant.xp,
         defaultAction: combatant.defaultAction,
+        teamFlag: combatant.teamFlag,
       };
     }
     return cleanCombatants;
@@ -130,38 +129,51 @@ class Battle {
 
   toJSON() {
     return {
+      phase: this.phase,
+      turn: this.turn,
       combatants: this.getCleanCombatants(),
       turnOrder: this.turnOrder,
-      teams: this.teamArrays(),
     };
   }
 
-  generateTurnOrder() {
-    this.turnOrder = Array.from(this.combatants.values()).sort(Battle.DEFAULT_SPEED_SORT).map(Battle.MAP_TO_ID);
+  generateTurnOrder(combatants: Map<string, Combatant>) {
+    this.turnOrder = Array.from(combatants.values()).sort(Battle.DEFAULT_SPEED_SORT).map(Battle.MAP_TO_ID);
   }
 
-  addCombatant(team: TeamFlag, combatant: Combatant, recalculateTurnOrder = false) {
-    this.combatants.set(combatant.id, combatant);
-    this.teams[team].add(combatant.id);
-    this.teamMap.set(combatant.id, team);
+  generateTeams(combatants: Map<string, Combatant>) {
+    this.teams = {
+      [TeamFlag.RED]: [],
+      [TeamFlag.BLUE]: [],
+    };
 
-    if (recalculateTurnOrder) {
-      this.generateTurnOrder();
+    for (const [id, combatant] of combatants) {
+      this.teams[combatant.teamFlag].push(id);
     }
   }
 
-  removeCombatant(team: TeamFlag, combatant: Combatant, recalculateTurnOrder = true) {
-    this.combatants.delete(combatant.id);
-    this.teams[team].delete(combatant.id);
-    this.teamMap.delete(combatant.id);
+  addPlayerCombatant(player: Player, team: TeamFlag) {
+    const playerCombatant = PlayerToCombatant(player, team);
+    this.combatants.set(playerCombatant.id, playerCombatant);
+  }
+
+  addMonsterCombatant(monster: Monster, team: TeamFlag) {
+    const monsterCombatant = MonsterToCombatant(monster, team);
+    this.combatants.set(monsterCombatant.id, monsterCombatant);
+  }
+
+  removeCombatant(team: TeamFlag, combatantId: string, recalculateTurnOrder = true) {
+    this.combatants.delete(combatantId);
+    this.dungeon.emit("RPG:BATTLE", { battle: this });
+    // this.teams[team].delete(combatant.id);
+    // this.teamMap.delete(combatant.id);
 
     if (recalculateTurnOrder) {
-      this.generateTurnOrder();
+      // this.generateTurnOrder();
     }
   }
 
-  addAction(combatant: Combatant, action: Action) {
-    this.actions.set(combatant.id, action);
+  setAction(combatantId: string, action: Action) {
+    this.actions.set(combatantId, action);
   }
 
   turn: number = 0;
@@ -172,7 +184,7 @@ class Battle {
     this.dungeon.spawnMonsters();
 
     this.phase = Phase.START;
-    this.dungeon.emit("RPG:BATTLE", { battle: { phase: this.phase } });
+    this.dungeon.emit("RPG:BATTLE", { battle: this });
 
     setTimeout(() => {
       this.phase = Phase.BATTLE;
@@ -185,41 +197,67 @@ class Battle {
     this.turn += 1;
 
     setTimeout(this.loop, 5000);
+
+    // lock combatants
+    this.lockedCombatants = new Map(this.combatants.entries());
+
+    // generate turn order
+    this.generateTurnOrder(this.lockedCombatants);
+
     // lock actions
     this.lockedActions = this.actions;
     this.actions = new Map();
 
     // lock targets
-    this.lockedTargets = this.targets;
-    this.targets = new Map();
+    this.lockedTargets = new Map(this.targets.entries());
 
-    // generate turn order
-    this.generateTurnOrder();
-    const teamArrays = this.teamArrays();
+    this.generateTeams(this.lockedCombatants);
 
     const actions = [];
     // execute turns
     for (const combatantId of this.turnOrder) {
-      const combatant = this.combatants.get(combatantId)!;
-      const team = this.teamMap.get(combatantId)!;
+      const combatant = this.lockedCombatants.get(combatantId)!;
       const action = this.lockedActions.get(combatantId) ?? combatant.defaultAction;
       const targetId =
-        this.lockedTargets.get(combatantId) ?? team === TeamFlag.RED
-          ? getRandomFromArray(teamArrays[TeamFlag.BLUE])!
-          : getRandomFromArray(teamArrays[TeamFlag.RED])!;
-      const target = this.combatants.get(targetId)!;
+        this.lockedTargets.get(combatantId) ?? combatant.teamFlag === TeamFlag.RED
+          ? getRandomFromArray(this.teams[TeamFlag.BLUE])!
+          : getRandomFromArray(this.teams[TeamFlag.RED])!;
+      const target = this.lockedCombatants.get(targetId)!;
+      const result: any = {
+        combatantId,
+        targetId,
+        action,
+      };
 
-      const message = `${combatant.name} -> ${action} -> ${target.id}`;
-      actions.push(message);
+      switch (action) {
+        case Action.ATTACK: {
+          const damage = Math.max(combatant.stats.attack - target.stats.defense, 0);
+          target.health -= damage;
+
+          if (target.health <= 0) {
+            this.removeCombatant(target.teamFlag, target.id);
+          }
+
+          result.damage = damage;
+          break;
+        }
+
+        default:
+          break;
+      }
+
+      // const message = `${combatant.name} -> ${Action[action]} -> ${target.id}`;
+
+      actions.push(result);
     }
 
     const turnInfo = {
-      turn: this.turn,
       actions,
+      ...this.toJSON(),
     };
 
     console.log(">>", turnInfo);
-    this.dungeon.emit("RPG:DEV:TURN_DATA", turnInfo);
+    this.dungeon.emit("RPG:BATTLE", { battle: turnInfo });
     // cleanup
   };
 }

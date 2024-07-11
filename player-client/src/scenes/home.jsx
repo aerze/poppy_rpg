@@ -6,25 +6,25 @@ export function HomeScene() {
   const handleTab = (target) => () => setTab(target);
 
   return (
-    <div class="home-scene">
-      <div class="tab-container row full-width">
-        <button class="tab" onClick={handleTab(0)}>
+    <div className="home-scene">
+      <div className="tab-container row full-width">
+        <button className="tab" onClick={handleTab(0)}>
           Badges
         </button>
-        <button class="tab" onClick={handleTab(1)}>
+        <button className="tab" onClick={handleTab(1)}>
           Titles
         </button>
       </div>
       <div className="tab-content">
         {tab === 0 && (
-          <div class="badge-tab full-height">
+          <div className="badge-tab full-height">
             <div className="badge-display column">
-              <div class="badge-shelf row">
+              <div className="badge-shelf row">
                 <img className="trophy-badge" src="/images/badges3.png"></img>
                 <img className="trophy-badge" src="/images/badges4.png"></img>
                 <img className="trophy-badge" src="/images/badges5.png"></img>
               </div>
-              <div class="badge-content column">
+              <div className="badge-content column">
                 <p className="badge-description">
                   Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit porro, temporibus eveniet quisquam
                   veritatis dolorem labore nobis quos distinctio dolore adipisci inventore ad ipsam architecto optio
@@ -32,8 +32,8 @@ export function HomeScene() {
                 </p>
               </div>
             </div>
-            <div class="badge-list-container column">
-              <div class="badge-list row">
+            <div className="badge-list-container column">
+              <div className="badge-list row">
                 <img className="badge" src="/images/badges3.png"></img>
                 <img className="badge" src="/images/badges3.png"></img>
                 <img className="badge" src="/images/badges3.png"></img>
@@ -62,14 +62,14 @@ export function HomeScene() {
           </div>
         )}
         {tab === 1 && (
-          <div class="title-tab">
-            <div class="title-display">
+          <div className="title-tab">
+            <div className="title-display">
               <div className="active-title"></div>
             </div>
-            <div class="title-content">
+            <div className="title-content">
               <p className="title-description"></p>
             </div>
-            <div class="title-list">
+            <div className="title-list">
               <div className="title"></div>
               <div className="title"></div>
               <div className="title"></div>

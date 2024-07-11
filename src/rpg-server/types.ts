@@ -1,3 +1,4 @@
+import { TeamFlag } from "./behavior/dungeon";
 import { Skills } from "./data/skills";
 
 export enum AbilityType {
@@ -35,10 +36,16 @@ export interface Monster {
   health: number;
   maxMana: number;
   mana: number;
+  level: number;
   xp: number;
   stats: Stats;
   defaultAction: Action;
-  activeSkills: Ability[];
+  abilitySlots: {
+    0?: Ability;
+    1?: Ability;
+    2?: Ability;
+    3?: Ability;
+  };
 }
 
 export interface Combatant {
@@ -50,8 +57,18 @@ export interface Combatant {
   maxMana: number;
   mana: number;
   stats: Stats;
+  abilitySlots: {
+    0?: Ability;
+    1?: Ability;
+    2?: Ability;
+    3?: Ability;
+  };
+  statuses?: Status[];
+  activeTitle?: Title;
+  level: number;
   xp: number;
   defaultAction: Action;
+  teamFlag: TeamFlag;
 }
 
 export interface Status {

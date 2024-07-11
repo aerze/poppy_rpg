@@ -1,5 +1,5 @@
-import { SkillType, Skills } from "./data/skills";
-import { Badge, Equipment, Item, Pet, Quest, Ability, Stats, Title, Status, Action } from "./types";
+import { SkillType, Skills } from "./skills";
+import { Badge, Equipment, Item, Pet, Quest, Ability, Stats, Title, Status, Action } from "../types";
 
 export interface BasePlayerInfo {
   name: string;
@@ -26,7 +26,12 @@ export interface Player {
   stats: Stats;
   skills: Skills;
   abilities: Ability[];
-  activeAbilities: Ability[];
+  abilitySlots: {
+    0?: Ability;
+    1?: Ability;
+    2?: Ability;
+    3?: Ability;
+  };
   statuses: Status[];
   defaultAction: Action;
   equipment: {
@@ -41,7 +46,7 @@ export interface Player {
   };
   badges: Badge[];
   titles: Title[];
-  activeTitle: Title | null;
+  activeTitle?: Title;
   quests: Quest[];
   activeQuests: Quest[];
   inventory: { [id: string]: Item };
@@ -78,7 +83,7 @@ export const DefaultPlayer: Player = {
     [SkillType.Slapping]: 1,
   },
   abilities: [],
-  activeAbilities: [],
+  abilitySlots: {},
   statuses: [],
   defaultAction: Action.ATTACK,
   equipment: {
@@ -93,7 +98,7 @@ export const DefaultPlayer: Player = {
   },
   badges: [],
   titles: [],
-  activeTitle: null,
+  activeTitle: undefined,
   quests: [],
   activeQuests: [],
   inventory: {},

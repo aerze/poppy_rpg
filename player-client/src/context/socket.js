@@ -12,6 +12,7 @@ export const DataType = {
   DUNGEON_LIST: 0,
   DUNGEON_INFO: 1,
   JOIN_DUNGEON: 2,
+  BATTLE_SET_ACTION: 3,
 };
 
 export class SocketProvider extends Component {
@@ -41,7 +42,7 @@ export class SocketProvider extends Component {
    * @param {*} callback
    */
   getData(dataType, options = null, callback) {
-    this.socket.emit("RPG:GET_DATA", dataType, options, callback);
+    this.socket.emit("RPG:REQUEST", dataType, options, callback);
   }
 
   handleConnect = () => {

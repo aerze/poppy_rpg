@@ -19,10 +19,10 @@ export function HUD() {
   const disabled = isNewPlayer;
 
   return (
-    <div class="hud">
+    <div className="hud">
       <Alerts />
 
-      <div class="hud-button-group">
+      <div className="hud-button-group">
         <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(1)}>
           🤔
         </button>

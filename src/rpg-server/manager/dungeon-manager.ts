@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 import { Dungeon, DungeonType } from "../behavior/dungeon";
-import { Player } from "../player";
+import { Player } from "../data/player";
 
 export class DungeonManager {
   dungeonCounter = 0;

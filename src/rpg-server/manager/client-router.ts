@@ -1,17 +1,22 @@
 import { Socket } from "socket.io";
 import { BaseManager } from "./base-manager";
-import { Player } from "../player";
+import { Player } from "../data/player";
 
 export enum DataType {
   DUNGEON_LIST,
   DUNGEON_INFO,
   JOIN_DUNGEON,
+  BATTLE_SET_ACTION,
 }
 
 export class ClientRouter extends BaseManager {
-  handleGetRequest(socket: Socket, player: Player, type: DataType, options: any, callback: (v: any) => void) {
-    console.log(">> GET", type, options);
-    callback(this.getData(type, options, socket, player));
+  handleRequest(socket: Socket, player: Player, type: DataType, options: any, callback: (v: any) => void) {
+    console.log("Claire:", `/${DataType[type]}`, options);
+    const result = this.getData(type, options, socket, player);
+    console.log(`\t /${DataType[type]}`, result);
+    if (callback) {
+      callback(result);
+    }
   }
 
   getData(type: DataType, options: any, socket: Socket, player: Player) {
@@ -24,6 +29,9 @@ export class ClientRouter extends BaseManager {
 
       case DataType.JOIN_DUNGEON:
         return this.claire.dungeons.join(options.dungeonId, socket, player);
+
+      case DataType.BATTLE_SET_ACTION:
+        return this.claire.dungeons.liveDungeon.battle.setAction(player.id, options.action);
 
       default:
         break;

@@ -4,6 +4,7 @@ import { Monster, AbilityType, Action } from "../types";
 export const MONSTERS = {
   SLIME: (id: string): Monster => ({
     id,
+    level: 2,
     type: "SLIME",
     name: "Slime",
     imageUrl: "🍮",
@@ -23,18 +24,18 @@ export const MONSTERS = {
       luck: 2,
     },
     defaultAction: Action.ATTACK,
-    activeSkills: [
-      {
+    abilitySlots: {
+      0: {
         name: "Tackle",
         type: AbilityType.Physical,
         effect: (s, t) => attack(s, t),
       },
-      {
+      1: {
         name: "Hug",
         type: AbilityType.Physical,
         effect: (s, t) => heal(s, t),
         condition: (t) => t.type === "SLIME",
       },
-    ],
+    },
   }),
 };

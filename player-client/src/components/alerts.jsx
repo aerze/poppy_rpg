@@ -11,12 +11,12 @@ export class Alerts extends React.Component {
   };
 
   componentDidMount() {
-    console.log(">> binding alert", this.context.socket);
+    console.log(">> binding alert");
     this.context?.socket.on("RPG:ALERT", this.handleAlert);
   }
 
   componentWillUnmount() {
-    console.log(">> unbinding alert", this.context.socket);
+    console.log(">> unbinding alert");
     this.context?.socket.off("RPG:ALERT", this.handleAlert);
   }
 

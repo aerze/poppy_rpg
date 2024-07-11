@@ -103,4 +103,29 @@
       }
     }
   }
+
+  .battlefield {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .combatant {
+      width: 75px;
+      height: 50px;
+      border: 2px solid black;
+
+      &.team-red {
+        background-color: red;
+        align-self: flex-end;
+      }
+      &.team-blue {
+        background-color: aquamarine;
+      }
+
+      .health {
+        font-size: 12px;
+        font-weight: 600;
+      }
+    }
+  }
 }

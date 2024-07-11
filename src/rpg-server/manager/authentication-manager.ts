@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import { Claire } from "../claire";
 import { BaseManager } from "./base-manager";
-import { BasePlayerInfo, DefaultPlayer, Player } from "../player";
+import { BasePlayerInfo, DefaultPlayer, Player } from "../data/player";
 
 export class AuthManager extends BaseManager {
   constructor(claire: Claire) {
@@ -64,7 +64,7 @@ export class AuthManager extends BaseManager {
 
   async initializeConnectedPlayer(socket: Socket, player: Player) {
     console.log("initializeConnectedPlayer");
-    socket.on("RPG:GET_DATA", this.claire.router.handleGetRequest.bind(this.claire.router, socket, player));
+    socket.on("RPG:REQUEST", this.claire.router.handleRequest.bind(this.claire.router, socket, player));
 
     // socket.on("RPG:UPDATE_PLAYER_INFO", handlePlayerUpdate.bind(null, socket));
     // debug(socket, `Initializing Connection for ${player.id}`);

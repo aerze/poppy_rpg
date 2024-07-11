@@ -1,7 +1,7 @@
 import sanitize from "mongo-sanitize";
 import { Collection, Db, ObjectId } from "mongodb";
 import { Socket } from "socket.io";
-import { BasePlayerInfo, DefaultPlayer, Player } from "./player";
+import { BasePlayerInfo, DefaultPlayer, Player } from "./data/player";
 // import { Player, PlayerUserData, SavedPlayerData } from "./player";
 
 export class PlayerCollection {
