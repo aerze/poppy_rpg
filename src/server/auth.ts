@@ -110,7 +110,7 @@ function login(req: import("express").Request, res: import("express").Response) 
     // Send the oauth-session token to the user
     res.cookie("oauth-session", id);
     // Redirect the user back to the home page
-    res.redirect("/");
+    res.redirect("/app");
   });
 }
 

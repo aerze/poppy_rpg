@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import logger from "morgan";
 // import twitchAuthMiddleware from "./auth";
 import cors from "cors";
+import twitchAuthMiddleware from "./auth";
 
 if (!process.env.MONGODB_URL) {
   throw Error("Failed to locate MongoURL");
@@ -15,22 +16,26 @@ export const app = express();
 
 app.use(cors());
 // view engine setup
-app.set("views", path.join(__dirname, "../../views"));
+// app.set("views", path.join(__dirname, "../../views"));
 app.set("view engine", "pug");
 
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "../../public")));
-app.use(express.static(path.join(__dirname, "../../player-client/build")));
-app.use(express.static(path.join(__dirname, "../../dist/builds")));
 
-// app.use(twitchAuthMiddleware({
-//   clientId: process.env.TWITCH_OAUTH_CLIENT_ID,
-//   clientSecret: process.env.TWITCH_OAUTH_CLIENT_SECRET,
-//   redirectUri: process.env.TWITCH_OAUTH_REDIRECT_URI,
-// }));
+app.use(express.static(path.join(__dirname, "../../public")));
+
+app.use(
+  twitchAuthMiddleware({
+    clientId: process.env.TWITCH_OAUTH_CLIENT_ID!,
+    clientSecret: process.env.TWITCH_OAUTH_CLIENT_SECRET!,
+    redirectUri: process.env.TWITCH_OAUTH_REDIRECT_URI!,
+  })
+);
+
+// app.use(express.static(path.join(__dirname, "../../dist/builds")));
+app.use("/app", express.static(path.join(__dirname, "../../player-client/build")));
 
 // This is a test route to check the twitch authentication
 // app.get('/', (req, res, next) => {

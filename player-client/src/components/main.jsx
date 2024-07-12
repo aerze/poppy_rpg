@@ -92,7 +92,7 @@ export function Main() {
           <div className="studio">MYTHRIL LABS</div>
         </div>
         <div className="illustration">
-          <img src="/images/image1.png" />
+          <img src="images/image1.png" />
         </div>
       </div>
       <div className="bottom">
