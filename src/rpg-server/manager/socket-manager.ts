@@ -2,18 +2,67 @@ import { Socket } from "socket.io";
 import { Claire } from "../claire";
 import { BaseManager } from "./base-manager";
 import { BasePlayerInfo, DefaultPlayer, Player } from "../data/player";
+import { getSession } from "../../server/auth";
 
-export class AuthManager extends BaseManager {
+export class SocketManager extends BaseManager {
   constructor(claire: Claire) {
     super(claire);
     claire.io.on("connection", this.handleSocketConnected);
   }
 
-  handleSocketConnected = (socket: Socket) => {
-    socket.on("disconnect", this.handleSocketConnected.bind(null, socket));
-    console.log(">> socket connected");
-    socket.once("RPG:CLIENT_CONNECT", this.handlePlayerClient.bind(this, socket));
+  parseCookies(cookieString: string = "") {
+    return cookieString.split(";").reduce((map: Record<string, string>, cookie: string) => {
+      const [key, value] = cookie.trim().split("=");
+      map[key] = value;
+      return map;
+    }, {});
+  }
+
+  debugSession = {
+    userid: "59227136",
+    username: "abby_the_lesbiab",
   };
+
+  handleSocketConnected = async (socket: Socket) => {
+    // console.log(">>>>> ", socket.request as any);
+
+    const cookies = this.parseCookies(socket.request.headers.cookie);
+    const sessionid = cookies?.["oauth-session"];
+    let session = getSession(sessionid);
+    // if (!sessionid) {
+    //   throw new Error("HOW THE FU.. but anyway ur missing the session cookie");
+    // }
+
+    console.log(">> host", session);
+    if (!session) {
+      if (socket.request.headers.origin === "http://localhost:3001") {
+        session = this.debugSession;
+      } else {
+        throw new Error("ur missing the session cookie wtf");
+      }
+    }
+
+    socket.data.session = session;
+
+    await this.populateSocketPlayer(socket);
+
+    socket.on("disconnect", this.handleSocketConnected.bind(null, socket));
+    // socket.once("RPG:CLIENT_CONNECT", this.handlePlayerClient.bind(this, socket));
+  };
+
+  async populateSocketPlayer(socket: Socket) {
+    const player = await this.claire.db.players.getByTwitchId(socket);
+    if (player === null) {
+      socket.emit("RPG:SIGN_UP", { name: socket.data.session.username });
+      socket.once("RPG:HANDLE_SIGN_UP", this.handlePlayerSignup.bind(this, socket));
+    } else {
+      const connectedPlayer = { ...DefaultPlayer, ...player };
+      console.log(">> player", player);
+      this.claire.db.players.update(socket, connectedPlayer, player.id);
+      socket.emit("RPG:SIGN_IN", connectedPlayer);
+      this.initializeConnectedPlayer(socket, player);
+    }
+  }
 
   handleSocketDisconnected = (socket: Socket) => {
     console.log(">> socket disconnected");
@@ -27,10 +76,8 @@ export class AuthManager extends BaseManager {
       if (!player) return;
 
       player = { ...DefaultPlayer, ...player };
-      const playerNoId: any = { ...player };
-      delete playerNoId._id;
-      delete playerNoId.id;
-      players.update(socket, playerNoId, player.id);
+
+      players.update(socket, player, player.id);
       socket.emit("RPG:SIGN_IN", player);
 
       this.initializeConnectedPlayer(socket, player);

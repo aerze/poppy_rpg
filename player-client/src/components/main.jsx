@@ -81,7 +81,7 @@ export function Main() {
     <div className="main-menu">
       <div className="top">
         <header>
-          <img src="images/frorg.png" />
+          <img src="/app/images/frorg.png" />
           <h1>Tales of the Pond</h1>
         </header>
       </div>
@@ -92,7 +92,7 @@ export function Main() {
           <div className="studio">MYTHRIL LABS</div>
         </div>
         <div className="illustration">
-          <img src="images/image1.png" />
+          <img src="/app/images/image1.png" />
         </div>
       </div>
       <div className="bottom">

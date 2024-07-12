@@ -21,6 +21,7 @@ export class Alerts extends React.Component {
   }
 
   handleAlert = (message) => {
+    console.debug("ALERT:", message);
     const id = alertId++;
     const alert = {
       id,

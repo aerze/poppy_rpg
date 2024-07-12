@@ -1,4 +1,4 @@
-import { AuthManager } from "./manager/authentication-manager";
+import { SocketManager } from "./manager/socket-manager";
 import { DungeonManager } from "./manager/dungeon-manager";
 import { Server } from "socket.io";
 import { Server as HTTPServer } from "http";
@@ -31,7 +31,7 @@ export class Claire {
   http: HTTPServer;
   mongo: MongoClient;
   mongodb: Db;
-  auth: AuthManager;
+  auth: SocketManager;
   router: ClientRouter;
   db: {
     players: PlayerCollection;
@@ -44,7 +44,7 @@ export class Claire {
     this.http = http;
     this.mongo = mongo;
     this.mongodb = this.mongo.db("poppyrpg");
-    this.auth = new AuthManager(this);
+    this.auth = new SocketManager(this);
     this.router = new ClientRouter(this);
     this.db = {
       players: new PlayerCollection(this.mongodb),

@@ -19,7 +19,7 @@ export class SocketProvider extends Component {
   state = {
     connected: false,
     newPlayer: null,
-    player: local.get("player") ?? null,
+    player: null,
     dungeons: [],
   };
 
@@ -61,19 +61,13 @@ export class SocketProvider extends Component {
   };
 
   handlePlayerInfoUpdated = (playerInfo) => {
-    this.setState(
-      (state) => ({
-        ...state,
-        player: {
-          ...state.player,
-          ...playerInfo,
-        },
-      }),
-      () => {
-        console.log(">> setState callback", this.state);
-        local.set("player", this.state.player);
-      }
-    );
+    this.setState((state) => ({
+      ...state,
+      player: {
+        ...state.player,
+        ...playerInfo,
+      },
+    }));
   };
 
   handleDisconnect = () => {
@@ -87,17 +81,16 @@ export class SocketProvider extends Component {
     this.setState({ player });
   };
 
-  handleSignUp = () => {
+  handleSignUp = ({ name }) => {
     console.log(">> RPG:SIGN_UP");
     this.socket.off("RPG:SIGN_IN");
     this.socket.once("RPG:COMPLETED_SIGN_UP", this.handleCompletedSignUp);
-    this.setState({ newPlayer: true });
+    this.setState({ newPlayer: true, player: { name } });
   };
 
   handleCompletedSignUp = (player) => {
     console.log(">> RPG:COMPLETED_SIGN_UP");
     this.setState({ player, newPlayer: false });
-    local.set("player", player);
   };
 
   render() {

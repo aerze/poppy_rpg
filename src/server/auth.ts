@@ -13,6 +13,7 @@ interface SessionUserDetails {
 
 let config: TwitchAuthOptions;
 const sessions = new Map();
+
 /**
  * Create a new session and return the id for that session
  * @param {string} userid twitch userid
@@ -30,7 +31,7 @@ function createSession(userid: string, username: string) {
  * @param {string} id session id
  * @returns {{userid: string, userid: string}} session user details
  */
-function getSession(id: string): SessionUserDetails {
+export function getSession(id: string): SessionUserDetails {
   return sessions.get(id);
 }
 

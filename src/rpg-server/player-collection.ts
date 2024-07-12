@@ -23,19 +23,19 @@ export class PlayerCollection {
     const cleanData = this.clean(playerInfo);
     console.log(`RPG:Player:create ${cleanData.name}`);
 
-    const player = { ...DefaultPlayer, ...cleanData };
+    const player = { ...DefaultPlayer, ...cleanData, twitchId: socket.data.session.userid };
 
     try {
       const result = await this.collection?.insertOne(player);
       if (!result) {
-        socket.emit("RPG:Error", { message: "Failed to create player" });
+        socket.emit("RPG:ALERT", "Failed to create player");
         return null;
       }
       player.id = result.insertedId.toString();
       return player;
     } catch (error) {
       console.log(`Failed to create player`, error);
-      socket.emit("RPG:Error", { message: "Failed to create player", error });
+      socket.emit("RPG:ALERT", "Failed to create player");
       return null;
     }
   }
@@ -44,7 +44,7 @@ export class PlayerCollection {
     try {
       const player = await this.collection.findOne(new ObjectId(playerId));
       if (!player) {
-        socket.emit("RPG:Error", { message: "Failed to find player" });
+        socket.emit("RPG:ALERT", "Failed to find player");
         return null;
       }
 
@@ -52,7 +52,24 @@ export class PlayerCollection {
       return player;
     } catch (error) {
       console.log("Failed to find player", error);
-      socket.emit("RPG:Error", { message: "Failed to find player", error });
+      socket.emit("RPG:ALERT", "Failed to find player");
+      return null;
+    }
+  }
+
+  async getByTwitchId(socket: Socket) {
+    try {
+      const player = await this.collection.findOne({ twitchId: socket.data.session.userid });
+      if (!player) {
+        socket.emit("RPG:ALERT", "You must be new here..");
+        return null;
+      }
+
+      player.id = player._id.toString();
+      return player;
+    } catch (error) {
+      console.log("Failed to find player", error);
+      socket.emit("RPG:ALERT", "Failed to find player");
       return null;
     }
   }
@@ -61,30 +78,33 @@ export class PlayerCollection {
     try {
       const result = await this.collection.replaceOne({ _id: new ObjectId(player.id) }, player);
       if (!result) {
-        socket.emit("RPG:Error", { message: "Failed to set player" });
+        socket.emit("RPG:Alert", "Failed to set player");
         return null;
       }
 
       return Boolean(result.matchedCount);
     } catch (error) {
       console.log("Failed to set player", error);
-      socket.emit("RPG:Error", { message: "Failed to set player" });
+      socket.emit("RPG:Alert", "Failed to set player");
       return null;
     }
   }
 
   async update(socket: Socket, player: Partial<Player>, playerId: string) {
+    delete (player as any)._id;
+    delete player.id;
+
     try {
       const result = await this.collection.updateOne({ _id: new ObjectId(playerId) }, { $set: player });
       if (!result) {
-        socket.emit("RPG:Error", { message: "Failed to update player" });
+        socket.emit("RPG:Alert", "Failed to update player");
         return null;
       }
 
       return Boolean(result.matchedCount);
     } catch (error) {
       console.log("Failed to update player", error);
-      socket.emit("RPG:Error", { message: "Failed to update player" });
+      socket.emit("RPG:Alert", "Failed to update player");
       return null;
     }
   }
