@@ -2,23 +2,24 @@ import "./shop.scss";
 
 const shopItems = [
   {
-    image: '/icons/icon1.png',
-    name: 'Potion',
-    description: '+20HP',
-    price: '200'
-  }, {
-    image: '/icons/icon3.png',
-    name: 'Potato',
-    description: '+10HP',
-    price: '500K'
+    image: "/app/icons/icon1.png",
+    name: "Potion",
+    description: "+20HP",
+    price: "200",
   },
   {
-    image: '/icons/icon31.png',
-    name: 'Free Revive Ticket',
-    description: 'Revives 1 Party Member',
-    price: '120M'
-  }
-]
+    image: "/app/icons/icon3.png",
+    name: "Potato",
+    description: "+10HP",
+    price: "500K",
+  },
+  {
+    image: "/app/icons/icon31.png",
+    name: "Free Revive Ticket",
+    description: "Revives 1 Party Member",
+    price: "120M",
+  },
+];
 
 const items = [...shopItems, ...shopItems, ...shopItems];
 
@@ -37,20 +38,16 @@ function ShopItem({ image, name, description, price }) {
       </div> */}
       <div className="item-description">
         <div className="name">{name}</div>
-        <div className="text">
-          {description}
-        </div>
+        <div className="text">{description}</div>
       </div>
       <div className="item-price">
         <div className="item-button">
           <div className="bg"></div>
-          <div className="t">
-            {price} ◈
-          </div>
+          <div className="t">{price} ◈</div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export function ShopScene() {
@@ -78,13 +75,9 @@ export function ShopScene() {
       </div>
       <div className="shop-bottom">
         <div className="shop-list">
-          {
-            [
-              ...shopItems,
-              ...shopItems,
-              ...shopItems
-            ]
-              .map((item, i) => <ShopItem key={i} {...item} />)}
+          {[...shopItems, ...shopItems, ...shopItems].map((item, i) => (
+            <ShopItem key={i} {...item} />
+          ))}
         </div>
       </div>
     </div>

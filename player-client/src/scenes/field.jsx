@@ -17,14 +17,14 @@ export class FieldScene extends Component {
   componentWillUnmount() {}
 
   updateDungeonList = () => {
-    this.context.get(DataType.DUNGEON_LIST, null, (dungeons) => {
+    this.context.send(DataType.DUNGEON_LIST, null, (dungeons) => {
       this.setState({ dungeons });
     });
   };
 
   getDungeonInfo = (event, dungeonId) => {
     event.preventDefault();
-    this.context.get(DataType.DUNGEON_INFO, { dungeonId }, (dungeonInfo) => {
+    this.context.send(DataType.DUNGEON_INFO, { dungeonId }, (dungeonInfo) => {
       this.setState({ dungeonInfo });
     });
   };
@@ -36,7 +36,7 @@ export class FieldScene extends Component {
 
     console.log(">> JOINING DUNGEON");
     this.context.socket.on("RPG:BATTLE", this.handleBattleUpdate);
-    this.context.get(DataType.JOIN_DUNGEON, { dungeonId });
+    this.context.send(DataType.JOIN_DUNGEON, { dungeonId });
   };
 
   handleBattleUpdate = ({ battle }) => {
@@ -112,11 +112,11 @@ export class FieldScene extends Component {
   }
 
   handleAttackClick = () => {
-    this.context.get(DataType.BATTLE_SET_ACTION, { action: 0 });
+    this.context.send(DataType.BATTLE_SET_ACTION, { action: 0 });
   };
 
   handleDefendClick = () => {
-    this.context.get(DataType.BATTLE_SET_ACTION, { action: 1 });
+    this.context.send(DataType.BATTLE_SET_ACTION, { action: 1 });
   };
 
   teamClasses = {

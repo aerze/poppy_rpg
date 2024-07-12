@@ -11,7 +11,7 @@ export function HomeScene() {
         <button className="tab" onClick={handleTab(0)}>
           Badges
         </button>
-        <button className="tab" onClick={handleTab(1)}>
+        <button disabled={true} className="tab" onClick={handleTab(1)}>
           Titles
         </button>
       </div>
@@ -20,9 +20,9 @@ export function HomeScene() {
           <div className="badge-tab full-height">
             <div className="badge-display column">
               <div className="badge-shelf row">
-                <img className="trophy-badge" src="/images/badges3.png"></img>
-                <img className="trophy-badge" src="/images/badges4.png"></img>
-                <img className="trophy-badge" src="/images/badges5.png"></img>
+                <img className="trophy-badge" src="/app/images/badges3.png"></img>
+                <img className="trophy-badge" src="/app/images/badges4.png"></img>
+                <img className="trophy-badge" src="/app/images/badges5.png"></img>
               </div>
               <div className="badge-content column">
                 <p className="badge-description">
@@ -34,29 +34,29 @@ export function HomeScene() {
             </div>
             <div className="badge-list-container column">
               <div className="badge-list row">
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
 
-                <img className="badge" src="/images/badges4.png"></img>
-                <img className="badge" src="/images/badges4.png"></img>
-                <img className="badge" src="/images/badges4.png"></img>
-                <img className="badge" src="/images/badges4.png"></img>
-                <img className="badge" src="/images/badges4.png"></img>
-                <img className="badge" src="/images/badges4.png"></img>
+                <img className="badge" src="/app/images/badges4.png"></img>
+                <img className="badge" src="/app/images/badges4.png"></img>
+                <img className="badge" src="/app/images/badges4.png"></img>
+                <img className="badge" src="/app/images/badges4.png"></img>
+                <img className="badge" src="/app/images/badges4.png"></img>
+                <img className="badge" src="/app/images/badges4.png"></img>
 
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
-                <img className="badge" src="/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
+                <img className="badge" src="/app/images/badges3.png"></img>
               </div>
             </div>
           </div>

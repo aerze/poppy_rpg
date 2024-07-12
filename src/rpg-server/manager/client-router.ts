@@ -7,19 +7,21 @@ export enum DataType {
   DUNGEON_INFO,
   JOIN_DUNGEON,
   BATTLE_SET_ACTION,
+  UPDATE_PLAYER,
 }
 
 export class ClientRouter extends BaseManager {
-  handleRequest(socket: Socket, player: Player, type: DataType, options: any, callback: (v: any) => void) {
+  async handleRequest(socket: Socket, playerId: string, type: DataType, options: any, callback: (v: any) => void) {
     console.log("Claire:", `/${DataType[type]}`, options);
-    const result = this.getData(type, options, socket, player);
+    const player = this.claire.players.get(playerId)!;
+    const result = await this.getData(type, options, socket, player);
     console.log(`\t /${DataType[type]}`, result);
     if (callback) {
       callback(result);
     }
   }
 
-  getData(type: DataType, options: any, socket: Socket, player: Player) {
+  async getData(type: DataType, options: any, socket: Socket, player: Player) {
     switch (type) {
       case DataType.DUNGEON_LIST:
         return this.claire.dungeons.getBasicList();
@@ -32,6 +34,9 @@ export class ClientRouter extends BaseManager {
 
       case DataType.BATTLE_SET_ACTION:
         return this.claire.dungeons.liveDungeon.battle.setAction(player.id, options.action);
+
+      case DataType.UPDATE_PLAYER:
+        return await this.claire.socket.handlePlayerUpdate(socket, options.playerInfo);
 
       default:
         break;

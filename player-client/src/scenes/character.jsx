@@ -77,7 +77,7 @@ export function CharacterInfoOverlay({ xp }) {
 
 export function CharacterInfoForm({ presetId, setPresetId }) {
   const [disabled, setDisabled] = useState(false);
-  const { socket, player } = useContext(SocketContext);
+  const { socket, player, updatePlayer } = useContext(SocketContext);
 
   console.log(">> char info", player);
   function handleFormSubmit(event) {
@@ -92,10 +92,7 @@ export function CharacterInfoForm({ presetId, setPresetId }) {
     setDisabled(true);
 
     if (player?.id) {
-      console.log(">> has player id", socket);
-      socket.emit("RPG:UPDATE_PLAYER_INFO", { ...formData, id: player.id });
-
-      socket.once("RPG:PLAYER_INFO_UPDATED", () => {
+      updatePlayer({ ...formData, id: player.id }, () => {
         setDisabled(false);
       });
     } else {
@@ -270,8 +267,8 @@ export function CharacterSkillList() {
 }
 
 const CHARACTER_SPRITE_MAP = {
-  0: "/images/tay_test.png",
-  1: "/images/abby_test.png",
+  0: "/app/images/tay_test.png",
+  1: "/app/images/abby_test.png",
 };
 
 export function CharacterScene() {
@@ -293,10 +290,10 @@ export function CharacterScene() {
         <button className="tab-button" onClick={(e) => setTabState(0)}>
           Info
         </button>
-        <button disabled={disabled} className="tab-button" onClick={(e) => setTabState(1)}>
-          Skills
+        <button disabled={true} className="tab-button" onClick={(e) => setTabState(1)}>
+          Abilities
         </button>
-        <button disabled={disabled} className="tab-button" onClick={(e) => setTabState(2)}>
+        <button disabled={true} className="tab-button" onClick={(e) => setTabState(2)}>
           Equipment
         </button>
       </div>

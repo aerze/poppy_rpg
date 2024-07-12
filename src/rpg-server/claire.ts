@@ -5,6 +5,7 @@ import { Server as HTTPServer } from "http";
 import { Db, MongoClient } from "mongodb";
 import { PlayerCollection } from "./player-collection";
 import { ClientRouter } from "./manager/client-router";
+import { PlayerManager } from "./manager/player-manager";
 
 export let claire: Claire;
 
@@ -31,8 +32,11 @@ export class Claire {
   http: HTTPServer;
   mongo: MongoClient;
   mongodb: Db;
-  auth: SocketManager;
+  socket: SocketManager;
   router: ClientRouter;
+
+  players: PlayerManager;
+
   db: {
     players: PlayerCollection;
   };
@@ -44,8 +48,9 @@ export class Claire {
     this.http = http;
     this.mongo = mongo;
     this.mongodb = this.mongo.db("poppyrpg");
-    this.auth = new SocketManager(this);
+    this.socket = new SocketManager(this);
     this.router = new ClientRouter(this);
+    this.players = new PlayerManager(this);
     this.db = {
       players: new PlayerCollection(this.mongodb),
     };

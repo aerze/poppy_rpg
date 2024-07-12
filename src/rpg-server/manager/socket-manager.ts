@@ -24,16 +24,9 @@ export class SocketManager extends BaseManager {
   };
 
   handleSocketConnected = async (socket: Socket) => {
-    // console.log(">>>>> ", socket.request as any);
-
     const cookies = this.parseCookies(socket.request.headers.cookie);
     const sessionid = cookies?.["oauth-session"];
     let session = getSession(sessionid);
-    // if (!sessionid) {
-    //   throw new Error("HOW THE FU.. but anyway ur missing the session cookie");
-    // }
-
-    console.log(">> host", session);
     if (!session) {
       if (socket.request.headers.origin === "http://localhost:3001") {
         session = this.debugSession;
@@ -47,7 +40,6 @@ export class SocketManager extends BaseManager {
     await this.populateSocketPlayer(socket);
 
     socket.on("disconnect", this.handleSocketConnected.bind(null, socket));
-    // socket.once("RPG:CLIENT_CONNECT", this.handlePlayerClient.bind(this, socket));
   };
 
   async populateSocketPlayer(socket: Socket) {
@@ -57,8 +49,8 @@ export class SocketManager extends BaseManager {
       socket.once("RPG:HANDLE_SIGN_UP", this.handlePlayerSignup.bind(this, socket));
     } else {
       const connectedPlayer = { ...DefaultPlayer, ...player };
-      console.log(">> player", player);
       this.claire.db.players.update(socket, connectedPlayer, player.id);
+
       socket.emit("RPG:SIGN_IN", connectedPlayer);
       this.initializeConnectedPlayer(socket, player);
     }
@@ -101,17 +93,19 @@ export class SocketManager extends BaseManager {
 
   async handlePlayerUpdate(socket: Socket, basePlayerInfo: BasePlayerInfo & { id: string }) {
     console.log(">> handlePlayerUpdate", basePlayerInfo);
-    if (!basePlayerInfo.id) return;
     if (!basePlayerInfo) return;
+    if (!basePlayerInfo.id) return;
 
-    if (await this.claire.db.players.update(socket, basePlayerInfo, basePlayerInfo.id)) {
-      socket.emit("RPG:PLAYER_INFO_UPDATED", basePlayerInfo);
+    const result = await this.claire.db.players.update(socket, basePlayerInfo, basePlayerInfo.id);
+    if (result) {
+      return basePlayerInfo;
     }
   }
 
   async initializeConnectedPlayer(socket: Socket, player: Player) {
-    console.log("initializeConnectedPlayer");
-    socket.on("RPG:REQUEST", this.claire.router.handleRequest.bind(this.claire.router, socket, player));
+    console.log(`${player.name} has connected`);
+    this.claire.players.set(player.id, player);
+    socket.on("RPG:REQUEST", this.claire.router.handleRequest.bind(this.claire.router, socket, player.id));
 
     // socket.on("RPG:UPDATE_PLAYER_INFO", handlePlayerUpdate.bind(null, socket));
     // debug(socket, `Initializing Connection for ${player.id}`);

@@ -13,6 +13,7 @@ export const DataType = {
   DUNGEON_INFO: 1,
   JOIN_DUNGEON: 2,
   BATTLE_SET_ACTION: 3,
+  UPDATE_PLAYER: 4,
 };
 
 export class SocketProvider extends Component {
@@ -41,7 +42,7 @@ export class SocketProvider extends Component {
    * @param {*} options
    * @param {*} callback
    */
-  getData(dataType, options = null, callback) {
+  sendData(dataType, options = null, callback) {
     this.socket.emit("RPG:REQUEST", dataType, options, callback);
   }
 
@@ -56,19 +57,24 @@ export class SocketProvider extends Component {
     this.socket.once("RPG:SIGN_UP", this.handleSignUp);
   };
 
+  updatePlayer = (playerInfo, callback) => {
+    this.sendData(DataType.UPDATE_PLAYER, { playerInfo }, (player) => {
+      this.setState((state) => ({
+        ...state,
+        player: {
+          ...state.player,
+          ...player,
+        },
+      }));
+      callback();
+    });
+  };
+
   handleError = ({ message, error }) => {
     console.error(message, error);
   };
 
-  handlePlayerInfoUpdated = (playerInfo) => {
-    this.setState((state) => ({
-      ...state,
-      player: {
-        ...state.player,
-        ...playerInfo,
-      },
-    }));
-  };
+  handlePlayerInfoUpdated = (playerInfo) => {};
 
   handleDisconnect = () => {
     console.log(">> Client Disconnected");
@@ -101,7 +107,8 @@ export class SocketProvider extends Component {
       connect: this.connect,
       isNewPlayer: this.state.newPlayer,
       player: this.state.player,
-      get: this.getData,
+      send: this.sendData,
+      updatePlayer: this.updatePlayer,
     };
 
     return <SocketContext.Provider value={value}>{this.props.children}</SocketContext.Provider>;

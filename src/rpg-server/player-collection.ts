@@ -91,8 +91,9 @@ export class PlayerCollection {
   }
 
   async update(socket: Socket, player: Partial<Player>, playerId: string) {
-    delete (player as any)._id;
-    delete player.id;
+    const playerNoId = { ...player };
+    delete (playerNoId as any)._id;
+    delete playerNoId.id;
 
     try {
       const result = await this.collection.updateOne({ _id: new ObjectId(playerId) }, { $set: player });

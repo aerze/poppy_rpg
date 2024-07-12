@@ -32,10 +32,10 @@ export function HUD() {
         <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(0)}>
           ⚔️
         </button>
-        <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(3)}>
+        <button disabled={true} className="hud-button" onClick={makeHandleSceneChange(3)}>
           🛍️
         </button>
-        <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(4)}>
+        <button disabled={true} className="hud-button" onClick={makeHandleSceneChange(4)}>
           🪅
         </button>
       </div>
