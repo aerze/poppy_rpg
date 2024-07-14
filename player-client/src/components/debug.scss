@@ -1,0 +1,32 @@
+.debug-container {
+  position: absolute;
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  z-index: 999999;
+
+  .connection-light {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25px;
+    height: 25px;
+  }
+
+  .light {
+    background-color: gray;
+    width: 5px;
+    height: 5px;
+    border-radius: 5px;
+
+    &.green {
+      background-color: #74bf48;
+      box-shadow: 0px 0px 3px 2px #74bf48;
+    }
+
+    &.red {
+      background-color: #696968;
+      box-shadow: 0px 0px 3px 2px #696968;
+    }
+  }
+}

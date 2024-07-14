@@ -1,63 +1,55 @@
-import { Component, useCallback, useContext, useState } from "react";
+import { Component } from "react";
 import "./field.scss";
 import { DataType, SocketContext } from "../context/socket";
+import { TimerBar } from "../components/timer-bar";
+
+const Phase = {
+  0: "INIT",
+  1: "START",
+  2: "BATTLE",
+  3: "END",
+};
+
+const PhaseTimers = {
+  1: 30000,
+  2: 8000,
+  3: 30000,
+};
+
+const SCENE = {
+  DUNGEON: 1,
+  BATTLE: 2,
+};
 
 export class FieldScene extends Component {
   state = {
-    screen: "DUNGEON",
-    dungeons: [],
-    dungeonInfo: undefined,
-    battle: undefined,
+    scene: SCENE.DUNGEON,
   };
 
   componentDidMount() {
-    this.updateDungeonList();
+    console.log("FIELD: DID MOUNT");
+    this.context.updateDungeonList();
+    if (this.context.battle) {
+      this.setState({ scene: SCENE.BATTLE });
+    }
   }
 
-  componentWillUnmount() {}
-
-  updateDungeonList = () => {
-    this.context.send(DataType.DUNGEON_LIST, null, (dungeons) => {
-      this.setState({ dungeons });
-    });
-  };
-
-  getDungeonInfo = (event, dungeonId) => {
-    event.preventDefault();
-    this.context.send(DataType.DUNGEON_INFO, { dungeonId }, (dungeonInfo) => {
-      this.setState({ dungeonInfo });
-    });
-  };
-
-  joinDungeon = (event) => {
-    event.preventDefault();
-    const dungeonId = this.state.dungeonInfo.id;
-    if (dungeonId === undefined) return;
-
-    console.log(">> JOINING DUNGEON");
-    this.context.socket.on("RPG:BATTLE", this.handleBattleUpdate);
-    this.context.send(DataType.JOIN_DUNGEON, { dungeonId });
-  };
-
-  handleBattleUpdate = ({ battle }) => {
-    console.log(">> battle update", battle);
-    this.setState((state) => {
-      return { battle: { ...state.battle, ...battle }, screen: "BATTLE" };
-    });
-  };
+  componentWillUnmount() {
+    console.log("FIELD: WILL UNMOUNT");
+  }
 
   renderDungeon() {
     return (
       <>
-        <div className="battle-screen">{this.state.dungeonInfo && this.renderDungeonInfo()}</div>
+        <div className="battle-screen">{this.context.dungeonInfo && this.renderDungeonInfo()}</div>
         <div className="battle-controls">
           <div className="dungeon-list">
-            {this.state.dungeons.map((dungeon) => {
+            {this.context.dungeons.map((dungeon) => {
               return (
                 <div
                   key={dungeon.id}
                   className="dungeon-item"
-                  onClick={(event) => this.getDungeonInfo(event, dungeon.id)}
+                  onClick={(event) => this.context.getDungeonInfo(dungeon.id)}
                 >
                   {dungeon.type === 1 && <div className="dungeon-tag">LIMITED TIME EVENT</div>}
                   {dungeon.type === 2 && <div className="dungeon-tag">SPECIAL EVENT</div>}
@@ -75,10 +67,15 @@ export class FieldScene extends Component {
     return (
       <div className="dungeon-info-container">
         <div className="dungeon-info">
-          <div className="dungeon-title">{this.state.dungeonInfo?.name} Dungeon</div>
-          <div className="dungeon-count">{this.state.dungeonInfo?.playerCount} Players</div>
+          <div className="dungeon-title">{this.context.dungeonInfo?.name} Dungeon</div>
+          <div className="dungeon-count">{this.context.dungeonInfo?.playerCount} Players</div>
         </div>
-        <div className="join-dungeon" onClick={this.joinDungeon}>
+        <div
+          className="join-dungeon"
+          onClick={() => {
+            this.context.joinDungeon();
+          }}
+        >
           JOIN
         </div>
       </div>
@@ -88,10 +85,15 @@ export class FieldScene extends Component {
   renderBattle() {
     return (
       <>
-        <div className="battle-screen">{this.state.battle && this.renderBattlefield()}</div>
+        <div className="battle-screen">{this.context.battle && this.renderBattlefield()}</div>
         <div className="battle-controls">
+          <div>{Phase[this.context.battle.phase]}</div>
           <div className="turn-indicator">
-            <progress className="turn-progress" max={100} value={30} />
+            <TimerBar
+              className="turn-progress"
+              max={PhaseTimers[this.context.battle.phase]}
+              endAt={this.context.timer}
+            />
           </div>
           <div className="battle-button-group">
             <button className="battle-button" onClick={this.handleAttackClick}>
@@ -127,8 +129,8 @@ export class FieldScene extends Component {
   renderBattlefield() {
     return (
       <div className="battlefield">
-        {this.state.battle.turnOrder.map((combatantId) => {
-          const combatant = this.state.battle.combatants[combatantId];
+        {this.context.battle.turnOrder.map((combatantId) => {
+          const combatant = this.context.battle.combatants[combatantId];
           return (
             <div key={combatant.id} className={`combatant ${this.teamClasses[combatant.teamFlag]}`}>
               {combatant.name}
@@ -144,12 +146,7 @@ export class FieldScene extends Component {
   }
 
   render() {
-    return (
-      <div className="field-scene">
-        {this.state.screen === "DUNGEON" && this.renderDungeon()}
-        {this.state.screen === "BATTLE" && this.renderBattle()}
-      </div>
-    );
+    return <div className="field-scene">{!this.context.battle ? this.renderDungeon() : this.renderBattle()}</div>;
   }
 }
 

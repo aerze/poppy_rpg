@@ -1,6 +1,5 @@
-import { Component, createContext, useState } from "react";
+import { Component, createContext } from "react";
 import { io } from "socket.io-client";
-import { local } from "../lib/local";
 
 export const SocketContext = createContext(null);
 
@@ -22,6 +21,9 @@ export class SocketProvider extends Component {
     newPlayer: null,
     player: null,
     dungeons: [],
+    dungeonInfo: undefined,
+    battle: undefined,
+    timer: undefined,
   };
 
   socket = null;
@@ -48,9 +50,7 @@ export class SocketProvider extends Component {
 
   handleConnect = () => {
     console.log("handleConnect");
-    const existingPlayerId = local.get("player")?.id;
     this.setState({ connected: true });
-    this.socket.emit("RPG:CLIENT_CONNECT", existingPlayerId);
     this.socket.on("RPG:Error", this.handleError);
     this.socket.on("RPG:PLAYER_INFO_UPDATED", this.handlePlayerInfoUpdated);
     this.socket.once("RPG:SIGN_IN", this.handleSignIn);
@@ -99,16 +99,54 @@ export class SocketProvider extends Component {
     this.setState({ player, newPlayer: false });
   };
 
+  updateDungeonList = () => {
+    this.sendData(DataType.DUNGEON_LIST, null, (dungeons) => {
+      this.setState({ dungeons });
+    });
+  };
+
+  getDungeonInfo = (dungeonId) => {
+    this.sendData(DataType.DUNGEON_INFO, { dungeonId }, (dungeonInfo) => {
+      this.setState({ dungeonInfo });
+    });
+  };
+
+  joinDungeon = () => {
+    const dungeonId = this.state.dungeonInfo.id;
+    if (dungeonId === undefined) return;
+    console.log(">> ", dungeonId);
+    this.socket.on("RPG:BATTLE", this.handleBattleUpdate);
+    this.sendData(DataType.JOIN_DUNGEON, { dungeonId });
+  };
+
+  handleBattleUpdate = ({ battle, timer }) => {
+    console.log(">> battle", battle, timer);
+    this.setState((state) => {
+      return {
+        timer,
+        battle: { ...state.battle, ...battle },
+      };
+    });
+  };
+
   render() {
     const value = {
       socket: this.socket,
+
       connected: this.state.connected,
-      playerId: this.state.playerId,
-      connect: this.connect,
       isNewPlayer: this.state.newPlayer,
       player: this.state.player,
+      dungeons: this.state.dungeons,
+      dungeonInfo: this.state.dungeonInfo,
+      battle: this.state.battle,
+      timer: this.state.timer,
+
+      connect: this.connect,
       send: this.sendData,
       updatePlayer: this.updatePlayer,
+      updateDungeonList: this.updateDungeonList,
+      getDungeonInfo: this.getDungeonInfo,
+      joinDungeon: this.joinDungeon,
     };
 
     return <SocketContext.Provider value={value}>{this.props.children}</SocketContext.Provider>;

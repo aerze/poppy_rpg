@@ -33,7 +33,7 @@ export class ClientRouter extends BaseManager {
         return this.claire.dungeons.join(options.dungeonId, socket, player);
 
       case DataType.BATTLE_SET_ACTION:
-        return this.claire.dungeons.liveDungeon.battle.setAction(player.id, options.action);
+        return this.claire.dungeons.liveDungeon.setAction(player.id, options.action);
 
       case DataType.UPDATE_PLAYER:
         return await this.claire.socket.handlePlayerUpdate(socket, options.playerInfo);

@@ -27,7 +27,7 @@ export class DungeonManager {
     return {
       id: dungeon.id,
       name: dungeon.name,
-      battle: dungeon.battle,
+      battle: dungeon.getBattleInfo(),
       playerCount: dungeon.connectedPlayers.size,
     };
   }

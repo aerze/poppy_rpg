@@ -10,6 +10,7 @@ import { ShopScene } from "../scenes/shop";
 import { ConfigScene } from "../scenes/config";
 import { SceneContext } from "../context/scene";
 import { LoadingPanel } from "./loadingPanel";
+import { Debug } from "./debug";
 
 function generatePreview({ itemType, item, style }) {
   return (
@@ -67,6 +68,7 @@ export function Main() {
   if (connected) {
     return (
       <>
+        <Debug />
         <Preview generator={generatePreview} />
         <HUD />
         <div className="scene-container">
@@ -78,35 +80,38 @@ export function Main() {
   }
 
   return (
-    <div className="main-menu">
-      <div className="top">
-        <header>
-          <img src="/app/images/frorg.png" />
-          <h1>Tales of the Pond</h1>
-        </header>
+    <>
+      <Debug />
+      <div className="main-menu">
+        <div className="top">
+          <header>
+            <img src="/app/images/frorg.png" />
+            <h1>Tales of the Pond</h1>
+          </header>
+        </div>
+        <div className="middle">
+          <div className="studio-logo">
+            <div className="title">DEVELOPED BY</div>
+            <div className="divider"></div>
+            <div className="studio">MYTHRIL LABS</div>
+          </div>
+          <div className="illustration">
+            <img src="/app/images/image1.png" />
+          </div>
+        </div>
+        <div className="bottom">
+          <div className="menu-item" onClick={handleStartGame}>
+            {player ? "CONTINUE" : "START GAME"}
+          </div>
+          <div className="menu-item" onClick={handleOpen}>
+            POP OUT ↗
+          </div>
+          {/* <div className="menu-item">RESET CHARACTER</div> */}
+          <div className="menu-item" onClick={handleOpenStream}>
+            STREAM
+          </div>
+        </div>
       </div>
-      <div className="middle">
-        <div className="studio-logo">
-          <div className="title">DEVELOPED BY</div>
-          <div className="divider"></div>
-          <div className="studio">MYTHRIL LABS</div>
-        </div>
-        <div className="illustration">
-          <img src="/app/images/image1.png" />
-        </div>
-      </div>
-      <div className="bottom">
-        <div className="menu-item" onClick={handleStartGame}>
-          {player ? "CONTINUE" : "START GAME"}
-        </div>
-        <div className="menu-item" onClick={handleOpen}>
-          POP OUT ↗
-        </div>
-        {/* <div className="menu-item">RESET CHARACTER</div> */}
-        <div className="menu-item" onClick={handleOpenStream}>
-          STREAM
-        </div>
-      </div>
-    </div>
+    </>
   );
 }

@@ -11,77 +11,31 @@ export enum DungeonType {
   SpecialEvent,
 }
 
-export class Dungeon {
-  id: number;
-  name: string;
-  type: DungeonType;
-
-  constructor(id: number, name: string, type = DungeonType.Normal) {
-    this.id = id;
-    this.name = name;
-    this.type = type;
-  }
-
-  battle: Battle = new Battle(this);
-
-  connectedPlayers: Map<Player, Socket> = new Map();
-
-  spawnMonsters() {
-    const monsterA = MONSTERS.SLIME("monsterA");
-    const monsterB = MONSTERS.SLIME("monsterB");
-    const monsterC = MONSTERS.SLIME("monsterC");
-    this.battle.addMonsterCombatant(monsterA, TeamFlag.RED);
-    this.battle.addMonsterCombatant(monsterB, TeamFlag.RED);
-    this.battle.addMonsterCombatant(monsterC, TeamFlag.RED);
-    return this.battle;
-  }
-
-  join(socket: Socket, player: Player) {
-    if (this.connectedPlayers.has(player)) return false;
-    this.connectedPlayers.set(player, socket);
-
-    this.battle.addPlayerCombatant(player, TeamFlag.BLUE);
-    socket.emit("RPG:BATTLE", { battle: this.battle });
-    // this.battle.addCombatant(TeamFlag.BLUE, player, true);
-
-    this.battle.start();
-
-    // TODO remove if dungeon ends
-    socket.once("disconnect", this.leave.bind(this, socket, player));
-
-    return true;
-  }
-
-  leave(socket: Socket, player: Player) {
-    this.connectedPlayers.delete(player);
-    this.battle.removeCombatant(TeamFlag.BLUE, player.id);
-  }
-
-  emit(eventName: string, data?: any) {
-    for (const socket of this.connectedPlayers.values()) {
-      socket.emit(eventName, data);
-    }
-  }
-}
-
 export enum TeamFlag {
   RED,
   BLUE,
 }
 
-enum Phase {
+export enum Phase {
   INIT,
   START,
   BATTLE,
   END,
 }
 
-class Battle {
-  static START_DELAY = 3000;
+export class Dungeon {
+  static START_DURATION = 30000;
+  static TURN_DURATION = 8000;
   static DEFAULT_SPEED_SORT = (a: Combatant, b: Combatant) => b.stats.speed - a.stats.speed;
   static MAP_TO_ID = (a: Combatant) => a.id;
 
+  id: number;
+  name: string;
+  type: DungeonType;
+  connectedPlayers: Map<Player, Socket> = new Map();
+
   phase: Phase = Phase.INIT;
+  turn: number = 0;
 
   combatants: Map<string, Combatant> = new Map();
   lockedCombatants: Map<string, Combatant> = new Map();
@@ -100,13 +54,51 @@ class Battle {
     [TeamFlag.BLUE]: [],
   };
 
-  dungeon: Dungeon;
+  initTime = Date.now();
+  startTime = Date.now();
 
-  constructor(dungeon: Dungeon) {
-    this.dungeon = dungeon;
+  constructor(id: number, name: string, type = DungeonType.Normal) {
+    this.id = id;
+    this.name = name;
+    this.type = type;
   }
 
-  // TODO remove partial
+  spawnMonsters() {
+    const monsterA = MONSTERS.SLIME("monsterA");
+    const monsterB = MONSTERS.SLIME("monsterB");
+    const monsterC = MONSTERS.SLIME("monsterC");
+    this.addMonsterCombatant(monsterA, TeamFlag.RED);
+    this.addMonsterCombatant(monsterB, TeamFlag.RED);
+    this.addMonsterCombatant(monsterC, TeamFlag.RED);
+    return this.getBattleInfo();
+  }
+
+  join(socket: Socket, player: Player) {
+    if (this.connectedPlayers.has(player)) return false;
+    this.connectedPlayers.set(player, socket);
+
+    this.addPlayerCombatant(player, TeamFlag.BLUE);
+    socket.emit("RPG:BATTLE", { battle: this.getBattleInfo() });
+    // this.battle.addCombatant(TeamFlag.BLUE, player, true);
+
+    this.startBattle();
+
+    // TODO remove if dungeon ends
+    socket.once("disconnect", this.leave.bind(this, socket, player));
+    return true;
+  }
+
+  leave(socket: Socket, player: Player) {
+    this.connectedPlayers.delete(player);
+    this.removeCombatant(TeamFlag.BLUE, player.id);
+  }
+
+  emit(eventName: string, data?: any) {
+    for (const socket of this.connectedPlayers.values()) {
+      socket.emit(eventName, data);
+    }
+  }
+
   getCleanCombatants() {
     const cleanCombatants: Record<string, Partial<Combatant>> = {};
     for (const combatant of this.combatants.values()) {
@@ -127,7 +119,7 @@ class Battle {
     return cleanCombatants;
   }
 
-  toJSON() {
+  getBattleInfo() {
     return {
       phase: this.phase,
       turn: this.turn,
@@ -137,7 +129,7 @@ class Battle {
   }
 
   generateTurnOrder(combatants: Map<string, Combatant>) {
-    this.turnOrder = Array.from(combatants.values()).sort(Battle.DEFAULT_SPEED_SORT).map(Battle.MAP_TO_ID);
+    this.turnOrder = Array.from(combatants.values()).sort(Dungeon.DEFAULT_SPEED_SORT).map(Dungeon.MAP_TO_ID);
   }
 
   generateTeams(combatants: Map<string, Combatant>) {
@@ -161,42 +153,48 @@ class Battle {
     this.combatants.set(monsterCombatant.id, monsterCombatant);
   }
 
-  removeCombatant(team: TeamFlag, combatantId: string, recalculateTurnOrder = true) {
+  removeCombatant(team: TeamFlag, combatantId: string) {
     this.combatants.delete(combatantId);
-    this.dungeon.emit("RPG:BATTLE", { battle: this });
-    // this.teams[team].delete(combatant.id);
-    // this.teamMap.delete(combatant.id);
+    this.emit("RPG:BATTLE", { battle: this });
+  }
 
-    if (recalculateTurnOrder) {
-      // this.generateTurnOrder();
-    }
+  removeAllCombatants() {
+    this.combatants.clear();
   }
 
   setAction(combatantId: string, action: Action) {
     this.actions.set(combatantId, action);
   }
 
-  turn: number = 0;
+  setTarget(combatantId: string, targetId: string) {
+    this.targets.set(combatantId, targetId);
+  }
 
-  start() {
-    console.log(">>> battle.start");
+  startBattle() {
     if (this.phase >= Phase.START) return;
-    this.dungeon.spawnMonsters();
+    this.initTime = Date.now();
+    this.startTime = this.initTime + 30000;
+    this.spawnMonsters();
 
     this.phase = Phase.START;
-    this.dungeon.emit("RPG:BATTLE", { battle: this });
+    this.emit("RPG:BATTLE", { battle: this, timer: this.startTime });
 
     setTimeout(() => {
       this.phase = Phase.BATTLE;
       this.loop();
-    }, Battle.START_DELAY);
+    }, Dungeon.START_DURATION);
+  }
+
+  endBattle() {
+    this.phase = Phase.END;
   }
 
   loop = () => {
     if (this.phase !== Phase.BATTLE) return;
     this.turn += 1;
 
-    setTimeout(this.loop, 5000);
+    const now = Date.now();
+    setTimeout(this.loop, Dungeon.TURN_DURATION);
 
     // lock combatants
     this.lockedCombatants = new Map(this.combatants.entries());
@@ -214,14 +212,33 @@ class Battle {
     this.generateTeams(this.lockedCombatants);
 
     const actions = [];
+
+    if (!this.teams[TeamFlag.BLUE].length) {
+      // end dungeon early, team wipe (or disconnect)
+      // return this.dungeon.end;
+      this.phase = Phase.END;
+      this.removeAllCombatants();
+      return;
+    }
+
+    if (!this.teams[TeamFlag.RED].length) {
+      // end dungeon normally
+      this.phase = Phase.END;
+      return;
+    }
+
     // execute turns
     for (const combatantId of this.turnOrder) {
       const combatant = this.lockedCombatants.get(combatantId)!;
       const action = this.lockedActions.get(combatantId) ?? combatant.defaultAction;
+
+      // const targetId =
+      //   combatant.teamFlag === TeamFlag.RED ? this.handleMonsterTargeting(combatant) : this.handlePlayerTargeting(combatant);
       const targetId =
         this.lockedTargets.get(combatantId) ?? combatant.teamFlag === TeamFlag.RED
           ? getRandomFromArray(this.teams[TeamFlag.BLUE])!
           : getRandomFromArray(this.teams[TeamFlag.RED])!;
+
       const target = this.lockedCombatants.get(targetId)!;
       const result: any = {
         combatantId,
@@ -253,11 +270,11 @@ class Battle {
 
     const turnInfo = {
       actions,
-      ...this.toJSON(),
+      ...this.getBattleInfo(),
     };
 
     console.log(">>", turnInfo);
-    this.dungeon.emit("RPG:BATTLE", { battle: turnInfo });
+    this.emit("RPG:BATTLE", { battle: turnInfo, timer: now + Dungeon.TURN_DURATION });
     // cleanup
   };
 }
