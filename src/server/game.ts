@@ -255,10 +255,12 @@ export class Game {
   async promotePlayers(players: Player[], forceRescale = false) {
     // promote players
     for (const player of players) {
-      const levelRequirement = getLevelRequirement(player.level);
 
-      if (player.xp >= levelRequirement) {
-        this.awardBadge(BadgeType.FirstLevelUp, [player]);
+      let levelRequirement = getLevelRequirement(player.level);
+      while (player.xp >= levelRequirement) {
+        if (player.level < 2) {
+          this.awardBadge(BadgeType.FirstLevelUp, [player]);
+        }
         player.level += 1;
         player.xp = player.xp - levelRequirement;
         player.maxHealth = scaleStat(player.level, Player.JOBS[player.job].health);
@@ -266,6 +268,7 @@ export class Game {
         player.defense = scaleStat(player.level, Player.JOBS[player.job].defense);
         player.attack = scaleStat(player.level, Player.JOBS[player.job].attack);
         player.heal = scaleStat(player.level, Player.JOBS[player.job].heal);
+        levelRequirement = getLevelRequirement(player.level);
       }
 
       if (forceRescale) {
