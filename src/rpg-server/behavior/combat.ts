@@ -1,4 +1,4 @@
-import { Combatant } from "../types";
+import { Combatant } from "../data/combatant";
 
 const GLOBAL_CRIT = 1.5;
 

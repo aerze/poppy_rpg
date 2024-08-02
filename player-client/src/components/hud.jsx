@@ -26,7 +26,7 @@ export function HUD() {
         <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(1)}>
           🤔
         </button>
-        <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(2)}>
+        <button disabled={true} className="hud-button" onClick={makeHandleSceneChange(2)}>
           🏠
         </button>
         <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(0)}>

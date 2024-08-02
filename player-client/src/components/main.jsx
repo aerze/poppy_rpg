@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { SocketContext } from "../context/socket";
 import { Preview } from "react-dnd-preview";
 import { HUD } from "./hud";
-import { FieldScene } from "../scenes/field";
+import { FieldScene } from "../scenes/field/field";
 import { CharacterScene } from "../scenes/character";
 import { HomeScene } from "../scenes/home";
 import { ShopScene } from "../scenes/shop";
@@ -30,19 +30,18 @@ function SceneManager() {
     return <CharacterScene />;
   }
 
+  // eslint-disable-next-line default-case
   switch (scene) {
     case 0:
-      return <FieldScene />;
+      return <FieldScene key={"FIELD"} />;
     case 1:
-      return <CharacterScene />;
+      return <CharacterScene key={"CHARACTER_SCENE "} />;
     case 2:
       return <HomeScene />;
     case 3:
       return <ShopScene />;
     case 4:
       return <ConfigScene />;
-    default:
-      return <FieldScene />;
   }
 }
 

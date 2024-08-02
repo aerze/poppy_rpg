@@ -37,6 +37,7 @@ app.use(
 // app.use(express.static(path.join(__dirname, "../../dist/builds")));
 app.use("/app", express.static(path.join(__dirname, "../../player-client/build")));
 
+app.use("/admin", express.static(path.join(__dirname, "../../admin")));
 // This is a test route to check the twitch authentication
 // app.get('/', (req, res, next) => {
 //   console.log('req.user', req.user);

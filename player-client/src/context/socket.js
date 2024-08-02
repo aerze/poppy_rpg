@@ -3,16 +3,23 @@ import { io } from "socket.io-client";
 
 export const SocketContext = createContext(null);
 
+export const SCREENS = {
+  DUNGEON_LIST: 0,
+  BATTLEFIELD: 1,
+};
+
 /**
  * @readonly
  * @enum {number}
  */
 export const DataType = {
   DUNGEON_LIST: 0,
-  DUNGEON_INFO: 1,
-  JOIN_DUNGEON: 2,
-  BATTLE_SET_ACTION: 3,
-  UPDATE_PLAYER: 4,
+  DUNGEON_INSTANCE_LIST: 1,
+  DUNGEON_INSTANCE_INFO: 2,
+  JOIN_DUNGEON: 3,
+  BATTLE_SET_ACTION: 4,
+  BATTLE_SET_ASSIST: 5,
+  UPDATE_PLAYER: 6,
 };
 
 export class SocketProvider extends Component {
@@ -24,6 +31,7 @@ export class SocketProvider extends Component {
     dungeonInfo: undefined,
     battle: undefined,
     timer: undefined,
+    fieldScreen: SCREENS.DUNGEON_LIST,
   };
 
   socket = null;
@@ -53,6 +61,7 @@ export class SocketProvider extends Component {
     this.setState({ connected: true });
     this.socket.on("RPG:Error", this.handleError);
     this.socket.on("RPG:PLAYER_INFO_UPDATED", this.handlePlayerInfoUpdated);
+    this.socket.on("RPG:DUNGEON", this.handleDungeonUpdate);
     this.socket.once("RPG:SIGN_IN", this.handleSignIn);
     this.socket.once("RPG:SIGN_UP", this.handleSignUp);
   };
@@ -85,6 +94,7 @@ export class SocketProvider extends Component {
     console.log(">> RPG:SIGN_IN");
     this.socket.off("RPG:SIGN_UP");
     this.setState({ player });
+    this.updateDungeonList();
   };
 
   handleSignUp = ({ name }) => {
@@ -106,24 +116,24 @@ export class SocketProvider extends Component {
   };
 
   getDungeonInfo = (dungeonId) => {
-    this.sendData(DataType.DUNGEON_INFO, { dungeonId }, (dungeonInfo) => {
-      this.setState({ dungeonInfo });
-    });
+    this.setState({ dungeonInfo: this.state.dungeons.find((d) => d.id === dungeonId) });
   };
 
   joinDungeon = () => {
     const dungeonId = this.state.dungeonInfo.id;
     if (dungeonId === undefined) return;
-    console.log(">> ", dungeonId);
-    this.socket.on("RPG:BATTLE", this.handleBattleUpdate);
-    this.sendData(DataType.JOIN_DUNGEON, { dungeonId });
+    this.sendData(DataType.JOIN_DUNGEON, { dungeonId }, (dungeonJoined) => {
+      if (dungeonJoined) {
+        this.setState({ fieldScreen: SCREENS.BATTLEFIELD });
+      }
+    });
   };
 
-  handleBattleUpdate = ({ battle, timer }) => {
-    console.log(">> battle", battle, timer);
+  handleDungeonUpdate = ({ battle }) => {
+    console.log("DUNGEON >>", battle);
     this.setState((state) => {
       return {
-        timer,
+        ...state,
         battle: { ...state.battle, ...battle },
       };
     });
@@ -139,7 +149,7 @@ export class SocketProvider extends Component {
       dungeons: this.state.dungeons,
       dungeonInfo: this.state.dungeonInfo,
       battle: this.state.battle,
-      timer: this.state.timer,
+      fieldScreen: this.state.fieldScreen,
 
       connect: this.connect,
       send: this.sendData,

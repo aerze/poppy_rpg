@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>POPPY RPG</title>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div id="admin">Admin</div>
+    <div id="connected">Disconnected</div>
+
+    <div class="dungeons-types">
+      <h4>Dungeon Types</h4>
+      <code id="selected-dungeon-type"></code>
+      <button id="refresh-dungeon-type">refresh</button>
+      <button id="create-dungeon-type">create</button>
+      <div id="list-dungeon-type" style="display: flex; flex-direction: column"></div>
+    </div>
+
+    <div class="dungeon-instances">
+      <h4>Dungeon Instances</h4>
+      <pre id="selected-dungeon-instance"></pre>
+      <button id="refresh-dungeon-instance">refresh</button>
+      <button id="delete-dungeon-instance">delete</button>
+      <div id="list-dungeon-instance" style="display: flex; flex-direction: column"></div>
+    </div>
+
+    <div class="dungeon">
+      <h4>Dungeon</h4>
+      <pre id="selected-dungeon"></pre>
+    </div>
+
+    <script src="admin.js" type="module"></script>
+  </body>
+</html>

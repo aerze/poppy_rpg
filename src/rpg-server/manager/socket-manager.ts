@@ -3,19 +3,13 @@ import { Claire } from "../claire";
 import { BaseManager } from "./base-manager";
 import { BasePlayerInfo, DefaultPlayer, Player } from "../data/player";
 import { getSession } from "../../server/auth";
+import { parseCookies } from "../lib/helpers";
+import { DungeonType } from "../data/types/dungeon-types";
 
 export class SocketManager extends BaseManager {
   constructor(claire: Claire) {
     super(claire);
     claire.io.on("connection", this.handleSocketConnected);
-  }
-
-  parseCookies(cookieString: string = "") {
-    return cookieString.split(";").reduce((map: Record<string, string>, cookie: string) => {
-      const [key, value] = cookie.trim().split("=");
-      map[key] = value;
-      return map;
-    }, {});
   }
 
   debugSession = {
@@ -24,27 +18,41 @@ export class SocketManager extends BaseManager {
   };
 
   handleSocketConnected = async (socket: Socket) => {
-    const cookies = this.parseCookies(socket.request.headers.cookie);
+    const cookies = parseCookies(socket.request.headers.cookie);
     const sessionid = cookies?.["oauth-session"];
     let session = getSession(sessionid);
-    if (!session) {
-      if (socket.request.headers.origin === "http://localhost:3001") {
+
+    const sessionIsMissing = !session;
+    const socketIsLocalDevClient = socket.request.headers.origin === "http://localhost:3001";
+    const socketIsLocalDevAdmin = socket.request.headers.referer === "http://localhost:3000/admin/";
+
+    if (sessionIsMissing) {
+      if (socketIsLocalDevAdmin) {
+        socket.on("ADMIN", this.handleAdmin.bind(null, socket));
+        socket.on("disconnect", this.handleSocketDisconnected.bind(null, undefined));
+        return;
+      }
+
+      if (socketIsLocalDevClient) {
         session = this.debugSession;
       } else {
-        throw new Error("ur missing the session cookie wtf");
+        this.error(`Socket missing session cookie`);
+        socket.disconnect();
+        return;
       }
     }
 
     socket.data.session = session;
 
     await this.populateSocketPlayer(socket);
-
-    socket.on("disconnect", this.handleSocketConnected.bind(null, socket));
   };
 
   async populateSocketPlayer(socket: Socket) {
     const player = await this.claire.db.players.getByTwitchId(socket);
-    if (player === null) {
+
+    const playerDoesNotExist = player === null;
+
+    if (playerDoesNotExist) {
       socket.emit("RPG:SIGN_UP", { name: socket.data.session.username });
       socket.once("RPG:HANDLE_SIGN_UP", this.handlePlayerSignup.bind(this, socket));
     } else {
@@ -56,34 +64,11 @@ export class SocketManager extends BaseManager {
     }
   }
 
-  handleSocketDisconnected = (socket: Socket) => {
-    console.log(">> socket disconnected");
-  };
-
-  async handlePlayerClient(socket: Socket, playerId?: string) {
-    const players = this.claire.db.players;
-
-    if (playerId) {
-      let player = await players.get(socket, playerId);
-      if (!player) return;
-
-      player = { ...DefaultPlayer, ...player };
-
-      players.update(socket, player, player.id);
-      socket.emit("RPG:SIGN_IN", player);
-
-      this.initializeConnectedPlayer(socket, player);
-    } else {
-      // respond to the client that it needs to create new character
-      socket.emit("RPG:SIGN_UP");
-      socket.once("RPG:HANDLE_SIGN_UP", this.handlePlayerSignup.bind(null, socket));
-    }
-  }
-
   async handlePlayerSignup(socket: Socket, basePlayerInfo: BasePlayerInfo) {
     const player = await this.claire.db.players.create(socket, basePlayerInfo);
 
     if (!player) {
+      this.error("Failed to create player with", basePlayerInfo);
       return null;
     }
 
@@ -91,35 +76,42 @@ export class SocketManager extends BaseManager {
     this.initializeConnectedPlayer(socket, player);
   }
 
+  async initializeConnectedPlayer(socket: Socket, player: Player) {
+    this.log(`${player.name} has connected.`);
+    this.claire.players.set(player.id, player);
+    socket.on("RPG:REQUEST", this.claire.router.handleRequest.bind(this.claire.router, socket, player.id));
+    socket.on("disconnect", this.handleSocketDisconnected.bind(null, player));
+  }
+
+  handleSocketDisconnected = (player?: Player) => {
+    if (player) {
+      this.claire.players.remove(player.id);
+      this.log(`${player.name} has disconnected.`);
+    }
+  };
+
+  handleAdmin = (socket: Socket) => {
+    socket.emit("ADMIN:CONNECTED");
+    socket.on("ADMIN:create-dungeon", (dungeonType: DungeonType) => {
+      const verifiedDungeonType = this.claire.dungeons.dungeonTypes.find((d) => d.id === dungeonType.id);
+      if (!verifiedDungeonType) {
+        this.log(`invalid dungeonType.id ${dungeonType.id}`);
+        // TODO: respond to socket with invalid data error;
+        return;
+      }
+      this.claire.dungeons.createInstance(verifiedDungeonType);
+    });
+    this.log("admin has connected");
+  };
+
   async handlePlayerUpdate(socket: Socket, basePlayerInfo: BasePlayerInfo & { id: string }) {
-    console.log(">> handlePlayerUpdate", basePlayerInfo);
     if (!basePlayerInfo) return;
     if (!basePlayerInfo.id) return;
+    this.debug(`updating player info`);
 
     const result = await this.claire.db.players.update(socket, basePlayerInfo, basePlayerInfo.id);
     if (result) {
       return basePlayerInfo;
     }
-  }
-
-  async initializeConnectedPlayer(socket: Socket, player: Player) {
-    console.log(`${player.name} has connected`);
-    this.claire.players.set(player.id, player);
-    socket.on("RPG:REQUEST", this.claire.router.handleRequest.bind(this.claire.router, socket, player.id));
-
-    // socket.on("RPG:UPDATE_PLAYER_INFO", handlePlayerUpdate.bind(null, socket));
-    // debug(socket, `Initializing Connection for ${player.id}`);
-    // socket.emit("RPG:DUNGEON:LIST", claire.dungeons.list());
-    // socket.on("Disconnect", () => {
-    //   dungeon.leave(socket, player);
-    // });
-    // socket.on("RPG:DEV:JOIN_DUNGEON", () => {
-    //   if (dungeon.join(socket, player)) {
-    //     socket.emit("RPG:DEV:DUNGEON_JOINED", { battle: dungeon.battle });
-    //   }
-    // });
-    // socket.on("RPG:DEV:START_BATTLE", () => {
-    //   dungeon.battle.start();
-    // });
   }
 }

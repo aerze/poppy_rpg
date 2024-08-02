@@ -1,4 +1,4 @@
-import { TeamFlag } from "./behavior/dungeon";
+import { Combatant } from "./data/combatant";
 import { Skills } from "./data/skills";
 
 export enum AbilityType {
@@ -48,7 +48,7 @@ export interface Monster {
   };
 }
 
-export interface Combatant {
+export interface CombatantOld {
   id: string;
   type: string;
   name: string;
@@ -68,7 +68,6 @@ export interface Combatant {
   level: number;
   xp: number;
   defaultAction: Action;
-  teamFlag: TeamFlag;
 }
 
 export interface Status {
@@ -134,3 +133,5 @@ export enum Action {
   ABILITY_3,
   ABILITY_4,
 }
+
+export type range = [number, number];

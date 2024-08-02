@@ -11,7 +11,8 @@ export class TimerBar extends React.Component {
 
   componentDidMount() {
     console.log(">> props", this.props);
-    this.initTimer();
+    this.max = this.props.max;
+    this.initTimer(this.props.endAt);
   }
 
   componentWillUnmount() {}
@@ -20,6 +21,7 @@ export class TimerBar extends React.Component {
     if (this.max !== nextProps.max) {
       this.max = nextProps.max;
     }
+
     if (this.props.endAt !== nextProps.endAt) {
       this.initTimer(nextProps.endAt);
     }

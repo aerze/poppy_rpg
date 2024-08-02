@@ -4,14 +4,14 @@ import { Server } from "socket.io";
 import { Server as HTTPServer } from "http";
 import { Db, MongoClient } from "mongodb";
 import { PlayerCollection } from "./player-collection";
-import { ClientRouter } from "./manager/client-router";
+import { Router } from "./manager/router";
 import { PlayerManager } from "./manager/player-manager";
 
 export let claire: Claire;
 
 export class Claire {
   static async initialize(io: Server, http: HTTPServer, mongo: MongoClient) {
-    console.log("CLAIRE: INITIALIZING");
+    console.log("CLAIRE: INITIALIZING 👩‍❤️‍💋‍👩");
 
     try {
       await mongo.connect();
@@ -21,10 +21,8 @@ export class Claire {
       throw e;
     }
 
-    console.log("CLAIRE: Mongo Connected");
+    console.log("CLAIRE: Mongo Connected 🥭");
     claire = new Claire(io, http, mongo);
-
-    claire.http;
     return claire;
   }
 
@@ -33,7 +31,7 @@ export class Claire {
   mongo: MongoClient;
   mongodb: Db;
   socket: SocketManager;
-  router: ClientRouter;
+  router: Router;
 
   players: PlayerManager;
 
@@ -49,11 +47,11 @@ export class Claire {
     this.mongo = mongo;
     this.mongodb = this.mongo.db("poppyrpg");
     this.socket = new SocketManager(this);
-    this.router = new ClientRouter(this);
+    this.router = new Router(this);
     this.players = new PlayerManager(this);
     this.db = {
-      players: new PlayerCollection(this.mongodb),
+      players: new PlayerCollection(this, this.mongodb),
     };
-    this.dungeons = new DungeonManager();
+    this.dungeons = new DungeonManager(this);
   }
 }
