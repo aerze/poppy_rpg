@@ -111,4 +111,20 @@ export class DungeonManager extends BaseManager {
 
     return dungeon.setAssist(playerId, assist);
   }
+
+  setTarget(playerId: string, targetId: string) {
+    const dungeonId = this.playerToInstanceId.get(playerId);
+    if (!dungeonId) {
+      this.log(`setAssist() failed to find dungeon for ${playerId}`);
+      return false;
+    }
+
+    const dungeon = this.instances.get(dungeonId);
+    if (!dungeon) {
+      this.log(`setAssist() failed to find dungeon with id ${dungeonId}`);
+      return false;
+    }
+
+    return dungeon.setTarget(playerId, targetId);
+  }
 }

@@ -3,7 +3,7 @@ import { Action } from "../types";
 import { Player } from "./player";
 import { Room } from "./types/dungeon-types";
 import { DungeonInstance } from "./dungeon-instance";
-import { getRandomInt } from "../../shared/helpers";
+import { getRandomFromArray, getRandomInt } from "../../shared/helpers";
 import { SafeCounter } from "../../shared/safe-counter";
 import { Combatant } from "./combatant";
 
@@ -24,11 +24,13 @@ export type CombatantId = string;
 const monsterCounter = new SafeCounter();
 
 export class BattleInstance {
-  static StartDuration = 30_000;
+  // static StartDuration = 30_000;
+  static StartDuration = 10_000;
 
   static TurnDuration = 8_000;
 
-  static EndDuration = 30_000;
+  // static EndDuration = 30_000;
+  static EndDuration = 10_000;
 
   static SORT_BY_SPEED = (a: Combatant, b: Combatant) => b.stats.speed - a.stats.speed;
 
@@ -92,6 +94,10 @@ export class BattleInstance {
     return [...Array.from(this.players.values()), ...Array.from(this.enemies.values())];
   }
 
+  getRandomPlayerId() {
+    return getRandomFromArray(Array.from(this.players.values()))!.id;
+  }
+
   constructor(dungeon: DungeonInstance, room: Room) {
     this.dungeon = dungeon;
     this.room = room;
@@ -142,18 +148,83 @@ export class BattleInstance {
     }, BattleInstance.StartDuration);
   }
 
-  update() {
+  getAction(id: string, actions: Map<CombatantId, Action>, defaultAction: Action) {
+    const action = actions.get(id);
+    if (action !== undefined) return action;
+
+    this.actions.set(id, defaultAction);
+    return defaultAction;
+  }
+
+  getTarget(id: string, targets: Map<CombatantId, CombatantId>, defaultTarget: CombatantId) {
+    const target = targets.get(id);
+    if (target !== undefined) return target;
+
+    this.targets.set(id, defaultTarget);
+    return defaultTarget;
+  }
+
+  isMonsterId(s: string) {
+    return s[0] === "m";
+  }
+
+  update = () => {
     if (this.phase !== BattlePhase.BATTLE) return;
     this.turn += 1;
+    this.log(`${BattlePhase[this.phase]}:${this.turn}`);
 
-    this.generateTurnOrder();
-
+    // prepare for next turn
     const now = Date.now();
     this.nextTurnTime = now + BattleInstance.TurnDuration;
     setTimeout(this.update, BattleInstance.TurnDuration);
 
+    if (this.players.size === 0) {
+      this.pushUpdate();
+      return;
+    }
+
+    // start battle logic
+    this.generateTurnOrder();
+    const actions = this.copyActions();
+    const targets = this.copyTargets();
+    this.log(this.turnOrder.map((id) => `${id}: ${Action[actions.get(id)!]} > ${targets.get(id)}`).join("\n"));
+
+    for (const id of this.turnOrder) {
+      const isMonster = this.isMonsterId(id);
+      if (isMonster) {
+        const monster = this.enemies.get(id);
+        if (!monster) {
+          this.log(`skipping turn for ${id}`);
+          continue;
+        }
+
+        const action = this.getAction(id, actions, Action.ATTACK);
+
+        if (action === Action.ATTACK) {
+          let targetId = targets.get(id);
+          if (targetId === undefined) {
+            targetId = this.getRandomPlayerId();
+            this.targets.set(id, targetId);
+          }
+          const target = this.players.get(targetId);
+          if (!target) {
+            targetId = this.getRandomPlayerId();
+            this.targets.set(id, targetId);
+          }
+        }
+      } else {
+        const player = this.players.get(id);
+        if (!player) {
+          this.log(`skipping turn for ${id}`);
+          continue;
+        }
+      }
+    }
+
     this.pushUpdate();
-  }
+  };
+
+  pickTarget() {}
 
   end() {}
 
@@ -172,13 +243,13 @@ export class BattleInstance {
     this.players.delete(playerId);
   }
 
-  // freeze combatants for this turn
-  // can we use turn order instead
-  lockCombatants() {}
+  copyActions() {
+    return new Map(this.actions);
+  }
 
-  lockActions() {}
-
-  lockTargets() {}
+  copyTargets() {
+    return new Map(this.targets);
+  }
 
   generateTurnOrder() {
     this.turnOrder = this.combatants.sort(BattleInstance.SORT_BY_SPEED).map(BattleInstance.MAP_TO_ID);

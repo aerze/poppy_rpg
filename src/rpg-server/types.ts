@@ -31,7 +31,7 @@ export interface Monster {
   id: string;
   type: string;
   name: string;
-  imageUrl: string;
+  assetUrl: string;
   maxHealth: number;
   health: number;
   maxMana: number;

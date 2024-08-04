@@ -4,18 +4,22 @@ import { Badge, Equipment, Item, Pet, Quest, Ability, Stats, Title, Status, Acti
 export interface BasePlayerInfo {
   name: string;
   color: string;
-  presetId: number;
+  presetId: PresetId;
 }
 
-// connected: true,
-// alive: true,
+export const PlayerPresetToUrl = {
+  0: "sprites/tay_test.png",
+  1: "sprites/abby_test.png",
+};
+
+export type PresetId = keyof typeof PlayerPresetToUrl;
 
 export interface Player {
   id: string;
   type: "PLAYER";
   name: string;
   color: string;
-  presetId: number;
+  presetId: PresetId;
   backstory: string;
   maxHealth: number;
   health: number;

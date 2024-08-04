@@ -1,6 +1,11 @@
 import React from "react";
 import { DataType, SocketContext } from "../../context/socket";
 import { TimerBar } from "../../components/timer-bar";
+import { Battle } from "./battle";
+
+function formalUrl(url) {
+  return `app/${url}`;
+}
 
 export const Phase = {
   0: "INIT",
@@ -40,33 +45,11 @@ export class DungeonScreen extends React.Component {
 
   render() {
     if (!this.context.battle) return "not in a battle yet";
+    const playerId = this.context.player.id;
     return (
       <>
         <div className="battle-screen">
-          <div className="battlefield">
-            {Object.values(this.context.battle?.players ?? {}).map((combatant) => {
-              return (
-                <div key={combatant.id} className={`combatant team-blue`}>
-                  {combatant.name}
-                  <br />
-                  <div className="health">
-                    {combatant.health}/{combatant.maxHealth}hp
-                  </div>
-                </div>
-              );
-            })}
-            {Object.values(this.context.battle?.enemies ?? {}).map((combatant) => {
-              return (
-                <div key={combatant.id} className={`combatant team-red`}>
-                  {combatant.name}
-                  <br />
-                  <div className="health">
-                    {combatant.health}/{combatant.maxHealth}hp
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <Battle />
         </div>
         <div className="battle-controls">
           <div>{Phase[this.context.battle.phase]}</div>

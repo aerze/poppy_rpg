@@ -1,7 +1,6 @@
 import { Socket } from "socket.io";
 import { BaseManager } from "./base-manager";
 import { Player } from "../data/player";
-import { Action } from "../types";
 
 export enum DataType {
   DUNGEON_LIST,
@@ -10,6 +9,7 @@ export enum DataType {
   JOIN_DUNGEON,
   BATTLE_SET_ACTION,
   BATTLE_SET_ASSIST,
+  BATTLE_SET_TARGET,
   UPDATE_PLAYER,
 }
 
@@ -44,6 +44,9 @@ export class Router extends BaseManager {
 
       case DataType.BATTLE_SET_ASSIST:
         return this.claire.dungeons.setAssist(player.id, options.assist);
+
+      case DataType.BATTLE_SET_TARGET:
+        return this.claire.dungeons.setTarget(player.id, options.targetId);
 
       case DataType.UPDATE_PLAYER:
         return await this.claire.socket.handlePlayerUpdate(socket, options.playerInfo);

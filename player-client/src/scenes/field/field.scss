@@ -4,6 +4,8 @@
   .battle-screen {
     height: 300px;
     position: relative;
+    background-color: rgb(240, 255, 255, 0.5);
+    border: 3px solid black;
   }
 
   .battle-controls {
@@ -40,23 +42,114 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+    position: relative;
 
-    .combatant {
-      width: 75px;
-      height: 50px;
-      border: 2px solid black;
+    .player-self-container {
+      width: 125px;
+      border: 2px solid rgb(0, 255, 162);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
 
-      &.team-red {
-        background-color: red;
-        align-self: flex-end;
-      }
-      &.team-blue {
-        background-color: aquamarine;
-      }
-
-      .health {
+      .player-name {
         font-size: 12px;
-        font-weight: 600;
+        text-align: center;
+      }
+
+      .health-bar {
+        width: 100%;
+        accent-color: red;
+      }
+
+      .mana-bar {
+        width: 100%;
+        accent-color: rgb(40, 40, 202);
+      }
+    }
+
+    .players-list {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      display: flex;
+      flex-direction: row;
+      width: calc(100% - 125px);
+      overflow-x: scroll;
+    }
+
+    .player-container {
+      border: 1px solid rgb(131, 131, 131);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2px;
+      // position: absolute;
+      bottom: 0;
+      right: 0;
+
+      .player-name {
+        font-size: 10px;
+        text-align: center;
+      }
+
+      .health-bar {
+        width: 65px;
+        height: 10px;
+        accent-color: red;
+      }
+
+      .mana-bar {
+        width: 65px;
+        height: 10px;
+        accent-color: rgb(40, 40, 202);
+      }
+    }
+
+    .enemies-list {
+      position: absolute;
+      right: 0;
+      top: 0;
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      overflow-x: scroll;
+    }
+
+    .enemy-container {
+      border: 1px solid rgb(131, 131, 131);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2px;
+      // position: absolute;
+      bottom: 0;
+      right: 0;
+
+      .player-name {
+        font-size: 10px;
+        text-align: center;
+      }
+
+      .health-bar {
+        width: 65px;
+        height: 10px;
+        accent-color: red;
+      }
+
+      .mana-bar {
+        width: 65px;
+        height: 10px;
+        accent-color: rgb(40, 40, 202);
       }
     }
   }

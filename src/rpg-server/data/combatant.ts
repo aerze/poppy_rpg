@@ -1,5 +1,5 @@
 import { Monster, Stats } from "../types";
-import { Player } from "./player";
+import { Player, PlayerPresetToUrl } from "./player";
 
 export interface CombatantOptions {
   id: string;
@@ -12,11 +12,24 @@ export interface CombatantOptions {
   stats: Stats;
   level: number;
   xp: number;
+  assetUrl: string;
 }
 
 export class Combatant {
   static fromPlayer(player: Player) {
-    return new Combatant(player);
+    return new Combatant({
+      id: player.id,
+      type: player.type,
+      name: player.name,
+      maxHealth: player.maxHealth,
+      health: player.health,
+      maxMana: player.maxMana,
+      mana: player.mana,
+      stats: player.stats,
+      level: player.level,
+      xp: player.xp,
+      assetUrl: PlayerPresetToUrl[player.presetId],
+    });
   }
 
   static fromMonster(monster: Monster) {
@@ -43,6 +56,8 @@ export class Combatant {
 
   xp: number;
 
+  assetUrl: string;
+
   constructor(options: CombatantOptions) {
     this.id = options.id;
     this.type = options.type;
@@ -54,6 +69,7 @@ export class Combatant {
     this.stats = options.stats;
     this.level = options.level;
     this.xp = options.xp;
+    this.assetUrl = options.assetUrl;
   }
 
   toJSON() {
@@ -68,6 +84,7 @@ export class Combatant {
       stats: this.stats,
       level: this.level,
       xp: this.xp,
+      assetUrl: this.assetUrl,
     };
   }
 }

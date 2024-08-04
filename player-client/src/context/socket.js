@@ -19,7 +19,8 @@ export const DataType = {
   JOIN_DUNGEON: 3,
   BATTLE_SET_ACTION: 4,
   BATTLE_SET_ASSIST: 5,
-  UPDATE_PLAYER: 6,
+  BATTLE_SET_TARGET: 6,
+  UPDATE_PLAYER: 7,
 };
 
 export class SocketProvider extends Component {
@@ -52,7 +53,7 @@ export class SocketProvider extends Component {
    * @param {*} options
    * @param {*} callback
    */
-  sendData(dataType, options = null, callback) {
+  send(dataType, options = null, callback) {
     this.socket.emit("RPG:REQUEST", dataType, options, callback);
   }
 
@@ -67,7 +68,7 @@ export class SocketProvider extends Component {
   };
 
   updatePlayer = (playerInfo, callback) => {
-    this.sendData(DataType.UPDATE_PLAYER, { playerInfo }, (player) => {
+    this.send(DataType.UPDATE_PLAYER, { playerInfo }, (player) => {
       this.setState((state) => ({
         ...state,
         player: {
@@ -110,7 +111,7 @@ export class SocketProvider extends Component {
   };
 
   updateDungeonList = () => {
-    this.sendData(DataType.DUNGEON_LIST, null, (dungeons) => {
+    this.send(DataType.DUNGEON_LIST, null, (dungeons) => {
       this.setState({ dungeons });
     });
   };
@@ -122,7 +123,7 @@ export class SocketProvider extends Component {
   joinDungeon = () => {
     const dungeonId = this.state.dungeonInfo.id;
     if (dungeonId === undefined) return;
-    this.sendData(DataType.JOIN_DUNGEON, { dungeonId }, (dungeonJoined) => {
+    this.send(DataType.JOIN_DUNGEON, { dungeonId }, (dungeonJoined) => {
       if (dungeonJoined) {
         this.setState({ fieldScreen: SCREENS.BATTLEFIELD });
       }
@@ -152,7 +153,7 @@ export class SocketProvider extends Component {
       fieldScreen: this.state.fieldScreen,
 
       connect: this.connect,
-      send: this.sendData,
+      send: this.send,
       updatePlayer: this.updatePlayer,
       updateDungeonList: this.updateDungeonList,
       getDungeonInfo: this.getDungeonInfo,

@@ -157,6 +157,14 @@ export class DungeonInstance {
     }
   }
 
+  setTarget(playerId: Player["id"], targetId: Combatant["id"]) {
+    if (!this.battle) return false;
+
+    this.log(`${playerId} joined`);
+    this.battle.targets.set(playerId, targetId);
+    return true;
+  }
+
   start() {
     this.battle?.start();
   }
