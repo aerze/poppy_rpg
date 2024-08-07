@@ -25,7 +25,7 @@ export const DUNGEONS = {
     return [
       {
         rooms: [
-          makeChikemRoom(14, [1, 2]),
+          makeChikemRoom(2, [30, 30]),
           makeRabbitRoom(12, [1, 2]),
           makeChikemRoom(2, [1, 2]),
           makeRabbitRoom(2, [2, 3]),

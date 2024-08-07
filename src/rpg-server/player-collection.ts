@@ -94,7 +94,7 @@ export class PlayerCollection extends BaseManager {
     }
   }
 
-  async update(socket: Socket, player: Partial<Player>, playerId: string) {
+  async update(playerId: string, player: Partial<Player>, socket?: Socket) {
     const playerNoId = { ...player };
     delete (playerNoId as any)._id;
     delete playerNoId.id;

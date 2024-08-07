@@ -12,7 +12,7 @@ export const MONSTERS = {
   CHIKEM: (level: number, id: string = `m${counter.next()}`): Monster => {
     const stats: Stats = {
       health: Math.ceil(level / 10),
-      attack: Math.ceil(level / 1.5),
+      attack: Math.ceil(level * 1.5),
       defense: Math.ceil(level / 1.5),
       mana: Math.ceil(level / 10),
       magic: Math.ceil(level / 1.5),

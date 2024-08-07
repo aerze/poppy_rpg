@@ -40,7 +40,7 @@ export class DungeonManager extends BaseManager {
 
   createInstance(dungeonType: DungeonType) {
     this.log(`Creating new ${dungeonType.name} dungeon.`);
-    const instance = new DungeonInstance(this.dungeonCounter++, dungeonType);
+    const instance = new DungeonInstance(this.claire, this.dungeonCounter++, dungeonType);
     this.instances.set(instance.id, instance);
     return instance;
   }

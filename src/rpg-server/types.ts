@@ -24,7 +24,7 @@ export interface Stats {
   magic: number;
   resist: number;
   speed: number;
-  luck: number;
+  luck: number; // max 100
 }
 
 export interface Monster {

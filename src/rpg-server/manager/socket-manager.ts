@@ -57,7 +57,7 @@ export class SocketManager extends BaseManager {
       socket.once("RPG:HANDLE_SIGN_UP", this.handlePlayerSignup.bind(this, socket));
     } else {
       const connectedPlayer = { ...DefaultPlayer, ...player };
-      this.claire.db.players.update(socket, connectedPlayer, player.id);
+      this.claire.db.players.update(player.id, connectedPlayer, socket);
 
       socket.emit("RPG:SIGN_IN", connectedPlayer);
       this.initializeConnectedPlayer(socket, player);
@@ -109,7 +109,7 @@ export class SocketManager extends BaseManager {
     if (!basePlayerInfo.id) return;
     this.debug(`updating player info`);
 
-    const result = await this.claire.db.players.update(socket, basePlayerInfo, basePlayerInfo.id);
+    const result = await this.claire.db.players.update(basePlayerInfo.id, basePlayerInfo, socket);
     if (result) {
       return basePlayerInfo;
     }

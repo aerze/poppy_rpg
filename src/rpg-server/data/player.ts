@@ -28,6 +28,7 @@ export interface Player {
   level: number;
   xp: number;
   stats: Stats;
+  availableStatPoints: number;
   skills: Skills;
   abilities: Ability[];
   abilitySlots: {
@@ -82,6 +83,7 @@ export const DefaultPlayer: Player = {
     // add dungeon modifier for tuning
     luck: 1,
   },
+  availableStatPoints: 0,
   skills: {
     [SkillType.Emoting]: 1,
     [SkillType.Slapping]: 1,
