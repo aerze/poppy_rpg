@@ -17,10 +17,13 @@ export const DataType = {
   DUNGEON_INSTANCE_LIST: 1,
   DUNGEON_INSTANCE_INFO: 2,
   JOIN_DUNGEON: 3,
-  BATTLE_SET_ACTION: 4,
-  BATTLE_SET_ASSIST: 5,
-  BATTLE_SET_TARGET: 6,
-  UPDATE_PLAYER: 7,
+  LEAVE_DUNGEON: 4,
+  BATTLE_SET_ACTION: 5,
+  BATTLE_SET_ASSIST: 6,
+  BATTLE_SET_TARGET: 7,
+  GET_PLAYER: 8,
+  UPDATE_PLAYER: 9,
+  ASSIGN_STAT_POINTS: 10,
 };
 
 export class SocketProvider extends Component {
@@ -130,12 +133,42 @@ export class SocketProvider extends Component {
     });
   };
 
+  leaveDungeon = () => {
+    this.send(DataType.LEAVE_DUNGEON, null, (result) => {
+      if (result) {
+        this.setState({ fieldScreen: SCREENS.DUNGEON_LIST });
+      }
+    });
+  };
+
   handleDungeonUpdate = ({ battle }) => {
     console.log("DUNGEON >>", battle);
     this.setState((state) => {
       return {
         ...state,
-        battle: { ...state.battle, ...battle },
+        battle: {
+          ...state.battle,
+          ...battle,
+        },
+      };
+    });
+  };
+
+  refreshPlayer = () => {
+    this.send(DataType.GET_PLAYER, null, (player) => {
+      this.handlePlayerUpdate({ player });
+    });
+  };
+
+  handlePlayerUpdate = ({ player }) => {
+    console.log("PLAYER >>", player);
+    this.setState((state) => {
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          ...player,
+        },
       };
     });
   };
@@ -158,6 +191,8 @@ export class SocketProvider extends Component {
       updateDungeonList: this.updateDungeonList,
       getDungeonInfo: this.getDungeonInfo,
       joinDungeon: this.joinDungeon,
+      leaveDungeon: this.leaveDungeon,
+      refreshPlayer: this.refreshPlayer,
     };
 
     return <SocketContext.Provider value={value}>{this.props.children}</SocketContext.Provider>;

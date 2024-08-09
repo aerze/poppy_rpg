@@ -45,7 +45,11 @@ export class DungeonManager extends BaseManager {
     return instance;
   }
 
-  joinInstance(instanceId: string, socket: Socket, player: Player) {
+  joinInstance(instanceId: string, socket: Socket, playerId: Player["id"]) {
+    const player = this.claire.players.get(playerId);
+    if (!player) {
+      return false;
+    }
     const dungeonType = DungeonTypes.find((d) => d.id === instanceId);
     if (!dungeonType) {
       this.log(`failed to join instance with id ${instanceId}`);
@@ -78,6 +82,16 @@ export class DungeonManager extends BaseManager {
         return true;
       }
     }
+  }
+
+  leaveInstance(playerId: Player["id"]) {
+    const existingDungeonId = this.playerToInstanceId.get(playerId);
+    if (!existingDungeonId) return false;
+    const dungeon = this.instances.get(existingDungeonId);
+    if (!dungeon) return false;
+
+    dungeon.leave(playerId);
+    return true;
   }
 
   setAction(playerId: string, action: Action) {

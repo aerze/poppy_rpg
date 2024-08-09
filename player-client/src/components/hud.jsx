@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { SceneContext } from "../context/scene";
 import { SocketContext } from "../context/socket";
 import { Alerts } from "./alerts";
+import { LevelUpModal } from "./levelup-modal";
 
 export function HUD() {
   const { scene, setScene } = useContext(SceneContext);
@@ -21,6 +22,7 @@ export function HUD() {
   return (
     <div className="hud">
       <Alerts />
+      <LevelUpModal />
 
       <div className="hud-button-group">
         <button disabled={disabled} className="hud-button" onClick={makeHandleSceneChange(1)}>
