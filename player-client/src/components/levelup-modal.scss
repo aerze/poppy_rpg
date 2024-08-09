@@ -1,0 +1,75 @@
+.levelup-modal {
+  z-index: 990;
+  position: absolute;
+  top: 0px;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 2em;
+
+  .levelup {
+    pointer-events: auto;
+    // margin-top: 1em;
+    border: 2px solid white;
+    border-radius: 5px;
+    background: white;
+    padding: 1em;
+    font-size: 14px;
+
+    .stat-container {
+      display: flex;
+      flex-direction: column;
+
+      .stat-row {
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 1rem;
+        justify-content: space-evenly;
+        align-items: center;
+
+        .stat-points-container {
+          display: flex;
+          flex-direction: row;
+        }
+
+        .stat-name {
+          font-size: 20px;
+          width: 100px;
+        }
+
+        .new-stat-value {
+          font-size: 20px;
+          font-weight: 700;
+          margin: 0 20px 0 auto;
+        }
+
+        .stat-down,
+        .stat-up,
+        .stat-value {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border: 1px solid black;
+          width: 2rem;
+          height: 2rem;
+        }
+
+        .stat-down,
+        .stat-up {
+          cursor: pointer;
+        }
+      }
+    }
+
+    .stat-buttons {
+      display: flex;
+      flex-direction: row;
+
+      button {
+        flex: 1;
+        height: 2rem;
+      }
+    }
+  }
+}

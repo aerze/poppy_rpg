@@ -43,6 +43,10 @@ export class DungeonScreen extends React.Component {
     });
   };
 
+  handleLeaveDungeon = () => {
+    this.context.leaveDungeon();
+  };
+
   render() {
     if (!this.context.battle) return "not in a battle yet";
     const playerId = this.context.player.id;
@@ -76,6 +80,9 @@ export class DungeonScreen extends React.Component {
             <button className="battle-button">Ability 3</button>
             <button className="battle-button">Ability 4</button>
             <button className="battle-button">Item</button> */}
+            <button className="battle-leave" onClick={this.handleLeaveDungeon}>
+              Leave
+            </button>
           </div>
         </div>
       </>

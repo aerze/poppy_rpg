@@ -162,6 +162,7 @@ export class DungeonInstance {
         if (nextRoom === null) {
           this.log(`dungeon complete`);
           // do a flip (celebrate)
+          this.destroy();
           return;
         }
 
@@ -195,6 +196,7 @@ export class DungeonInstance {
         if (nextRoom === null) {
           this.log(`dungeon complete`);
           // do a flip (celebrate)
+          this.destroy();
           return;
         }
 
@@ -204,6 +206,10 @@ export class DungeonInstance {
         return;
       }
     }
+  }
+
+  destroy() {
+    this.log(`ready for destruction`);
   }
 
   promotePlayer(player: Player, xp: number) {

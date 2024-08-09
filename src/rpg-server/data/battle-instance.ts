@@ -259,6 +259,9 @@ export class BattleInstance {
         // handle enemy actions
         if (action === Action.ATTACK) {
           const target = this.findPlayerTarget(targets, monster.id);
+          if (!target) {
+            break;
+          }
           const [damage, crit, dodge] = this.attack(monster, target, blocks.includes(target.id));
           results.push([monster.id, target.id, damage, crit, dodge]);
         }
@@ -276,6 +279,9 @@ export class BattleInstance {
         // handle player actions
         if (action === Action.ATTACK) {
           const target = this.findEnemyTarget(targets, player.id);
+          if (!target) {
+            break;
+          }
           const [damage, crit, dodge] = this.attack(player, target, blocks.includes(target.id));
           results.push([player.id, target.id, damage, crit, dodge]);
         }
@@ -299,6 +305,8 @@ export class BattleInstance {
     }
 
     const target = this.getRandomPlayer(BattleInstance.LIVING_FILTER);
+    if (!target) return;
+
     this.targets.set(sourceId, target.id);
     return target;
   }
@@ -315,6 +323,8 @@ export class BattleInstance {
     }
 
     const target = this.getRandomEnemy(BattleInstance.LIVING_FILTER);
+    if (!target) return;
+
     this.targets.set(sourceId, target.id);
     return target;
   }
