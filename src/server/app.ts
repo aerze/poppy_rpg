@@ -11,6 +11,10 @@ if (!process.env.MONGODB_URL) {
   throw Error("Failed to locate MongoURL");
 }
 
+const ROOT_DIR = process.cwd();
+const CLIENT_DIR = path.join(ROOT_DIR, "./player-client/build");
+const CLIENT_ROOT = path.join(CLIENT_DIR, "./index.html");
+
 // export const game = new Game(client);
 export const app = express();
 
@@ -34,8 +38,8 @@ app.use(
   })
 );
 
-// app.use(express.static(path.join(__dirname, "../../dist/builds")));
-app.use("/app", express.static(path.join(__dirname, "../../player-client/build")));
+app.use("/app", express.static(CLIENT_DIR));
+app.get("/app/*", (req, res) => res.sendFile(CLIENT_ROOT));
 
 app.use("/admin", express.static(path.join(__dirname, "../../admin")));
 // This is a test route to check the twitch authentication

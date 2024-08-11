@@ -13,9 +13,13 @@
     display: flex;
     flex-direction: row;
 
-    .hud-button {
+    .hud-link {
       flex: 1 1 80px;
+    }
+
+    .hud-button {
       height: 100%;
+      width: 100%;
       font-size: 2em;
     }
   }

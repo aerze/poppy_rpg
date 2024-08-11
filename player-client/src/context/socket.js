@@ -1,4 +1,5 @@
 import { Component, createContext } from "react";
+import { redirect } from "react-router-dom";
 import { io } from "socket.io-client";
 
 export const SocketContext = createContext(null);
@@ -44,6 +45,7 @@ export class SocketProvider extends Component {
     console.log(">> connect");
     if (!this.socket) {
       this.socket = io("localhost:3000");
+      window.socket = this.socket;
       this.socket.on("connect", this.handleConnect);
       this.socket.on("disconnect", this.handleDisconnect);
     } else {
@@ -62,6 +64,8 @@ export class SocketProvider extends Component {
 
   handleConnect = () => {
     console.log("handleConnect");
+    redirect("/app/town");
+    console.log("did the redirect");
     this.setState({ connected: true });
     this.socket.on("RPG:Error", this.handleError);
     this.socket.on("RPG:PLAYER_INFO_UPDATED", this.handlePlayerInfoUpdated);
@@ -91,6 +95,7 @@ export class SocketProvider extends Component {
 
   handleDisconnect = () => {
     console.log(">> Client Disconnected");
+    redirect("/app");
     this.setState({ connected: false });
   };
 

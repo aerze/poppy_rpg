@@ -50,7 +50,7 @@ export class Battle extends React.Component {
           style={{
             width: "100px",
             height: "100px",
-            backgroundImage: `url('app/${player.assetUrl}')`,
+            backgroundImage: `url('/app/${player.assetUrl}')`,
             backgroundSize: "contain",
           }}
         ></div>
@@ -101,7 +101,7 @@ export class Battle extends React.Component {
             style={{
               width: "65px",
               height: "65px",
-              backgroundImage: `url('app/${player.assetUrl}')`,
+              backgroundImage: `url('/app/${player.assetUrl}')`,
               backgroundSize: "contain",
             }}
           ></div>
@@ -134,7 +134,7 @@ export class Battle extends React.Component {
             style={{
               width: "65px",
               height: "65px",
-              backgroundImage: `url('app/${enemy.assetUrl}')`,
+              backgroundImage: `url('/app/${enemy.assetUrl}')`,
               backgroundSize: "contain",
             }}
           ></div>

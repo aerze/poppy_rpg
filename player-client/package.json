@@ -13,6 +13,7 @@
     "react-dnd-preview": "^8.0.3",
     "react-dnd-touch-backend": "^16.0.1",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0",
     "react-scripts": "5.0.1",
     "sass": "^1.77.6",
     "socket.io-client": "^4.7.5",

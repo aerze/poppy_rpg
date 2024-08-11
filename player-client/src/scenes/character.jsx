@@ -1,11 +1,9 @@
 import { useContext, useState } from "react";
 import { DragPreviewImage, useDrag, useDrop } from "react-dnd";
 import "./character.scss";
-import { PlayerContext } from "../context/player";
 import { SocketContext } from "../context/socket";
 
 export function CharacterEquipmentOverlay() {
-  const { player } = useContext(PlayerContext);
   return (
     <div className="equipment-overlay">
       <div className="equipment left-equipment">

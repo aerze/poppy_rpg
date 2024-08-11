@@ -1,10 +1,15 @@
 import "./App.css";
-import { SceneProvider } from "./context/scene";
+import React, { useContext } from "react";
+import ReactDOM from "react-dom/client";
 import { Main } from "./components/main";
 import { DndProvider } from "react-dnd";
 import { TouchBackend } from "react-dnd-touch-backend";
-import { PlayerProvider } from "./context/player";
-import { SocketProvider } from "./context/socket";
+import { SocketContext, SocketProvider } from "./context/socket";
+import { createBrowserRouter, Link, Navigate, RouterProvider, useNavigate } from "react-router-dom";
+import ErrorPage from "./pages/error";
+import { HUD } from "./components/hud";
+import { CharacterScene } from "./scenes/character";
+import { FieldScene } from "./scenes/field/field";
 
 const hasNative = document && (document.elementsFromPoint || document.msElementsFromPoint);
 
@@ -21,16 +26,70 @@ const backendOptions = {
   getDropTargetElementsAtPoint: !hasNative && getDropTargetElementsAtPoint,
 };
 
+function Redirect() {
+  const { connected } = useContext(SocketContext);
+
+  if (!connected) {
+    return <Navigate to="/app/menu" replace={true} />;
+  } else {
+    return <Navigate to="/app/🐸" replace={true} />;
+  }
+}
+
+const router = createBrowserRouter([
+  {
+    errorElement: <Redirect />,
+  },
+  {
+    path: "/app",
+    element: <Redirect />,
+    // errorElement: <ErrorPage />,
+  },
+
+  {
+    path: "/app/menu",
+    element: <Main />,
+    // errorElement: <ErrorPage />,
+  },
+  {
+    path: "/app/🐸",
+    element: <HUD />,
+    // errorElement: <ErrorPage />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to="✨"></Navigate>,
+      },
+      {
+        path: "🤔",
+        element: <CharacterScene></CharacterScene>,
+      },
+      {
+        path: "🏡",
+        element: <h2> home </h2>,
+      },
+      {
+        path: "✨",
+        element: <FieldScene></FieldScene>,
+      },
+      {
+        path: "🛒",
+        element: <h2> shops </h2>,
+      },
+      {
+        path: "🪅",
+        element: <h2> guild </h2>,
+      },
+    ],
+  },
+]);
+
 function App() {
   return (
     <SocketProvider>
-      <SceneProvider>
-        <PlayerProvider>
-          <DndProvider backend={TouchBackend} options={backendOptions}>
-            <Main />
-          </DndProvider>
-        </PlayerProvider>
-      </SceneProvider>
+      <DndProvider backend={TouchBackend} options={backendOptions}>
+        <RouterProvider router={router}></RouterProvider>
+      </DndProvider>
     </SocketProvider>
   );
 }
