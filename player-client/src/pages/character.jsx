@@ -47,7 +47,7 @@ export class Character extends React.Component {
 
   render() {
     return (
-      <div className="character-container simple-container column">
+      <div className="character-container simple-container column main-background">
         <div className="hud-top-buffer"></div>
         <CharacterView player={this.context.player} />
         <div className="character-form-container">

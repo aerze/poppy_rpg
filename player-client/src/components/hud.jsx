@@ -21,13 +21,12 @@ export function HUD() {
   const navigate = useNavigate();
 
   if (!connected) {
-    console.log(">> not connected", connected);
+    console.log("HUD: not connected, redirecting to /app/menu");
     return <Navigate to="/app/menu" replace={true} />;
   }
 
   const disabled = isNewPlayer;
 
-  console.log("p", player);
   return (
     <>
       <Preview generator={generatePreview} />

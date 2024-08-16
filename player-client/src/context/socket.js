@@ -117,7 +117,6 @@ export class SocketProvider extends Component {
     console.log(">> RPG:SIGN_IN");
     this.socket.off("RPG:SIGN_UP");
     this.setState({ player });
-    this.updateDungeonList();
   };
 
   handleSignUp = ({ name }) => {
@@ -133,6 +132,7 @@ export class SocketProvider extends Component {
   };
 
   updateDungeonList = () => {
+    console.log(">> updating dungeon list");
     this.send(DataType.DUNGEON_LIST, null, (dungeons) => {
       this.setState({ dungeons });
     });
@@ -145,17 +145,13 @@ export class SocketProvider extends Component {
   joinDungeon = () => {
     const dungeonId = this.state.dungeonInfo.id;
     if (dungeonId === undefined) return;
-    this.send(DataType.JOIN_DUNGEON, { dungeonId }, (dungeonJoined) => {
-      if (dungeonJoined) {
-        this.setState({ fieldScreen: SCREENS.BATTLEFIELD });
-      }
-    });
+    this.send(DataType.JOIN_DUNGEON, { dungeonId });
   };
 
   leaveDungeon = () => {
     this.send(DataType.LEAVE_DUNGEON, null, (result) => {
       if (result) {
-        this.setState({ fieldScreen: SCREENS.DUNGEON_LIST });
+        this.setState({ battle: undefined });
       }
     });
   };
@@ -193,6 +189,7 @@ export class SocketProvider extends Component {
   };
 
   render() {
+    console.log("socket.render()");
     const value = {
       // local read-only data
       socket: this.socket,

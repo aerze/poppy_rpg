@@ -1,0 +1,178 @@
+.battle {
+}
+
+.battle-screen {
+  background-color: black;
+  height: 300px;
+  width: 100%;
+  position: relative;
+}
+
+.battlefield {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  .player-self-container {
+    width: 125px;
+    border: 2px solid rgb(0, 255, 162);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    .player-name {
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .health-bar {
+      width: 100%;
+      accent-color: red;
+    }
+
+    .mana-bar {
+      width: 100%;
+      accent-color: rgb(40, 40, 202);
+    }
+  }
+
+  .players-list {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: row;
+    width: calc(100% - 125px);
+    overflow-x: scroll;
+  }
+
+  .player-container {
+    border: 1px solid rgb(131, 131, 131);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2px;
+    // position: absolute;
+    bottom: 0;
+    right: 0;
+
+    .player-name {
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .health-bar {
+      width: 65px;
+      height: 10px;
+      accent-color: red;
+    }
+
+    .mana-bar {
+      width: 65px;
+      height: 10px;
+      accent-color: rgb(40, 40, 202);
+    }
+  }
+
+  .enemies-list {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    overflow-x: scroll;
+  }
+
+  .enemy-container {
+    border: 1px solid rgb(131, 131, 131);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2px;
+    // position: absolute;
+    bottom: 0;
+    right: 0;
+
+    .player-name {
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .health-bar {
+      width: 65px;
+      height: 10px;
+      accent-color: red;
+    }
+
+    .mana-bar {
+      width: 65px;
+      height: 10px;
+      accent-color: rgb(40, 40, 202);
+    }
+  }
+}
+
+.battle-info {
+  width: 100%;
+  padding: 0 1em;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  .turn-progress {
+    width: 100%;
+  }
+}
+
+.battle-controls {
+  display: flex;
+  flex-direction: column-reverse;
+  flex: 1;
+  padding: 1em;
+
+  .battle-button {
+    width: 100%;
+    height: 48px;
+    margin-top: 8px;
+    padding: 4px 16px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 1px 1px rgba(203, 203, 203, 0.697);
+    background-color: white;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:active {
+      box-shadow: inset 2px 2px 1px 1px rgba(203, 203, 203, 0.697);
+      bottom: 12px;
+      right: 12px;
+    }
+  }
+
+  .battle-button-group {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .button-leave {
+    height: 32px;
+  }
+
+  .button-assist {
+    height: 32px;
+    margin-top: 48px;
+  }
+}

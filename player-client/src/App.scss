@@ -87,12 +87,14 @@ body {
 .hud-bottom-buffer {
   // margin-top: 6px;
   height: 60px;
+  flex: 0 0 60px;
   // background: #f1f5fb;
 }
 
 .hud-top-buffer {
   // margin-top: 6px;
   height: 30px;
+  flex: 0 0 30px;
   // background: #f1f5fb;
 }
 
@@ -151,4 +153,12 @@ body {
   100% {
     background-position: 0% 10%;
   }
+}
+
+.main-background {
+  background-image: url("../public/assets/field.png");
+  width: 100%;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }

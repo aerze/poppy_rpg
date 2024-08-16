@@ -10,7 +10,7 @@ export class Town extends React.Component {
     }
 
     return (
-      <div className="simple-container column-reverse town">
+      <div className="simple-container column-reverse town main-background">
         <div className="hud-bottom-buffer"></div>
         {/* <div className="main-actions row">
         <div className="left-action">Character</div>

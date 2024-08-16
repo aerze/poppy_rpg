@@ -5,13 +5,15 @@ import { Main } from "./components/main";
 import { DndProvider } from "react-dnd";
 import { TouchBackend } from "react-dnd-touch-backend";
 import { SocketContext, SocketProvider } from "./context/socket";
-import { createBrowserRouter, Link, Navigate, RouterProvider, useNavigate } from "react-router-dom";
+import { createBrowserRouter, Link, Navigate, Outlet, RouterProvider, useNavigate } from "react-router-dom";
 import ErrorPage from "./pages/error";
 import { HUD } from "./components/hud";
 import { CharacterScene } from "./scenes/character";
 import { FieldScene } from "./scenes/field/field";
 import { Town } from "./pages/town";
 import { Character } from "./pages/character";
+import { Dungeons } from "./pages/dungeons";
+import { Battle } from "./pages/battle";
 
 const hasNative = document && (document.elementsFromPoint || document.msElementsFromPoint);
 
@@ -64,7 +66,7 @@ const router = createBrowserRouter([
       },
       {
         path: "🏡",
-        element: <Town></Town>,
+        element: <Town />,
       },
       {
         path: "🤔",
@@ -72,7 +74,16 @@ const router = createBrowserRouter([
       },
       {
         path: "✨",
-        element: <FieldScene></FieldScene>,
+        children: [
+          {
+            index: true,
+            element: <Dungeons />,
+          },
+          {
+            path: "battle",
+            element: <Battle />,
+          },
+        ],
       },
       {
         path: "🪅",
