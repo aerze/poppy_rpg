@@ -216,22 +216,19 @@ export class DungeonInstance {
     player.xp += xp;
 
     if (player.level < 10) {
-      let levelRequirement = this.getLevelRequirement(player.level);
+      let levelRequirement = this.claire.players.getLevelRequirement(player.level);
+      player.nextLevel = levelRequirement;
 
       while (player.xp >= levelRequirement) {
         player.level += 1;
         player.availableStatPoints += 8;
-        levelRequirement = this.getLevelRequirement(player.level);
+        levelRequirement = this.claire.players.getLevelRequirement(player.level);
       }
     }
 
     this.claire.db.players.update(player.id, player);
     const socket = this.sockets.get(player.id);
     socket?.emit("RPG:PLAYER", { player });
-  }
-
-  getLevelRequirement(level: number) {
-    return Math.floor((level * level * level) / Math.log10(level + 1) + 100);
   }
 
   setAction(playerId: Player["id"], action: Action) {

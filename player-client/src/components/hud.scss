@@ -4,23 +4,126 @@
   height: 100%;
   pointer-events: none;
 
-  .hud-button-group {
+  .header {
+    background-color: white;
+    box-shadow: 0px 1px 1px 1px rgba(203, 203, 203, 0.697);
     position: absolute;
-    bottom: 0px;
-    height: 70px;
+    top: 0px;
+    height: 30px;
     width: 100%;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
     pointer-events: auto;
     display: flex;
     flex-direction: row;
 
+    padding: 4px;
+    font-size: 12px;
+    align-items: center;
+
+    .level {
+      box-sizing: border-box;
+      margin: 0 6px;
+      padding-right: 3px;
+      border-right: 1px solid rgba(0, 0, 0, 0.145);
+    }
+
+    .xp {
+      height: 12px;
+      width: 150px;
+      color: white;
+      border-radius: 6px;
+      background: #1111111a;
+      box-shadow: inset 2px 2px 1px 1px rgba(203, 203, 203, 0.697);
+      // padding-left: 1em;
+      border-right: 1px solid rgba(0, 0, 0, 0.145);
+
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      .value {
+        height: 12px;
+        padding: 0 6px;
+        position: absolute;
+        // left: 1em;
+        border-radius: 6px;
+        background-color: rgba(0, 0, 0, 0.068);
+        display: flex;
+        align-items: center;
+
+        .label {
+          font-size: 10px;
+          font-weight: 600;
+          margin-right: 4px;
+        }
+      }
+
+      .fill {
+        height: 100%;
+        width: 50%;
+        background: rgb(45, 168, 255);
+
+        border-radius: 6px;
+        box-shadow: inset 0px 2px 0px 0px rgb(255 255 255 / 50%);
+      }
+    }
+  }
+
+  .hud-button-group {
+    position: absolute;
+    bottom: 0px;
+    height: 60px;
+    width: 100%;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    // background-color: rgb(240, 240, 240);
+
     .hud-link {
-      flex: 1 1 80px;
+      box-shadow: 0px -2px 0px 0px rgba(203, 203, 203, 0.697);
+      background-color: white;
+      height: 50px;
+      flex: 1 1 50px;
+      border-left: 2px solid rgba(203, 203, 203, 0.313);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-decoration: none;
+
+      &.disabled {
+        background-color: rgb(240, 240, 240);
+      }
+
+      &:first-child {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        border-left: none;
+        margin-right: 12px;
+      }
+
+      &:nth-child(2) {
+        border-top-left-radius: 8px;
+        border-left: none;
+      }
+
+      &:last-child {
+        border-top-right-radius: 8px;
+      }
     }
 
     .hud-button {
       height: 100%;
       width: 100%;
-      font-size: 2em;
+      font-size: 1.5em;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      cursor: pointer;
+      text-decoration: none;
     }
   }
 }

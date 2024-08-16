@@ -1,4 +1,4 @@
-import "./App.css";
+import "./App.scss";
 import React, { useContext } from "react";
 import ReactDOM from "react-dom/client";
 import { Main } from "./components/main";
@@ -10,6 +10,8 @@ import ErrorPage from "./pages/error";
 import { HUD } from "./components/hud";
 import { CharacterScene } from "./scenes/character";
 import { FieldScene } from "./scenes/field/field";
+import { Town } from "./pages/town";
+import { Character } from "./pages/character";
 
 const hasNative = document && (document.elementsFromPoint || document.msElementsFromPoint);
 
@@ -26,7 +28,7 @@ const backendOptions = {
   getDropTargetElementsAtPoint: !hasNative && getDropTargetElementsAtPoint,
 };
 
-function Redirect() {
+export function Redirect() {
   const { connected } = useContext(SocketContext);
 
   if (!connected) {
@@ -58,27 +60,46 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="✨"></Navigate>,
-      },
-      {
-        path: "🤔",
-        element: <CharacterScene></CharacterScene>,
+        element: <Navigate to="🏡"></Navigate>,
       },
       {
         path: "🏡",
-        element: <h2> home </h2>,
+        element: <Town></Town>,
+      },
+      {
+        path: "🤔",
+        element: <Character />,
       },
       {
         path: "✨",
         element: <FieldScene></FieldScene>,
       },
       {
-        path: "🛒",
-        element: <h2> shops </h2>,
+        path: "🪅",
+        element: (
+          <div>
+            <div className="hud-top-buffer"></div>
+            <h2> party </h2>
+          </div>
+        ),
       },
       {
-        path: "🪅",
-        element: <h2> guild </h2>,
+        path: "⚖️",
+        element: (
+          <div>
+            <div className="hud-top-buffer"></div>
+            <h2> shops </h2>
+          </div>
+        ),
+      },
+      {
+        path: "⚜️",
+        element: (
+          <div>
+            <div className="hud-top-buffer"></div>
+            <h2> guild </h2>
+          </div>
+        ),
       },
     ],
   },

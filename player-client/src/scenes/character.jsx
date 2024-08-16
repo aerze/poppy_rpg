@@ -270,10 +270,9 @@ const CHARACTER_SPRITE_MAP = {
 };
 
 export function CharacterScene() {
-  const { isNewPlayer, player } = useContext(SocketContext);
+  const { player } = useContext(SocketContext);
   const [tabState, setTabState] = useState(0);
   const [presetId, setPresetId] = useState(player?.presetId ?? 0);
-  const disabled = isNewPlayer;
 
   return (
     <div className="character-scene column full-height">

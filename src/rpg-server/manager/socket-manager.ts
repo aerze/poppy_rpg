@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import { Claire } from "../claire";
 import { BaseManager } from "./base-manager";
-import { BasePlayerInfo, DefaultPlayer, Player } from "../data/player";
+import { BasePlayerInfo, DefaultPlayer, Player, PlayerPresetToUrl } from "../data/player";
 import { getSession } from "../../server/auth";
 import { parseCookies } from "../lib/helpers";
 import { DungeonType } from "../data/types/dungeon-types";
@@ -59,7 +59,7 @@ export class SocketManager extends BaseManager {
       const connectedPlayer = { ...DefaultPlayer, ...player };
       this.claire.db.players.update(player.id, connectedPlayer, socket);
 
-      socket.emit("RPG:SIGN_IN", connectedPlayer);
+      socket.emit("RPG:SIGN_IN", { ...player, assetUrl: PlayerPresetToUrl[player.presetId] });
       this.initializeConnectedPlayer(socket, player);
     }
   }
@@ -72,14 +72,17 @@ export class SocketManager extends BaseManager {
       return null;
     }
 
-    socket.emit("RPG:COMPLETED_SIGN_UP", player);
+    socket.emit("RPG:COMPLETED_SIGN_UP", { ...player, assetUrl: PlayerPresetToUrl[player.presetId] });
     this.initializeConnectedPlayer(socket, player);
   }
 
   async initializeConnectedPlayer(socket: Socket, player: Player) {
     this.log(`${player.name} has connected.`);
-    this.claire.players.set(player.id, player);
-    socket.on("RPG:REQUEST", this.claire.router.handleRequest.bind(this.claire.router, socket, player.id));
+    this.claire.players.add(player.id, player, socket);
+    socket.on(
+      "RPG:REQUEST",
+      this.claire.router.handleRequest.bind(this.claire.router, socket, player.id, player.roles)
+    );
     socket.on("disconnect", this.handleSocketDisconnected.bind(null, player));
   }
 

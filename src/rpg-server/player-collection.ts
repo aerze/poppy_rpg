@@ -25,7 +25,12 @@ export class PlayerCollection extends BaseManager {
     const cleanData = this.clean(playerInfo);
     this.log(`creating ${cleanData.name}`);
 
-    const player = { ...DefaultPlayer, ...cleanData, twitchId: socket.data.session.userid };
+    const player = {
+      ...DefaultPlayer,
+      ...cleanData,
+      twitchId: socket.data.session.userid,
+      nextLevel: this.claire.players.getLevelRequirement(1),
+    };
 
     try {
       const result = await this.collection?.insertOne(player);
@@ -98,6 +103,7 @@ export class PlayerCollection extends BaseManager {
     const playerNoId = { ...player };
     delete (playerNoId as any)._id;
     delete playerNoId.id;
+    delete playerNoId.roles;
 
     try {
       const result = await this.collection.updateOne({ _id: new ObjectId(playerId) }, { $set: player });

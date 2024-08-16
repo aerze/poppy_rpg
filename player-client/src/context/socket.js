@@ -31,12 +31,12 @@ export class SocketProvider extends Component {
   state = {
     connected: false,
     newPlayer: null,
-    player: null,
+    player: {},
     dungeons: [],
     dungeonInfo: undefined,
     battle: undefined,
     timer: undefined,
-    fieldScreen: SCREENS.DUNGEON_LIST,
+    town: undefined,
   };
 
   socket = null;
@@ -63,15 +63,26 @@ export class SocketProvider extends Component {
   }
 
   handleConnect = () => {
-    console.log("handleConnect");
-    redirect("/app/town");
-    console.log("did the redirect");
+    // console.log("handleConnect");
+    // redirect("/app/town");
+    // console.log("did the redirect");
     this.setState({ connected: true });
     this.socket.on("RPG:Error", this.handleError);
     this.socket.on("RPG:PLAYER_INFO_UPDATED", this.handlePlayerInfoUpdated);
     this.socket.on("RPG:DUNGEON", this.handleDungeonUpdate);
+    this.socket.on("RPG:ROOM", this.handleLobbyUpdate);
     this.socket.once("RPG:SIGN_IN", this.handleSignIn);
     this.socket.once("RPG:SIGN_UP", this.handleSignUp);
+  };
+
+  handleLobbyUpdate = (data) => {
+    this.setState((state) => ({
+      ...state,
+      town: {
+        ...state.town,
+        ...data,
+      },
+    }));
   };
 
   updatePlayer = (playerInfo, callback) => {
@@ -87,11 +98,14 @@ export class SocketProvider extends Component {
     });
   };
 
+  createPlayer = (playerInfo, callback) => {
+    this.socket.emit("RPG:HANDLE_SIGN_UP", playerInfo);
+    this.socket.once("RPG:COMPLETED_SIGN_UP", callback);
+  };
+
   handleError = ({ message, error }) => {
     console.error(message, error);
   };
-
-  handlePlayerInfoUpdated = (playerInfo) => {};
 
   handleDisconnect = () => {
     console.log(">> Client Disconnected");
@@ -110,7 +124,7 @@ export class SocketProvider extends Component {
     console.log(">> RPG:SIGN_UP");
     this.socket.off("RPG:SIGN_IN");
     this.socket.once("RPG:COMPLETED_SIGN_UP", this.handleCompletedSignUp);
-    this.setState({ newPlayer: true, player: { name } });
+    this.setState({ newPlayer: true, player: { name, presetId: 0 } });
   };
 
   handleCompletedSignUp = (player) => {
@@ -180,19 +194,29 @@ export class SocketProvider extends Component {
 
   render() {
     const value = {
+      // local read-only data
       socket: this.socket,
-
       connected: this.state.connected,
       isNewPlayer: this.state.newPlayer,
+
+      // socket read-only data
+      town: this.state.town,
       player: this.state.player,
+
+      // local methods
+      connect: this.connect,
+      updateLocalPlayer: this.handlePlayerUpdate,
+
+      // socket methods
+      send: this.send,
+      createPlayer: this.createPlayer,
+      updatePlayer: this.updatePlayer,
+
       dungeons: this.state.dungeons,
       dungeonInfo: this.state.dungeonInfo,
       battle: this.state.battle,
       fieldScreen: this.state.fieldScreen,
 
-      connect: this.connect,
-      send: this.send,
-      updatePlayer: this.updatePlayer,
       updateDungeonList: this.updateDungeonList,
       getDungeonInfo: this.getDungeonInfo,
       joinDungeon: this.joinDungeon,

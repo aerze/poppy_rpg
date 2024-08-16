@@ -1,6 +1,6 @@
 import { Socket } from "socket.io";
 import { BaseManager } from "./base-manager";
-import { Player } from "../data/player";
+import { Player, Roles } from "../data/player";
 
 export enum DataType {
   DUNGEON_LIST,
@@ -17,10 +17,17 @@ export enum DataType {
 }
 
 export class Router extends BaseManager {
-  async handleRequest(socket: Socket, playerId: string, type: DataType, options: any, callback: (v: any) => void) {
+  async handleRequest(
+    socket: Socket,
+    playerId: string,
+    roles: Roles[],
+    type: DataType,
+    options: any,
+    callback: (v: any) => void
+  ) {
     this.log(`/${DataType[type]}`, options);
     // const player = this.claire.players.get(playerId)!;
-    const result = await this.getData(type, options, socket, playerId);
+    const result = await this.getData(type, options, socket, playerId, roles);
     this.debug(`\n>> `, result);
 
     if (callback) {
@@ -28,7 +35,7 @@ export class Router extends BaseManager {
     }
   }
 
-  async getData(type: DataType, options: any, socket: Socket, playerId: Player["id"]) {
+  async getData(type: DataType, options: any, socket: Socket, playerId: Player["id"], roles: Roles[]) {
     switch (type) {
       case DataType.DUNGEON_LIST:
         return this.claire.dungeons.dungeonTypes;
@@ -55,7 +62,7 @@ export class Router extends BaseManager {
         return this.claire.dungeons.setTarget(playerId, options.targetId);
 
       case DataType.GET_PLAYER:
-        return this.claire.players.get(playerId);
+        return this.claire.players.map.get(playerId);
 
       case DataType.UPDATE_PLAYER:
         return await this.claire.socket.handlePlayerUpdate(socket, options.playerInfo);

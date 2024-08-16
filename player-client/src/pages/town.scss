@@ -1,0 +1,68 @@
+.town {
+  background-image: url("../../public/assets/field.png");
+  // flex: 1;
+  width: 100%;
+  background-position: center;
+  background-size: cover;
+  // background-size: 200%;
+  background-repeat: no-repeat;
+  // position: relative;
+  // bottom: -120px;
+}
+
+.main-actions {
+  // z-index: 200;
+  height: 200px;
+  // border: 1px solid #303031;
+  // padding: 30px 0px 50px 0px;
+  background-image: url("../../public/assets/main-actions.png");
+  background-position: bottom;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  align-items: flex-end;
+  justify-content: center;
+
+  .left-action,
+  .right-action {
+    width: 100px;
+    height: 60px;
+    // border: 3px solid #303031;
+    border: 3px solid #41b3d6;
+    background-color: #34b9e6;
+    border-radius: 20px;
+    margin-bottom: 8px;
+
+    font-size: 14px;
+    color: white;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 8px;
+  }
+
+  .left-action {
+  }
+
+  .right-action {
+  }
+
+  .main-action {
+    width: 100px;
+    height: 100px;
+    border: 3px solid #303031;
+    border-radius: 50%;
+    margin: 0 28px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.town-players {
+  .town-player {
+    width: 100px;
+    height: auto;
+  }
+}

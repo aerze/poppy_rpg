@@ -46,7 +46,7 @@ export class DungeonManager extends BaseManager {
   }
 
   joinInstance(instanceId: string, socket: Socket, playerId: Player["id"]) {
-    const player = this.claire.players.get(playerId);
+    const player = this.claire.players.map.get(playerId);
     if (!player) {
       return false;
     }

@@ -1,4 +1,5 @@
-import { Player } from "../data/player";
+import { Socket } from "socket.io";
+import { Player, PlayerId, PlayerPresetToUrl } from "../data/player";
 import { Stats } from "../types";
 import { BaseManager } from "./base-manager";
 
@@ -7,26 +8,91 @@ export enum Location {
   DUNGEON,
 }
 
+export const LocationToRoom = {
+  [Location.TOWN]: "town", // main lobby
+  [Location.DUNGEON]: "dungeon",
+};
+
 export class PlayerManager extends BaseManager {
-  map: Map<string, Player> = new Map();
+  map: Map<PlayerId, Player> = new Map();
 
-  locations: Map<string, Location> = new Map();
+  sockets: Map<PlayerId, Socket> = new Map();
 
-  get(playerId: string) {
-    return this.map.get(playerId);
+  locations: Map<PlayerId, Location> = new Map();
+
+  add(playerId: PlayerId, player: Player, socket: Socket) {
+    this.sockets.set(playerId, socket);
+    this.map.set(playerId, player);
+    this.setLocation(playerId, Location.TOWN, socket);
   }
 
-  set(playerId: string, player: Player) {
-    this.locations.set(playerId, Location.TOWN);
-    return this.map.set(playerId, player);
+  move(playerId: PlayerId, location: Location) {
+    const socket = this.sockets.get(playerId);
+    if (!socket) {
+      this.log(`Player ${playerId} failed to move, missing socket`);
+      return;
+    }
+
+    const previousLocation = this.locations.get(playerId);
+    if (previousLocation) {
+      const previousRoom = LocationToRoom[previousLocation];
+      socket.leave(previousRoom);
+      this.updateRoom(previousLocation);
+    } else {
+      this.log(`Player ${playerId} had no previous location?`);
+    }
+
+    const room = LocationToRoom[location];
+    this.locations.set(playerId, location);
+    socket.join(room);
+    this.updateRoom(location);
   }
 
-  move(playerId: string, location: Location) {
-    return this.locations.set(playerId, location);
+  setLocation(playerId: PlayerId, location: Location, socket: Socket) {
+    this.locations.set(playerId, location);
+    socket.join(LocationToRoom[location]);
+    this.updateRoom(location);
   }
 
-  remove(playerId: string) {
-    return this.map.delete(playerId);
+  updateRoom(location: Location) {
+    const players = this.getPlayersAt(location).map(this.getSimplePlayer);
+    this.claire.io.to(LocationToRoom[location]).emit("RPG:ROOM", { players });
+  }
+
+  getPlayersAt(filterLocation: Location) {
+    const players: Player[] = [];
+    for (const [playerId, location] of this.locations) {
+      if (location === filterLocation) {
+        const player = this.map.get(playerId);
+        if (player) players.push(player);
+      }
+    }
+    return players;
+  }
+
+  remove(playerId: PlayerId) {
+    const socket = this.sockets.get(playerId);
+    if (socket) {
+      const previousLocation = this.locations.get(playerId);
+      if (previousLocation) {
+        socket.leave(LocationToRoom[previousLocation]);
+      }
+    }
+
+    this.sockets.delete(playerId);
+    this.locations.delete(playerId);
+    this.map.delete(playerId);
+  }
+
+  getSimplePlayer(player: Player) {
+    return {
+      id: player.id,
+      name: player.name,
+      color: player.color,
+      level: player.level,
+      title: player.activeTitle,
+      assetUrl: PlayerPresetToUrl[player.presetId],
+    };
   }
 
   getStatsTotal(stats: Stats) {
@@ -57,5 +123,9 @@ export class PlayerManager extends BaseManager {
     await this.claire.db.players.update(playerId, player);
 
     return true;
+  }
+
+  getLevelRequirement(level: number) {
+    return Math.floor((level * level * level) / Math.log10(level + 1) + 100);
   }
 }

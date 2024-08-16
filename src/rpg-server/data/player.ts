@@ -14,9 +14,17 @@ export const PlayerPresetToUrl = {
 
 export type PresetId = keyof typeof PlayerPresetToUrl;
 
+export type PlayerId = Player["id"];
+
+export enum Roles {
+  PLAYER = "Player",
+  ADMIN = "Admin",
+}
+
 export interface Player {
   id: string;
   type: "PLAYER";
+  roles: Roles[];
   name: string;
   color: string;
   presetId: PresetId;
@@ -27,6 +35,7 @@ export interface Player {
   mana: number;
   level: number;
   xp: number;
+  nextLevel: number;
   stats: Stats;
   availableStatPoints: number;
   skills: Skills;
@@ -61,6 +70,7 @@ export interface Player {
 export const DefaultPlayer: Player = {
   id: "",
   type: "PLAYER",
+  roles: [Roles.PLAYER],
   name: "Unknown",
   color: "#A80085",
   presetId: 0,
@@ -71,6 +81,7 @@ export const DefaultPlayer: Player = {
   mana: 400,
   level: 1,
   xp: 0,
+  nextLevel: 0,
   stats: {
     health: 1,
     attack: 1,

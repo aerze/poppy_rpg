@@ -17,7 +17,7 @@ function generatePreview({ itemType, item, style }) {
 }
 
 export function HUD() {
-  const { connected, isNewPlayer } = useContext(SocketContext);
+  const { connected, isNewPlayer, player } = useContext(SocketContext);
   const navigate = useNavigate();
 
   if (!connected) {
@@ -27,43 +27,61 @@ export function HUD() {
 
   const disabled = isNewPlayer;
 
+  console.log("p", player);
   return (
     <>
       <Preview generator={generatePreview} />
+      <div className="scene-container">
+        <Outlet />
+      </div>
       <div className="hud">
+        <div className="header">
+          <div className="level">Lv. {player.level} </div>
+          <div className="xp">
+            <div className="value">
+              <label className="label">XP</label> {player.xp} / {player.nextLevel}
+            </div>
+            <div className="fill" style={{ width: `${Math.floor(100 * (player.xp / player.nextLevel))}` }}></div>
+          </div>
+        </div>
         <Alerts />
         <LevelUpModal />
 
         <div className="hud-button-group">
-          <NavLink to="🤔" className="hud-link">
-            <button disabled={disabled} className="hud-button">
-              🤔
-            </button>
-          </NavLink>
           <NavLink to="🏡" className="hud-link">
-            <button disabled={true} className="hud-button">
+            <div disabled={true} className="hud-button">
               🏡
-            </button>
+            </div>
           </NavLink>
+
+          <NavLink to="🤔" className="hud-link">
+            <div disabled={disabled} className="hud-button">
+              🤔
+            </div>
+          </NavLink>
+
           <NavLink to="✨" className="hud-link">
-            <button disabled={disabled} className="hud-button">
+            <div disabled={disabled} className="hud-button">
               ⚔️
-            </button>
+            </div>
           </NavLink>
-          <NavLink to="🛒" className="hud-link">
-            <button disabled={true} className="hud-button">
-              🛒
-            </button>
-          </NavLink>
-          <NavLink to="🪅" className="hud-link">
-            <button disabled={true} className="hud-button">
+          <NavLink disabled={true} to="🪅" className="hud-link  disabled">
+            <div disabled={true} className="hud-button">
               🪅
-            </button>
+            </div>
+          </NavLink>
+
+          <NavLink to="⚖️" className="hud-link  disabled">
+            <div disabled={true} className="hud-button">
+              ⚖️
+            </div>
+          </NavLink>
+          <NavLink disabled={true} to="⚜️" className="hud-link disabled">
+            <div disabled={true} className="hud-button">
+              ⚜️
+            </div>
           </NavLink>
         </div>
-      </div>
-      <div className="scene-container">
-        <Outlet />
       </div>
     </>
   );
