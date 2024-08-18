@@ -45,6 +45,8 @@ export class DungeonInstance {
 
   battle?: BattleInstance;
 
+  overlays = new Map<number, Socket>();
+
   constructor(claire: Claire, id: number, dungeonType: DungeonType) {
     this.claire = claire;
     this.id = id;
@@ -67,6 +69,9 @@ export class DungeonInstance {
   init() {
     if (this.initialized) return;
     this.loadBattle();
+    for (const [overlayId, socket] of this.claire.socket.overlayMap) {
+      this.connectOverlay(overlayId, socket);
+    }
   }
 
   toJSON() {
@@ -118,10 +123,12 @@ export class DungeonInstance {
     this.battle?.join(player);
     this.send(player.id, { battle: this.battle });
     socket.on("disconnect", this.leave.bind(this, player.id));
+    this.sendOverlays({ battle: this.battle });
   }
 
   leave(playerId: Player["id"]) {
     this.log(`${playerId} left`);
+    this.sendOverlays({ battle: this.battle });
     this.battle?.leave(playerId);
     this.players.delete(playerId);
     this.activePlayers.delete(playerId);
@@ -263,5 +270,20 @@ export class DungeonInstance {
 
   start() {
     this.battle?.start();
+  }
+
+  connectOverlay(overlayId: number, socket: Socket) {
+    this.overlays.set(overlayId, socket);
+    socket.on("disconnected", this.disconnectOverlay.bind(this, overlayId));
+  }
+
+  disconnectOverlay(overlayId: number) {
+    this.overlays.delete(overlayId);
+  }
+
+  sendOverlays(...data: any) {
+    for (const socket of this.overlays.values()) {
+      socket.emit("RPG:DUNGEON", ...data);
+    }
   }
 }

@@ -15,6 +15,8 @@ export interface CombatantOptions {
   assetUrl: string;
 }
 
+export type CombatantData = ReturnType<Combatant["toJSON"]>;
+
 export class Combatant {
   static fromPlayer(player: Player) {
     return new Combatant({

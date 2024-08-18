@@ -13,7 +13,7 @@ export class PlayerCollection extends BaseManager {
     this.collection = mongoDb.collection<Player>("rpg_players");
   }
 
-  clean(playerInfo: BasePlayerInfo) {
+  clean(playerInfo: BasePlayerInfo): BasePlayerInfo {
     return {
       name: sanitize(playerInfo.name),
       color: sanitize(playerInfo.color),
@@ -93,7 +93,7 @@ export class PlayerCollection extends BaseManager {
 
       return Boolean(result.matchedCount);
     } catch (error) {
-      this.log("failed to set player", error);
+      this.log("failed to set player test", error);
       // socket.emit("RPG:Alert", "Failed to set player");
       return null;
     }

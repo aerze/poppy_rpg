@@ -4,16 +4,25 @@
   "private": true,
   "scripts": {
     "start": "node ./dist/server/main.js",
+    "prebuild": "npm run client",
     "build": "tsc -p tsconfig.json",
-    "postbuild": "npm run client",
+    "postbuild": "npm run overlay",
     "lint": "eslint",
-    "predev": "npm run build",
-    "dev": "npm run start",
+    
     "server": "tsc -p tsconfig.json",
     "server:watch": "tsc -p tsconfig.json --watch",
-    "client": "esbuild ./dist/clients/player-client.js --bundle --outfile=./dist/builds/player-client.js",
-    "client:watch": "esbuild ./dist/clients/player-client.js --bundle --outfile=./dist/builds/player-client.js --watch",
-    "display-client": "esbuild ./dist/clients/player-client.js --bundle --outfile=./dist/builds/player-client.js"
+    
+    "client": "cd ./player-client && npm run build",
+    "client:watch": "cd ./player-client && npm run start",
+
+    "overlay": "esbuild ./dist/clients/overlay/index.js --bundle --outfile=./dist/builds/overlay.js",
+    "overlay:watch": "esbuild ./dist/clients/overlay/index.js --bundle --outfile=./dist/builds/overlay.js --watch",
+    
+    "deprecated": "echo \"deprecated scripts\"",
+    "display-client": "esbuild ./dist/clients/player-client.js --bundle --outfile=./dist/builds/player-client.js",
+    "old_client": "esbuild ./dist/clients/player-client.js --bundle --outfile=./dist/builds/player-client.js",
+    "predev": "npm run build",
+    "dev": "npm run start"
   },
   "dependencies": {
     "@tsconfig/node-lts": "^20.1.3",

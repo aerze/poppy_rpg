@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Overlay</title>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        font-size: 50px;
+        font-family: monospace;
+      }
+
+      div {
+        box-sizing: border-box;
+      }
+
+      .game {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        height: 20vh;
+        border: 5px solid white;
+      }
+
+      .window {
+        border-radius: 8px;
+        border: 3px solid #5e825e;
+        background-color: #b2cda2;
+        padding: 6px;
+        padding-top: 24px;
+      }
+
+      .window-title {
+        color: #5e825e;
+        font-size: 22px;
+        position: absolute;
+        font-family: monospace;
+        top: 0px;
+      }
+
+      .window-inner {
+        border-radius: 8px;
+        border: 3px solid #5e825e;
+        background-color: #fcfff9;
+        width: 100%;
+        height: 100%;
+      }
+
+      .window-content {
+        height: 100%;
+        width: 100%;
+
+        background-image: url("assets/background_forest.png");
+        background-size: contain;
+        position: relative;
+      }
+
+      .character {
+        position: absolute;
+        border: 1px solid black;
+
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 14px;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        transition: transform 100ms;
+      }
+
+      .character-image {
+        position: absolute;
+        top: 0;
+        left: -60px;
+        height: 120px;
+      }
+
+      .character-plate {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        background-color: #f4fbff7c;
+        border-radius: 8px;
+      }
+
+      .character-name {
+        text-align: center;
+        border-radius: 12px;
+        padding: 4px;
+
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .character-info {
+        display: flex;
+        flex-direction: row;
+      }
+
+      .character-level {
+        font-size: 16px;
+        font-weight: 600;
+        width: 20px;
+        height: 20px;
+        background-color: rgb(227, 255, 245);
+        border-top-left-radius: 50%;
+        border-bottom-left-radius: 50%;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .character-bars {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .character-health {
+        appearance: none;
+        height: 10px;
+        border-top-right-radius: 7px;
+        border-bottom-right-radius: 7px;
+      }
+
+      .character-health::-webkit-progress-value {
+        background-color: rgb(173, 71, 71);
+      }
+
+      .character-mana {
+        appearance: none;
+        height: 10px;
+        border-top-right-radius: 7px;
+        border-bottom-right-radius: 7px;
+      }
+
+      .character-mana::-webkit-progress-value {
+        background-color: #4747ce;
+      }
+
+      .player-name-stroke {
+        font: 18px sans-serif;
+        baseline-shift: -100%;
+        stroke: rgba(0, 0, 0, 0.8);
+        stroke-width: 3px;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .player-name-fill {
+        fill: #fff;
+        font: 18px sans-serif;
+        baseline-shift: -100%;
+      }
+      svg {
+        display: block;
+        overflow: visible;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game window">
+      <label class="window-title">Tales of the Pond.exe</label>
+      <div class="window-inner">
+        <div id="root" class="window-content"></div>
+      </div>
+    </div>
+    <script src="/overlay.js"></script>
+  </body>
+</html>

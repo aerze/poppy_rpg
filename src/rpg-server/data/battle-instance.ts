@@ -29,6 +29,16 @@ export enum BattleEndType {
   WIN,
 }
 
+export type BattleData = ReturnType<BattleInstance["toJSON"]>;
+
+export type ResultData = [sourceId: CombatantId, targetId: CombatantId, damage: number, crit: boolean, dodge: boolean];
+
+export type UpdateData = {
+  battle: BattleData;
+  results?: ResultData[];
+  battleEndType?: BattleEndType;
+};
+
 export class BattleInstance {
   // static StartDuration = 30_000;
   static StartDuration = 10_000;
@@ -240,7 +250,7 @@ export class BattleInstance {
     const targets = this.copyTargets();
     const blocks = this.turnOrder.filter((id) => actions.get(id) === Action.DEFEND);
 
-    const results = [];
+    const results: ResultData[] = [];
 
     // main loop
     for (const id of this.turnOrder) {
@@ -361,8 +371,10 @@ export class BattleInstance {
     }, BattleInstance.EndDuration);
   }
 
-  pushUpdate(extras?: any) {
-    this.dungeon.sendAll({ battle: this, ...extras });
+  pushUpdate(extras?: { results?: ResultData[]; battleEndType?: BattleEndType }) {
+    const data = { battle: this, ...extras };
+    this.dungeon.sendOverlays(data);
+    this.dungeon.sendAll(data);
   }
 
   join(player: Player) {

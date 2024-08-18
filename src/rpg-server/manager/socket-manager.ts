@@ -5,11 +5,15 @@ import { BasePlayerInfo, DefaultPlayer, Player, PlayerPresetToUrl } from "../dat
 import { getSession } from "../../server/auth";
 import { parseCookies } from "../lib/helpers";
 import { DungeonType } from "../data/types/dungeon-types";
+import { SafeCounter } from "../../shared/safe-counter";
 
 export class SocketManager extends BaseManager {
+  overlayCounter: SafeCounter;
+
   constructor(claire: Claire) {
     super(claire);
     claire.io.on("connection", this.handleSocketConnected);
+    this.overlayCounter = new SafeCounter();
   }
 
   debugSession = {
@@ -23,11 +27,18 @@ export class SocketManager extends BaseManager {
     let session = getSession(sessionid);
 
     const sessionIsMissing = !session;
+    const socketIsOverlay = socket.request.headers.referer?.includes(`/overlay/`);
     const socketIsLocalDevClient = socket.request.headers.origin === "http://localhost:3001";
     const socketIsLocalDevAdmin = socket.request.headers.referer === "http://localhost:3000/admin/";
 
+    if (socketIsOverlay) {
+      this.initializeOverlay(socket);
+      return;
+    }
+
     if (sessionIsMissing) {
       if (socketIsLocalDevAdmin) {
+        this.log(`Admin Connected`);
         socket.on("ADMIN", this.handleAdmin.bind(null, socket));
         socket.on("disconnect", this.handleSocketDisconnected.bind(null, undefined));
         return;
@@ -116,5 +127,29 @@ export class SocketManager extends BaseManager {
     if (result) {
       return basePlayerInfo;
     }
+  }
+
+  overlayMap = new Map<number, Socket>();
+
+  async initializeOverlay(socket: Socket) {
+    const overlayId = this.overlayCounter.next();
+    this.log(`Overlay ${overlayId} Connected`);
+    this.overlayMap.set(overlayId, socket);
+
+    const dungeon = this.claire.dungeons.singletons.get("LIVE");
+    if (dungeon) {
+      dungeon.connectOverlay(overlayId, socket);
+    }
+
+    socket.on("OVERLAY", this.handleOverlay.bind(null, socket, overlayId));
+    socket.on("disconnected", this.handleOverlayDisconnected.bind(null, socket, overlayId));
+  }
+
+  async handleOverlay(socket: Socket, overlayId: number, command: string, data: any) {
+    this.log(`Overlay ${overlayId}: ${command}`, data);
+  }
+
+  async handleOverlayDisconnected(socket: Socket, overlayId: number) {
+    this.log(`Overlay ${overlayId} Disconnected`);
   }
 }
