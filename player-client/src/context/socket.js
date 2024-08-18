@@ -44,7 +44,7 @@ export class SocketProvider extends Component {
   connect = () => {
     console.log(">> connect");
     if (!this.socket) {
-      this.socket = io("localhost:3000");
+      this.socket = io();
       window.socket = this.socket;
       this.socket.on("connect", this.handleConnect);
       this.socket.on("disconnect", this.handleDisconnect);
