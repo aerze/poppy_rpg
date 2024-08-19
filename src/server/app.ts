@@ -30,7 +30,6 @@ app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, "../../public")));
 app.use(express.static(path.join(__dirname, "../../dist/builds")));
-app.use("/app", express.static(CLIENT_DIR));
 
 app.use(
   twitchAuthMiddleware({
@@ -40,6 +39,7 @@ app.use(
   })
 );
 
+app.use("/app", express.static(CLIENT_DIR));
 app.get("/app/*", (req, res) => res.sendFile(CLIENT_ROOT));
 
 app.use("/admin", express.static(path.join(__dirname, "../../admin")));
