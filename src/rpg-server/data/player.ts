@@ -1,5 +1,6 @@
 import { SkillType, Skills } from "./skills";
-import { Badge, Equipment, Item, Pet, Quest, Ability, Stats, Title, Status, Action } from "../types";
+import { Equipment, Item, Pet, Quest, Ability, Stats, Title, Status, Action } from "../types";
+import { Badge } from "./badges";
 
 export interface BasePlayerInfo {
   name: string;

@@ -6,6 +6,7 @@ import { getSession } from "../../server/auth";
 import { parseCookies } from "../lib/helpers";
 import { DungeonType } from "../data/types/dungeon-types";
 import { SafeCounter } from "../../shared/safe-counter";
+import { BadgeType } from "../data/badges";
 
 export class SocketManager extends BaseManager {
   overlayCounter: SafeCounter;
@@ -123,7 +124,18 @@ export class SocketManager extends BaseManager {
     if (!basePlayerInfo.id) return;
     this.debug(`updating player info`);
 
-    const result = await this.claire.db.players.update(basePlayerInfo.id, basePlayerInfo, socket);
+    const existingPlayer = this.claire.players.map.get(basePlayerInfo.id);
+    if (!existingPlayer) return false;
+
+    if (basePlayerInfo.name !== existingPlayer.name) {
+      this.claire.players.addBadge(basePlayerInfo.id, BadgeType.NameChange);
+    }
+
+    if (basePlayerInfo.presetId !== existingPlayer.presetId) {
+      this.claire.players.addBadge(basePlayerInfo.id, BadgeType.SpriteChange);
+    }
+
+    const result = await this.claire.db.players.update(basePlayerInfo.id, { ...existingPlayer, ...basePlayerInfo });
     if (result) {
       return basePlayerInfo;
     }

@@ -2,6 +2,7 @@ import { Socket } from "socket.io";
 import { Player, PlayerId, PlayerPresetToUrl } from "../data/player";
 import { Stats } from "../types";
 import { BaseManager } from "./base-manager";
+import { BadgeType } from "../data/badges";
 
 export enum Location {
   TOWN, // main lobby
@@ -127,5 +128,17 @@ export class PlayerManager extends BaseManager {
 
   getLevelRequirement(level: number) {
     return Math.floor((level * level * level) / Math.log10(level + 1) + 100);
+  }
+
+  addBadge(playerId: PlayerId, badgeType: BadgeType) {
+    const player = this.map.get(playerId);
+    if (!player) return false;
+
+    const bannerSet = new Set(player.badges.map((b) => b.id));
+    if (bannerSet.has(badgeType)) return false;
+
+    const badge = { id: badgeType, date: new Date() };
+    player.badges.push(badge);
+    return true;
   }
 }

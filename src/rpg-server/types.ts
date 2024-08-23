@@ -83,11 +83,6 @@ export interface Equipment {
   abilities?: Skills;
 }
 
-export interface Badge {
-  id: string;
-  date: Date;
-}
-
 export interface Title {
   name: string;
   date: Date;
