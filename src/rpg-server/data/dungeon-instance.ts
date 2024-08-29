@@ -123,12 +123,12 @@ export class DungeonInstance {
     this.battle?.join(player);
     this.send(player.id, { battle: this.battle });
     socket.on("disconnect", this.leave.bind(this, player.id));
-    this.sendOverlays({ battle: this.battle });
+    // this.sendOverlays({ battle: this.battle.toOverlay() });
   }
 
   leave(playerId: Player["id"]) {
     this.log(`${playerId} left`);
-    this.sendOverlays({ battle: this.battle });
+    // this.sendOverlays({ battle: this.battle.toOverlay() });
     this.battle?.leave(playerId);
     this.players.delete(playerId);
     this.activePlayers.delete(playerId);

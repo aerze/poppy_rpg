@@ -96,6 +96,8 @@ export class PlayerManager extends BaseManager {
     };
   }
 
+  getOverlayPlayer(player: Player) {}
+
   getStatsTotal(stats: Stats) {
     return (
       stats.attack + stats.defense + stats.health + stats.luck + stats.magic + stats.mana + stats.resist + stats.speed

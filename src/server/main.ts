@@ -3,7 +3,12 @@ require("dotenv").config();
 
 import { Server } from "socket.io";
 import { app } from "./app";
-import { Claire } from "../rpg-server/claire";
+// old claire
+// import { Claire } from "../rpg-server/claire";
+
+// new claire
+import { Claire } from "../refactor/claire/claire";
+
 import http from "http";
 import { MongoClient } from "mongodb";
 

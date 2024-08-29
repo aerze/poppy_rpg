@@ -165,6 +165,18 @@ export class BattleInstance {
     };
   }
 
+  toOverlay() {
+    return {
+      turn: this.turn,
+      phase: this.phase,
+      turnOrder: this.turnOrder,
+      countdownTarget: this.countdownTarget,
+      countdownDuration: this.countdownDuration,
+      players: Object.fromEntries(this.players.entries()),
+      enemies: Object.fromEntries(this.enemies.entries()),
+    };
+  }
+
   start() {
     this.log(`starting battle`);
     if (this.phase >= BattlePhase.START) return;

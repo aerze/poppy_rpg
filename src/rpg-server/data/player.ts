@@ -30,13 +30,20 @@ export interface Player {
   color: string;
   presetId: PresetId;
   backstory: string;
+  level: number;
+  xp: number;
+  nextLevel: number;
+  badges: Badge[];
+  titles: Title[];
+  activeTitle?: Title;
+  quests: Quest[];
+  activeQuests: Quest[];
+  inventory: { [id: string]: Item };
+  pets: { [id: string]: Pet };
   maxHealth: number;
   health: number;
   maxMana: number;
   mana: number;
-  level: number;
-  xp: number;
-  nextLevel: number;
   stats: Stats;
   availableStatPoints: number;
   skills: Skills;
@@ -59,13 +66,6 @@ export interface Player {
     extra1: Equipment | null;
     extra2: Equipment | null;
   };
-  badges: Badge[];
-  titles: Title[];
-  activeTitle?: Title;
-  quests: Quest[];
-  activeQuests: Quest[];
-  inventory: { [id: string]: Item };
-  pets: { [id: string]: Pet };
 }
 
 export const DefaultPlayer: Player = {

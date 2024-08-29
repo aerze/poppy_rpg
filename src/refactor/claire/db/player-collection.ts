@@ -1,9 +1,9 @@
 import sanitize from "mongo-sanitize";
-import { Collection, Db, ObjectId } from "mongodb";
 import { Socket } from "socket.io";
-import { BasePlayerInfo, DefaultPlayer, Player } from "./data/player";
-import { BaseManager } from "./manager/base-manager";
-import { Claire } from "./claire";
+import { Collection, Db, ObjectId } from "mongodb";
+import { Claire } from "../claire";
+import { BaseManager } from "../base-manager";
+import { Player, PlayerFormData } from "../../gameplay/global/player";
 
 export class PlayerCollection extends BaseManager {
   collection: Collection<Player>;
@@ -13,23 +13,23 @@ export class PlayerCollection extends BaseManager {
     this.collection = mongoDb.collection<Player>("rpg_players");
   }
 
-  clean(playerInfo: BasePlayerInfo): BasePlayerInfo {
+  clean(playerInfo: PlayerFormData): PlayerFormData {
     return {
       name: sanitize(playerInfo.name),
       color: sanitize(playerInfo.color),
       presetId: sanitize(playerInfo.presetId),
+      backstory: sanitize(playerInfo.backstory),
     };
   }
 
-  async create(socket: Socket, playerInfo: BasePlayerInfo) {
+  async create(socket: Socket, playerInfo: PlayerFormData) {
     const cleanData = this.clean(playerInfo);
     this.log(`creating ${cleanData.name}`);
 
     const player = {
-      ...DefaultPlayer,
-      ...cleanData,
+      ...Player.create(playerInfo),
       twitchId: socket.data.session.userid,
-      nextLevel: this.claire.players.getLevelRequirement(1),
+      nextLevel: Player.getLevelRequirement(1),
     };
 
     try {
@@ -66,9 +66,9 @@ export class PlayerCollection extends BaseManager {
     }
   }
 
-  async getByTwitchId(userId: string) {
+  async getByTwitchId(socket: Socket) {
     try {
-      const player = await this.collection.findOne({ twitchId: userId });
+      const player = await this.collection.findOne({ twitchId: socket.data.session.userid });
       if (!player) {
         // socket.emit("RPG:ALERT", "You must be new here..");
         return null;
@@ -99,7 +99,7 @@ export class PlayerCollection extends BaseManager {
     }
   }
 
-  async update(playerId: string, player: Partial<Player>, socket?: Socket) {
+  async update(playerId: string, player: Partial<Player>) {
     const playerNoId = { ...player };
     delete (playerNoId as any)._id;
     delete playerNoId.id;

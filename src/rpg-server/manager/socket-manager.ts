@@ -60,7 +60,7 @@ export class SocketManager extends BaseManager {
   };
 
   async populateSocketPlayer(socket: Socket) {
-    const player = await this.claire.db.players.getByTwitchId(socket);
+    const player = await this.claire.db.players.getByTwitchId(socket.data.session.userid);
 
     const playerDoesNotExist = player === null;
 
