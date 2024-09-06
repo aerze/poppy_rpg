@@ -1,25 +1,121 @@
 import { Socket } from "socket.io";
 import { Player } from "../global/player";
 import { System } from "../system";
-import { CombatDefinition } from "./combat-definition";
-import { AbilityType, Action, EffectType } from "./combat-types";
+import { CombatDefinition, Encounter } from "./combat-definition";
+import { AbilityType, Action, Combatant, CombatPhase, EffectType, WeaponType } from "./combat-types";
 import { MaterialRank, MaterialTags } from "../global/materials";
+import { InstanceManager } from "../../claire/instance-manager";
+import { Monster } from "./monsters";
 
 export class CombatSystem extends System {
-  encounters: Encounter[];
+  name = "combat";
 
-  bossEncounters: Encounter[];
+  encounters: Encounter[] = [];
 
-  players = new Map<Player["id"], PlayerCombatant>();
+  bossEncounters: Encounter[] = [];
+
+  players = new Map<Player["id"], Combatant>();
+
+  monsters = new Map<Monster["id"], Monster>();
+
+  paused = false;
+
+  frame = 0;
+
+  phase: CombatPhase = CombatPhase.Loading;
+
+  nextEncounter = 0;
 
   async load(): Promise<void> {
     this.encounters = combatDef.encounters;
     this.bossEncounters = combatDef.bossEncounter;
+
+    this.phase = CombatPhase.Exploring;
+    this.tick();
   }
 
-  join(playerId: Player["id"], socket: Socket): void {}
+  explore() {
+    this.phase = CombatPhase.Exploring;
+    const nextEncounterDate = new Date();
+    // nextEncounterDate.setMinutes(nextEncounterDate.getMinutes() + 2);
+    nextEncounterDate.setSeconds(nextEncounterDate.getSeconds() + 45);
 
-  leave(playerId: Player["id"]): void {}
+    this.nextEncounter = nextEncounterDate.valueOf();
+  }
+
+  join(playerId: Player["id"]): void {
+    const player = this.claire.players.list.get(playerId);
+    if (!player) {
+      this.log(`player was missing when joining`);
+      this.claire.instances.move(playerId, InstanceManager.Town);
+      return;
+    }
+
+    const playerCombatant: Combatant = {
+      health: player.stats.health * 100,
+      maxHealth: player.stats.health * 100,
+      mana: player.stats.mana * 20,
+      maxMana: player.stats.mana * 20,
+      statuses: [],
+      equipment: {
+        weapon: {
+          id: "weapon",
+          name: "Dave",
+          assetUrl: "",
+          type: WeaponType.Sword,
+          created: new Date(),
+          creatorId: "npc",
+          modifiers: [],
+          abilities: [
+            {
+              name: "slash",
+              type: AbilityType.Physical,
+              effectDefinitions: [[EffectType.Damage, 10, 15]],
+            },
+          ],
+        },
+        armor1: null,
+        armor2: null,
+      },
+    };
+
+    this.players.set(playerId, playerCombatant);
+  }
+
+  leave(playerId: Player["id"]): void {
+    this.players.delete(playerId);
+  }
+
+  tick = () => {
+    const now = Date.now();
+    if (this.paused) return;
+
+    this.frame++;
+    this.log(`frame: ${this.frame}`);
+
+    let playerAlive = false;
+    // check for players
+    for (const [playerId, combatant] of this.players) {
+      if (combatant.health > 0) playerAlive = true;
+    }
+
+    if (!playerAlive) {
+      // reset party
+    }
+
+    // if we're exploring, roll for combat
+    if (now > this.nextEncounter) {
+      // initiate next encounter
+    }
+
+    // check for monsters in the current encounter
+
+    // check for encounter cooldown
+
+    // start new encounter
+
+    setTimeout(this.tick, 1000);
+  };
 }
 
 const combatDef: CombatDefinition = {
@@ -30,6 +126,34 @@ const combatDef: CombatDefinition = {
         {
           id: "SLIME",
           name: "Red Slime",
+          assetUrl: "",
+          maxHealth: [20, 30],
+          maxMana: [5, 10],
+          stats: {
+            health: [2, 5],
+            attack: [4, 7],
+            defense: [2, 5],
+            mana: [2, 5],
+            magic: [2, 5],
+            resist: [2, 5],
+            speed: [2, 5],
+            luck: [2, 5], // max 100
+          },
+          level: 2,
+          xp: 3,
+          action: Action.ABILITY_1,
+          abilitySlots: {
+            0: {
+              name: "Squish",
+              type: AbilityType.Physical,
+              effectDefinitions: [[EffectType.Damage, 10, 12]],
+            },
+          },
+        },
+
+        {
+          id: "YELLOW_SLIME",
+          name: "Cheese",
           assetUrl: "",
           maxHealth: [20, 30],
           maxMana: [5, 10],

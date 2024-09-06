@@ -17,6 +17,7 @@ import { Battle } from "./pages/battle";
 import { NetContext, NetProvider } from "./context/net";
 import { Demo } from "./pages/demo";
 import { Crossroad } from "./pages/crossroad";
+import { Combat } from "./pages/combat";
 
 const hasNative = document && (document.elementsFromPoint || document.msElementsFromPoint);
 
@@ -88,6 +89,10 @@ const router = createBrowserRouter([
         //     element: <Battle />,
         //   },
         // ],
+      },
+      {
+        path: "⚔️",
+        element: <Combat />,
       },
       {
         path: "🪅",

@@ -78,6 +78,14 @@ export class HUD extends Component {
               </NavLink>
             )}
 
+            {instance?.systems.includes("combat") && (
+              <NavLink to="⚔️" className="hud-link">
+                <div disabled={isNewPlayer} className="hud-button">
+                  ⚔️
+                </div>
+              </NavLink>
+            )}
+
             {/* <NavLink disabled={true} to="🪅" className="hud-link  disabled">
               <div disabled={true} className="hud-button">
                 🪅

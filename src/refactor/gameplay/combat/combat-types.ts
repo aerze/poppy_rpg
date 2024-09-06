@@ -10,7 +10,7 @@ export enum StatusEffect {
 
 export type status = [StatusEffect, number];
 
-export interface Combatant {
+export type Combatant = {
   health: number;
   maxHealth: number;
   mana: number;
@@ -19,21 +19,29 @@ export interface Combatant {
   statuses: status[];
 
   equipment: {
-    weapon: Equipment | null;
+    weapon: Weapon | null;
     armor1: Equipment | null;
     armor2: Equipment | null;
   };
-}
+};
 
 export interface Equipment {
   name: string;
-  imageUrl: string;
+  assetUrl: string;
   stats?: Partial<Stats>;
   skills?: Skills;
 }
 
+export enum WeaponType {
+  Sword,
+  Scythe,
+}
+
 export interface Weapon {
   id: string;
+  name: string;
+  assetUrl: string;
+  type: WeaponType;
   created: Date;
   creatorId: string;
   modifiers: Modifier[];
@@ -85,3 +93,12 @@ export type CombatItem = Item & {
   durationMs?: number;
   price?: number;
 };
+
+export enum CombatPhase {
+  Loading,
+  Exploring,
+  BattleStart,
+  PlayerTurn,
+  EnemyTurn,
+  BattleEnd,
+}
