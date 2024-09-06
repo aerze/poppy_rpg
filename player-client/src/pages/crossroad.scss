@@ -1,0 +1,45 @@
+.crossroad {
+  .signpost {
+    flex: 1;
+    gap: 12px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-bottom: 100px;
+
+    .sign {
+      position: relative;
+      width: 110%;
+      height: 80px;
+      background-color: #22222288;
+      color: white;
+      font-size: 23px;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      cursor: pointer;
+      rotate: -1deg;
+
+      &:nth-child(2n) {
+        rotate: 1deg;
+      }
+
+      &:active {
+        opacity: 0.3;
+      }
+
+      .yah {
+        position: absolute;
+        font-size: 20px;
+        top: 20px;
+        right: 40px;
+        rotate: -15deg;
+        background-color: rgb(66, 66, 66);
+        border-radius: 20px;
+        padding: 0.5em;
+      }
+    }
+  }
+}

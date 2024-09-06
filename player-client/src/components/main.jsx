@@ -2,6 +2,7 @@ import "./main.scss";
 import { useContext } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { SocketContext } from "../context/socket";
+import { NetContext } from "../context/net";
 
 const isMobileRegex = /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
 function isMobile() {
@@ -9,7 +10,7 @@ function isMobile() {
 }
 
 export function Main() {
-  const { connected, connect, newPlayer, player } = useContext(SocketContext);
+  const { connected, connect, newPlayer, player } = useContext(NetContext);
   const navigate = useNavigate();
 
   function handleStartGame() {
@@ -17,7 +18,7 @@ export function Main() {
       document.body.requestFullscreen();
     }
     connect();
-    navigate("/app/🐸/🏡");
+    // navigate("/app/🐸/🏡");
   }
 
   function handleOpen() {
@@ -30,7 +31,7 @@ export function Main() {
     window.open("https://www.twitch.tv/abby_the_lesbiab", "_blank");
   }
 
-  if (connected) {
+  if (connected && player) {
     return <Navigate to="/app/🐸" replace={true} />;
   }
 

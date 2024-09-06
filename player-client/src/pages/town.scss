@@ -52,7 +52,11 @@
 }
 
 .town-players {
+  flex: 1;
+
   .town-player {
+    transition: transform 1s linear;
+    position: relative;
     width: 100px;
     height: auto;
   }

@@ -1,6 +1,7 @@
 import React from "react";
 import "./character.scss";
 import { SocketContext } from "../context/socket";
+import { NetContext } from "../context/net";
 
 export const CHARACTER_SPRITE_MAP = {
   0: "/app/images/tay_test.png",
@@ -23,11 +24,11 @@ export class Character extends React.Component {
     this.setState({ disabled: true });
 
     if (this.context.player.id) {
-      this.context.updatePlayer({ ...formData, id: this.context.player.id }, () => {
+      this.context.send("char:updatePlayer", { formData: { ...formData, id: this.context.player.id } }, () => {
         this.setState({ disabled: false });
       });
     } else {
-      this.context.createPlayer(formData, () => {
+      this.context.send("char:create", formData, () => {
         this.setState({ disabled: false });
       });
     }
@@ -172,4 +173,4 @@ function CharacterStats({ player }) {
   );
 }
 
-Character.contextType = SocketContext;
+Character.contextType = NetContext;

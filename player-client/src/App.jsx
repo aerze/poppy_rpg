@@ -14,6 +14,9 @@ import { Town } from "./pages/town";
 import { Character } from "./pages/character";
 import { Dungeons } from "./pages/dungeons";
 import { Battle } from "./pages/battle";
+import { NetContext, NetProvider } from "./context/net";
+import { Demo } from "./pages/demo";
+import { Crossroad } from "./pages/crossroad";
 
 const hasNative = document && (document.elementsFromPoint || document.msElementsFromPoint);
 
@@ -31,7 +34,7 @@ const backendOptions = {
 };
 
 export function Redirect() {
-  const { connected } = useContext(SocketContext);
+  const { connected } = useContext(NetContext);
 
   if (!connected) {
     return <Navigate to="/app/menu" replace={true} />;
@@ -73,17 +76,18 @@ const router = createBrowserRouter([
         element: <Character />,
       },
       {
-        path: "✨",
-        children: [
-          {
-            index: true,
-            element: <Dungeons />,
-          },
-          {
-            path: "battle",
-            element: <Battle />,
-          },
-        ],
+        path: "🗺️",
+        element: <Crossroad />,
+        // children: [
+        //   {
+        //     index: true,
+        //     element: <Dungeons />,
+        //   },
+        //   {
+        //     path: "battle",
+        //     element: <Battle />,
+        //   },
+        // ],
       },
       {
         path: "🪅",
@@ -105,12 +109,7 @@ const router = createBrowserRouter([
       },
       {
         path: "⚜️",
-        element: (
-          <div>
-            <div className="hud-top-buffer"></div>
-            <h2> guild </h2>
-          </div>
-        ),
+        element: <Demo />,
       },
     ],
   },
@@ -118,11 +117,11 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <SocketProvider>
+    <NetProvider>
       <DndProvider backend={TouchBackend} options={backendOptions}>
         <RouterProvider router={router}></RouterProvider>
       </DndProvider>
-    </SocketProvider>
+    </NetProvider>
   );
 }
 

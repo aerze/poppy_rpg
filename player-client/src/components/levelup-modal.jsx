@@ -1,6 +1,7 @@
 import React from "react";
 import "./levelup-modal.scss";
 import { DataType, SocketContext } from "../context/socket";
+import { NetContext } from "../context/net";
 
 export class LevelUpModal extends React.Component {
   state = {
@@ -233,4 +234,4 @@ export class LevelUpModal extends React.Component {
   }
 }
 
-LevelUpModal.contextType = SocketContext;
+LevelUpModal.contextType = NetContext;

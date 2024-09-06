@@ -3,10 +3,12 @@ import { BaseManager } from "./base-manager";
 import { Claire } from "./claire";
 import { parseCookies } from "../../rpg-server/lib/helpers";
 import { getSession } from "../../server/auth";
-import { PlayerClientManager } from "./client";
+import { PlayerClientManager } from "./player-client-manager";
+import { Player } from "../gameplay/global/player";
 
 export class ClientManager extends BaseManager {
   players: PlayerClientManager;
+  // overlays: OverlayClientManager;
 
   constructor(claire: Claire) {
     super(claire);
@@ -51,7 +53,7 @@ export class ClientManager extends BaseManager {
   }
 
   async handlePlayerClient(socket: Socket) {
-    const player = await this.claire.db.players.getByTwitchId(socket.data.session.userid);
+    const player = await this.claire.db.players.getByTwitchId(socket);
     if (player === null) {
       this.players.signUp(socket);
     } else {
@@ -60,4 +62,12 @@ export class ClientManager extends BaseManager {
   }
 
   handleOverlayClient(socket: Socket) {}
+
+  updatePlayerGlobal(playerId: Player["id"], data: any) {
+    this.log(`globalUpdate()`, JSON.stringify(data).length);
+    const socket = this.claire.players.sockets.get(playerId);
+    if (socket) {
+      socket.emit("RPG", data);
+    }
+  }
 }

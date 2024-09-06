@@ -3,7 +3,7 @@ import { Socket } from "socket.io";
 import { Collection, Db, ObjectId } from "mongodb";
 import { Claire } from "../claire";
 import { BaseManager } from "../base-manager";
-import { Player, PlayerFormData } from "../../gameplay/global/player";
+import { Player, PlayerFormData, PlayerPresetToUrl } from "../../gameplay/global/player";
 
 export class PlayerCollection extends BaseManager {
   collection: Collection<Player>;
@@ -48,7 +48,7 @@ export class PlayerCollection extends BaseManager {
     }
   }
 
-  async get(socket: Socket, playerId: string) {
+  async get(playerId: string) {
     try {
       const player = await this.collection.findOne(new ObjectId(playerId));
       if (!player) {
@@ -75,6 +75,7 @@ export class PlayerCollection extends BaseManager {
       }
 
       player.id = player._id.toString();
+      player.assetUrl = PlayerPresetToUrl[player.presetId];
       return player;
     } catch (error) {
       this.log("failed to find player by twitch ID.", error);
@@ -83,7 +84,7 @@ export class PlayerCollection extends BaseManager {
     }
   }
 
-  async set(socket: Socket, player: Player) {
+  async set(player: Player) {
     try {
       const result = await this.collection.replaceOne({ _id: new ObjectId(player.id) }, player);
       if (!result) {

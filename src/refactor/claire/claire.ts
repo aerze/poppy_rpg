@@ -40,9 +40,9 @@ export class Claire {
     players: PlayerCollection;
   };
 
+  instances: InstanceManager;
   players: PlayerManager;
   clients: ClientManager;
-  instances: InstanceManager;
 
   constructor(io: Server, http: HTTPServer, mongo: MongoClient) {
     this.io = io;
