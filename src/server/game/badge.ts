@@ -7,6 +7,7 @@ export enum BadgeType {
   FirstLevelUp,
   FirstDeath,
   SlimeHell,
+  SlimeHeavenClear,
 }
 
 export class Badge {

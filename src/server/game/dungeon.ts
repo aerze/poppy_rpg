@@ -178,4 +178,24 @@ export const DungeonMap: { [DungeonKey: string]: DungeonData } = {
       asset: "slime5.png",
     }),
   },
+
+  SLIME_HEAVEN: {
+    name: "SLIME HEAVEN",
+    completionBadge: BadgeType.SlimeHeavenClear,
+    scale: 5,
+    roomCount: 20000,
+    bossCondition: Dungeon.CONDITIONS.multipleOf(5),
+    monsterPool: [Slime.BLUE_SLIME, Slime.GREEN_SLIME, Slime.RED_SLIME],
+    bossPool: [Slime.BOSS_SLIME, Slime.KING_SLIME],
+    finalBoss: Monster.generate(999, {
+      name: "JELLEMY: GOD OF SLIME-KIND",
+      health: [9999, 9999],
+      attack: [999, 999],
+      defense: [999, 999],
+      heal: [999, 999],
+      color: "#AB00B5",
+      xp: [99999, 99999],
+      asset: "slime6.png",
+    }),
+  },
 };

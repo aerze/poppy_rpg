@@ -44,4 +44,15 @@ export class Slime extends Monster {
     xp: [8, 10],
     asset: "slime4.png",
   };
+
+  static KING_SLIME: MonsterBase = {
+    name: "King Slime",
+    health: [5000, 6000],
+    attack: [20, 50],
+    defense: [40, 60],
+    heal: [50, 51],
+    color: "#AB00B5",
+    xp: [10000, 50000],
+    asset: "slime5.png",
+  };
 }
