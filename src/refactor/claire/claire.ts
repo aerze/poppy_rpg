@@ -56,5 +56,6 @@ export class Claire {
     this.clients = new ClientManager(this);
     this.players = new PlayerManager(this);
     this.instances = new InstanceManager(this);
+    this.instances.loadDefaultLocations();
   }
 }

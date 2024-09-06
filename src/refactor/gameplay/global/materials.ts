@@ -1,3 +1,5 @@
+import { Range } from "../types";
+
 export enum MaterialTags {
   Lumber,
   Stone,
@@ -6,12 +8,38 @@ export enum MaterialTags {
   Cloth,
   Ingredient,
   Sharp,
+  Slime,
+  Gel,
+  Boss,
+  Red,
+  RedDye,
+  CherryFlavor,
 }
 
 // prettier-ignore
 export enum MaterialRank { S, A, B, C, D, }
 
+export type MaterialDefinition = {
+  type: "MD";
+
+  name: string;
+
+  tags: MaterialTags[];
+  /** min 1, max 5 */
+  rank: MaterialRank;
+  /** min 1, max 100 */
+  quality: Range<number>;
+  /** min 1, max 999 */
+  quantity: Range<number>;
+  /** min 1, max 100 */
+  durability: Range<number>;
+};
+
 export type Material = {
+  type: "M";
+
+  name: string;
+
   tags: MaterialTags[];
   /** min 1, max 5 */
   rank: MaterialRank;

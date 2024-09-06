@@ -6,6 +6,7 @@ import { Player } from "../gameplay/global/player";
 import { TownSystem } from "../gameplay/town/town-system";
 import { CharacterSystem } from "../gameplay/town/character-system";
 import { CrossroadSystem } from "../gameplay/town/crossroad-system";
+import { CombatSystem } from "../gameplay/combat/combat-system";
 
 export class InstanceManager extends BaseManager {
   static Town: Instance["id"];
@@ -14,15 +15,15 @@ export class InstanceManager extends BaseManager {
   instances = new Map<Instance["id"], Instance>();
   playerLocations = new Map<Player["id"], Instance["id"]>();
 
-  constructor(claire: Claire) {
-    super(claire);
-    InstanceManager.Town = this.create([TownSystem, CharacterSystem, CrossroadSystem]).id;
-    InstanceManager.Forest = this.create([TownSystem]).id;
+  async loadDefaultLocations() {
+    InstanceManager.Town = (await this.create([TownSystem, CharacterSystem, CrossroadSystem])).id;
+    InstanceManager.Forest = (await this.create([CombatSystem])).id;
   }
 
-  create(systems: (typeof System)[]) {
+  async create(systems: (typeof System)[]) {
     const instance = new Instance(this.claire, systems, `🏙️`);
     this.instances.set(instance.id, instance);
+    await instance.load();
     return instance;
   }
 
@@ -114,6 +115,12 @@ export class Instance {
     }
 
     this.log(`✅`);
+  }
+
+  async load() {
+    for (const system of this.systems.values()) {
+      await system.load();
+    }
   }
 
   delete() {

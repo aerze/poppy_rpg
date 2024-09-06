@@ -1,5 +1,5 @@
 import { Item } from "../global/crafting";
-import { Material } from "../global/materials";
+import { Material, MaterialDefinition } from "../global/materials";
 import { MonsterDefinition } from "./monsters";
 
 export type CombatDefinition = {
@@ -13,4 +13,4 @@ export type Encounter = {
   loot: Loot[];
 };
 
-export type Loot = [drop: Material | Item, dropRate: number];
+export type Loot = [drop: Material | MaterialDefinition | Item, dropRate: number];

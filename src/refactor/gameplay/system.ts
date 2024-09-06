@@ -19,6 +19,10 @@ export class System {
     this.name = "missing_name";
   }
 
+  async load() {
+    this.log(`loading`);
+  }
+
   delete() {
     this.log("deleted");
   }

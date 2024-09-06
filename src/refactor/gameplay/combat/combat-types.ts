@@ -29,7 +29,7 @@ export interface Equipment {
   name: string;
   imageUrl: string;
   stats?: Partial<Stats>;
-  abilities?: Skills;
+  skills?: Skills;
 }
 
 export interface Weapon {
@@ -62,8 +62,8 @@ export type EffectDefinition = [type: EffectType, min: number, max: number];
 export interface Ability {
   name: string;
   type: AbilityType;
-  source: Combatant;
-  target: Combatant;
+  // source: Combatant;
+  // target: Combatant;
   effectDefinitions: EffectDefinition[];
 }
 
