@@ -5,7 +5,12 @@ import { CombatDefinition, Encounter } from "./combat-definition";
 import { AbilityType, Action, Combatant, CombatPhase, EffectType, WeaponType } from "./combat-types";
 import { MaterialRank, MaterialTags } from "../global/materials";
 import { InstanceManager } from "../../claire/instance-manager";
-import { Monster } from "./monsters";
+import { Monster, MonsterFactory } from "./monsters";
+import { getRandomFromArray, getRandomFromRange } from "../../../shared/helpers";
+
+type PlayerTeam = Map<Player["id"], Combatant>;
+
+type MonsterTeam = Map<Monster["id"], Monster>;
 
 export class CombatSystem extends System {
   name = "combat";
@@ -14,9 +19,9 @@ export class CombatSystem extends System {
 
   bossEncounters: Encounter[] = [];
 
-  players = new Map<Player["id"], Combatant>();
+  players: PlayerTeam = new Map();
 
-  monsters = new Map<Monster["id"], Monster>();
+  monsters: MonsterTeam = new Map();
 
   paused = false;
 
@@ -24,27 +29,18 @@ export class CombatSystem extends System {
 
   phase: CombatPhase = CombatPhase.Loading;
 
-  nextEncounter = 0;
+  // nextEncounter = 0;
 
   async load(): Promise<void> {
     this.encounters = combatDef.encounters;
     this.bossEncounters = combatDef.bossEncounter;
-
-    this.phase = CombatPhase.Exploring;
-    this.tick();
-  }
-
-  explore() {
-    this.phase = CombatPhase.Exploring;
-    const nextEncounterDate = new Date();
-    // nextEncounterDate.setMinutes(nextEncounterDate.getMinutes() + 2);
-    nextEncounterDate.setSeconds(nextEncounterDate.getSeconds() + 45);
-
-    this.nextEncounter = nextEncounterDate.valueOf();
+    this.log(`loaded en:${this.encounters.length} bs:${this.bossEncounters.length} phase:${CombatPhase[this.phase]}`);
+    this.setPhase(CombatPhase.Exploring);
   }
 
   join(playerId: Player["id"]): void {
     const player = this.claire.players.list.get(playerId);
+
     if (!player) {
       this.log(`player was missing when joining`);
       this.claire.instances.move(playerId, InstanceManager.Town);
@@ -86,36 +82,112 @@ export class CombatSystem extends System {
     this.players.delete(playerId);
   }
 
-  tick = () => {
-    const now = Date.now();
-    if (this.paused) return;
+  setPhase(phase: CombatPhase, delay: number = 0) {
+    this.log(`${CombatPhase[this.phase]} -> ${CombatPhase[phase]} in (${delay / 1000}s)`);
 
-    this.frame++;
-    this.log(`frame: ${this.frame}`);
-
-    let playerAlive = false;
-    // check for players
-    for (const [playerId, combatant] of this.players) {
-      if (combatant.health > 0) playerAlive = true;
+    if (!delay) {
+      this.log(`${CombatPhase[this.phase]} -> ${CombatPhase[phase]}`);
+      this.phase = phase;
+      this.triggerPhase(this.phase);
+      return;
     }
 
-    if (!playerAlive) {
-      // reset party
+    setTimeout(() => {
+      this.log(`${CombatPhase[this.phase]} -> ${CombatPhase[phase]}`);
+      this.phase = phase;
+      this.triggerPhase(this.phase);
+    }, delay);
+  }
+
+  triggerPhase(phase = this.phase) {
+    switch (phase) {
+      case CombatPhase.Loading:
+        return;
+      case CombatPhase.Exploring:
+        return this.onExplore();
+      case CombatPhase.Encounter:
+        return this.onEncounter();
+      case CombatPhase.PlayerTurn:
+        return this.onPlayerTurn();
+      case CombatPhase.EnemyTurn:
+        return this.onEnemyTurn();
+      case CombatPhase.Victory:
+        return this.onVictory();
+      case CombatPhase.Defeat:
+        return this.onDefeat();
+    }
+  }
+
+  onExplore() {
+    if (this.players.size === 0) {
+      this.setPhase(CombatPhase.Exploring, 15_000);
+      return;
+    }
+    this.setPhase(CombatPhase.Encounter, 45_000);
+  }
+
+  onEncounter() {
+    const encounterData = getRandomFromArray(this.encounters)!;
+
+    // load monsters into array
+    for (const monsterDef of encounterData.monsters) {
+      const amount = getRandomFromRange(monsterDef.quantity);
+      for (let i = 0; i < amount; i++) {
+        const monster = MonsterFactory(monsterDef);
+        this.monsters.set(monster.id, monster);
+      }
     }
 
-    // if we're exploring, roll for combat
-    if (now > this.nextEncounter) {
-      // initiate next encounter
+    this.setPhase(CombatPhase.PlayerTurn, 3_000);
+  }
+
+  onPlayerTurn() {
+    if (!this.isTeamAlive(this.players)) {
+      this.setPhase(CombatPhase.Defeat);
+      return;
     }
 
-    // check for monsters in the current encounter
+    if (!this.isTeamAlive(this.monsters)) {
+      this.setPhase(CombatPhase.Victory);
+      return;
+    }
 
-    // check for encounter cooldown
+    this.setPhase(CombatPhase.EnemyTurn, 1_000);
+  }
 
-    // start new encounter
+  onEnemyTurn() {
+    if (!this.isTeamAlive(this.players)) {
+      this.setPhase(CombatPhase.Defeat);
+      return;
+    }
 
-    setTimeout(this.tick, 1000);
-  };
+    if (!this.isTeamAlive(this.monsters)) {
+      this.setPhase(CombatPhase.Victory);
+      return;
+    }
+
+    this.setPhase(CombatPhase.PlayerTurn, 1_000);
+  }
+
+  onVictory() {
+    this.log(`Team has won the battle`);
+
+    this.setPhase(CombatPhase.Exploring, 45_000);
+  }
+
+  onDefeat() {
+    this.log(`Team has lost the battle`);
+
+    this.setPhase(CombatPhase.Exploring, 45_000);
+  }
+
+  isTeamAlive(team: PlayerTeam | MonsterTeam) {
+    for (const [id, member] of team) {
+      if (member.health > 0) return true;
+    }
+
+    return false;
+  }
 }
 
 const combatDef: CombatDefinition = {
@@ -141,6 +213,7 @@ const combatDef: CombatDefinition = {
           },
           level: 2,
           xp: 3,
+          quantity: [1, 3],
           action: Action.ABILITY_1,
           abilitySlots: {
             0: {
@@ -169,6 +242,7 @@ const combatDef: CombatDefinition = {
           },
           level: 2,
           xp: 3,
+          quantity: [1, 3],
           action: Action.ABILITY_1,
           abilitySlots: {
             0: {
@@ -217,6 +291,7 @@ const combatDef: CombatDefinition = {
           },
           level: 30,
           xp: 1000,
+          quantity: [1, 1],
           action: Action.ABILITY_1,
           abilitySlots: {
             0: {

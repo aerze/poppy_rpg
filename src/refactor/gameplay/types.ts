@@ -1,4 +1,4 @@
-export type Ranged<T> = { [P in keyof T]?: [T[P], T[P]] | undefined };
+export type Ranged<T> = { [P in keyof T]: [T[P], T[P]] };
 
 export type Range<T> = [T, T];
 

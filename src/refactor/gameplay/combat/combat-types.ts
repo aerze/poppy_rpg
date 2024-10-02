@@ -97,8 +97,9 @@ export type CombatItem = Item & {
 export enum CombatPhase {
   Loading,
   Exploring,
-  BattleStart,
+  Encounter,
   PlayerTurn,
   EnemyTurn,
-  BattleEnd,
+  Victory,
+  Defeat,
 }
